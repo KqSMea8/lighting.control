@@ -27,12 +27,12 @@ public class Project {
 
     private Integer updateBy;
 
-    public Integer getId() {
+    public Integer getProjectId() {
         return projectId;
     }
 
-    public void setId(Integer id) {
-        this.projectId = id;
+    public void setProjectId(Integer projectId) {
+        this.projectId = projectId;
     }
 
     public String getProjectName() {

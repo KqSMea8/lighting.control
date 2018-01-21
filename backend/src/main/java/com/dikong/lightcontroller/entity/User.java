@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.entity;
 
+import javax.persistence.Id;
+
 /**
  * 用户信息表
  * 
@@ -8,7 +10,8 @@ package com.dikong.lightcontroller.entity;
  */
 public class User {
 
-    private Integer id;
+    @Id
+    private Integer userId;
     /**
      * 用户名、登录名
      */
@@ -30,12 +33,12 @@ public class User {
 
     private Integer updateBy;
 
-    public Integer getId() {
-        return id;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getUserName() {
@@ -88,7 +91,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User [id=" + id + ", userName=" + userName + ", password=" + password
+        return "User [id=" + userId + ", userName=" + userName + ", password=" + password
                 + ", userStatus=" + userStatus + ", isDelete=" + isDelete + ", createBy=" + createBy
                 + ", updateBy=" + updateBy + "]";
     }

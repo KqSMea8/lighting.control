@@ -3,7 +3,7 @@ package com.dikong.lightcontroller.entity;
 
 public class Role {
 
-    private Integer id;
+    private Integer roleId;
     /**
      * 角色名称
      */
@@ -21,39 +21,50 @@ public class Role {
 
     private Integer updateBy;
 
-    public Integer getId() {
-        return id;
+    public Integer getRoleId() {
+        return roleId;
     }
-    public void setId(Integer id) {
-        this.id = id;
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
+
     public String getRoleName() {
         return roleName;
     }
+
     public void setRoleName(String roleName) {
         this.roleName = roleName;
     }
+
     public Integer getRoleStatus() {
         return roleStatus;
     }
+
     public void setRoleStatus(Integer roleStatus) {
         this.roleStatus = roleStatus;
     }
+
     public Integer getIsDelete() {
         return isDelete;
     }
+
     public void setIsDelete(Integer isDelete) {
         this.isDelete = isDelete;
     }
+
     public Integer getCreateBy() {
         return createBy;
     }
+
     public void setCreateBy(Integer createBy) {
         this.createBy = createBy;
     }
+
     public Integer getUpdateBy() {
         return updateBy;
     }
+
     public void setUpdateBy(Integer updateBy) {
         this.updateBy = updateBy;
     }
