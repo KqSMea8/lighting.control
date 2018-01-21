@@ -59,7 +59,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public ReturnInfo projectRemove(int projectId) {
         Project project = new Project();
-        project.setId(projectId);
+        project.setProjectId(projectId);;
         project.setIsDelete(2);
         project.setUpdateBy(AuthCurrentUser.getUserId());
         projectDao.updateByPrimaryKeySelective(project);

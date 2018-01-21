@@ -2,12 +2,13 @@ package com.dikong.lightcontroller.entity;
 
 /**
  * 资源权限表
+ * 
  * @author huangwenjun
  * @date 2018年01月20日
  */
 public class Resource {
 
-    private Integer id;
+    private Integer resourceId;
     /**
      * 资源名称
      */
@@ -33,51 +34,66 @@ public class Resource {
 
     private Integer updateBy;
 
-    public Integer getId() {
-        return id;
+    public Integer getResourceId() {
+        return resourceId;
     }
-    public void setId(Integer id) {
-        this.id = id;
+
+    public void setResourceId(Integer resourceId) {
+        this.resourceId = resourceId;
     }
+
     public String getResourceName() {
         return resourceName;
     }
+
     public void setResourceName(String resourceName) {
         this.resourceName = resourceName;
     }
+
     public Integer getMenuId() {
         return menuId;
     }
+
     public void setMenuId(Integer menuId) {
         this.menuId = menuId;
     }
+
     public String getResourceInfo() {
         return resourceInfo;
     }
+
     public void setResourceInfo(String resourceInfo) {
         this.resourceInfo = resourceInfo;
     }
+
     public Integer getResourceStatus() {
         return resourceStatus;
     }
+
     public void setResourceStatus(Integer resourceStatus) {
         this.resourceStatus = resourceStatus;
     }
+
     public Integer getIsDelete() {
         return isDelete;
     }
+
     public void setIsDelete(Integer isDelete) {
         this.isDelete = isDelete;
     }
+
     public Integer getCreateBy() {
         return createBy;
     }
+
     public void setCreateBy(Integer createBy) {
         this.createBy = createBy;
     }
+
     public Integer getUpdateBy() {
         return updateBy;
     }
+
     public void setUpdateBy(Integer updateBy) {
         this.updateBy = updateBy;
     }

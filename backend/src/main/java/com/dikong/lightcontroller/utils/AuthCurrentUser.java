@@ -1,16 +1,15 @@
 package com.dikong.lightcontroller.utils;
 
-import com.dikong.lightcontroller.dto.AuthCurrentUserDto;
+import com.dikong.lightcontroller.dto.LoginRes;
 
 public class AuthCurrentUser {
-    private static ThreadLocal<AuthCurrentUserDto> currentUser =
-            new ThreadLocal<AuthCurrentUserDto>();
+    private static ThreadLocal<LoginRes> currentUser = new ThreadLocal<LoginRes>();
 
-    public static void set(AuthCurrentUserDto user) {
+    public static void set(LoginRes user) {
         currentUser.set(user);
     }
 
-    public static AuthCurrentUserDto get() {
+    public static LoginRes get() {
         return currentUser.get();
     }
 
@@ -24,11 +23,11 @@ public class AuthCurrentUser {
 
     public static int getUserId() {
         return 1;
-        // AuthCurrentUserDto userInfo = currentUser.get();
+        // LoginRes userInfo = currentUser.get();
         // if (Objects.isNull(userInfo)) {
         // throw new NullPointerException();
         // }
-        // return userInfo.getUserInfo().getId();
+        // return userInfo.getUserInfo().getUserId();
     }
 }
 
