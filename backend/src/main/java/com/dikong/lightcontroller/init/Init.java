@@ -1,7 +1,5 @@
 package com.dikong.lightcontroller.init;
 
-import com.dikong.lightcontroller.server.TcpServer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -21,11 +19,10 @@ import org.springframework.stereotype.Component;
 @Order(1)
 public class Init implements CommandLineRunner {
 
-    @Autowired
-    private TcpServer tcpServer;
+
 
     @Override
     public void run(String... args) throws Exception {
-        tcpServer.run();
+//        tcpServer.run();
     }
 }
