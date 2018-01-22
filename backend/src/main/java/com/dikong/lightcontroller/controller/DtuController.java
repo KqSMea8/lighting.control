@@ -40,7 +40,7 @@ public class DtuController {
         return dtuService.list(dtuList);
     }
 
-    @DeleteMapping("/dtu/{id}")
+    @DeleteMapping("/dtu/del/{id}")
     public ReturnInfo delteDtu(@PathVariable("id") Long id) {
         if (null == id || id == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
@@ -59,5 +59,14 @@ public class DtuController {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return deviceService.list(dtuId);
+    }
+
+    /**
+     * dtu列表选择框
+     * @return
+     */
+    @GetMapping(path = "/dtu/id/list")
+    public ReturnInfo dtuIdList(){
+        return dtuService.idList();
     }
 }

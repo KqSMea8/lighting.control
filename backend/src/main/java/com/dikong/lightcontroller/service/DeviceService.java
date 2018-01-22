@@ -26,4 +26,6 @@ public interface DeviceService {
     ReturnInfo addDevice(DeviceAdd deviceAdd);
 
     ReturnInfo uploadPointTableFile(MultipartFile multipartFile, Long id);
+
+    ReturnInfo idList(Long dtuId);
 }

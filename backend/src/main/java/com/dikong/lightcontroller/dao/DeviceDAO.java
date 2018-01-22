@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.vo.DeviceAdd;
 
@@ -40,5 +41,16 @@ public interface DeviceDAO {
     int insertDevice(@Param("add") DeviceAdd deviceAdd);
 
     @Update({"update device set model_file=#{filePath} where id=#{id}"})
-    int updateModeFilePathById(@Param("id")Long id,@Param("filePath")String filePath);
+    int updateModeFilePathById(@Param("id") Long id, @Param("filePath") String filePath);
+
+
+    @Select({"select id,code from device where dtu_id=#{dtuId} AND is_delete=#{isDelete} "})
+    List<Device> selectIdList(@Param("dtuId") Long dtuId, @Param("isDelete") Byte isDelete);
+
+
+    @Select({"<script>"
+            + "SELECT d.id,dt.device AS `dtu_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where d.id in "
+            + "<foreach collection=\" ids\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
+            + " #{item} " + "" + "</foreach>" + "</script>"})
+    List<DeviceDtu> selectByDeviceId(@Param("ids") List<Long> ids);
 }

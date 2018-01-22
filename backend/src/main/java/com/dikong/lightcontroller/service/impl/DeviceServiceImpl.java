@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -54,6 +55,9 @@ public class DeviceServiceImpl implements DeviceService {
     private RegisterDAO registerDAO;
 
 
+    @Autowired
+    private Environment environment;
+
     /**
      * 只有16个不需要分页
      * 
@@ -70,6 +74,7 @@ public class DeviceServiceImpl implements DeviceService {
                 DeviceList device = new DeviceList();
                 BeanUtils.copyProperties(item, device);
                 device.setDtuName(dtuName);
+                deviceLists.add(device);
             });
         }
         return ReturnInfo.createReturnSuccessOne(deviceLists);
@@ -96,7 +101,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public ReturnInfo uploadPointTableFile(MultipartFile multipartFile, Long id) {
-        String filePath = System.getProperty("file.path");
+        String filePath = environment.getProperty("file.path");
         if (StringUtils.isEmpty(filePath)) {
             LOG.error("dot config file.path property");
             return ReturnInfo.create(CodeEnum.SERVER_ERROR);
@@ -110,7 +115,7 @@ public class DeviceServiceImpl implements DeviceService {
             InputStream inputStream = multipartFile.getInputStream();
             List<String> multiLine = FileUtils.readFileByLine(inputStream);
             List<Register> registers = new ArrayList<>();
-            multiLine.forEach(item -> {
+            for (String item : multiLine) {
                 Register register = new Register();
                 String[] regisName = item.split("=");
                 register.setRegisName(regisName[0]);
@@ -122,9 +127,8 @@ public class DeviceServiceImpl implements DeviceService {
                 register.setDeviceId(id);
                 register.setProjId(projId);
                 registers.add(register);
-            });
+            }
             registerDAO.insertMultiItem(registers);
-
 
             String modilFilePath = filePath + fileName;
             deviceDAO.updateModeFilePathById(id, modilFilePath);
@@ -137,5 +141,18 @@ public class DeviceServiceImpl implements DeviceService {
         }
 
         return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+
+    @Override
+    public ReturnInfo idList(Long dtuId) {
+        List<Device> devices = deviceDAO.selectIdList(dtuId, Device.DEL_NO);
+        if (!CollectionUtils.isEmpty(devices)) {
+            devices.forEach(item -> {
+                String code = "ID" + Integer.parseInt(item.getCode());
+                item.setCode(code);
+            });
+        }
+        return ReturnInfo.createReturnSuccessOne(devices);
     }
 }

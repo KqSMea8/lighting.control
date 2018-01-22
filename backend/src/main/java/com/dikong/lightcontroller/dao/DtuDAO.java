@@ -37,4 +37,7 @@ public interface DtuDAO {
 
     @Select({"select device from dtu where id=#{id}"})
     String selectAllNameById(@Param("id") Long id);
+
+    @Select({"select id,device from dtu where is_delete = #{isDelete} AND proj_id=#{projId}"})
+    List<Dtu> selectAllDtuId(@Param("projId") Integer projId,@Param("isDelete") Byte isDelete);
 }

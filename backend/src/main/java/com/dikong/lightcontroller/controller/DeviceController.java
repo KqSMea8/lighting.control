@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,8 +42,11 @@ public class DeviceController {
      * @param id
      * @return
      */
-    @DeleteMapping(path = "/device/{id}")
+    @DeleteMapping(path = "/device/del/{id}")
     public ReturnInfo deleteDevice(@PathVariable("id") Long id) {
+        if (null == id || id == 0){
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
         return deviceService.deleteDevice(id);
     }
 
@@ -71,6 +75,14 @@ public class DeviceController {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return deviceService.uploadPointTableFile(uploadfile, id);
+    }
+
+    @GetMapping(path = "/device/list/{dtuId}")
+    public ReturnInfo dtuIdList(@PathVariable("dtuId")Long dtuId){
+        if (null == dtuId || dtuId == 0){
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return deviceService.idList(dtuId);
     }
 
 }

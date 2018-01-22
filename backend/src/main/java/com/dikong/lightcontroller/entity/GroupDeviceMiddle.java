@@ -4,10 +4,12 @@ package com.dikong.lightcontroller.entity;
 public class GroupDeviceMiddle {
 
     private Long id;
-
+    //设备id
     private Long deviceId;
-
+    //群组id
     private Long groupId;
+    //变量id
+    private Long regisId;
 
     public Long getId() {
         return id;
@@ -33,4 +35,11 @@ public class GroupDeviceMiddle {
         this.groupId = groupId;
     }
 
+    public Long getRegisId() {
+        return regisId;
+    }
+
+    public void setRegisId(Long regisId) {
+        this.regisId = regisId;
+    }
 }

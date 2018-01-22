@@ -58,4 +58,12 @@ public class DtuServiceImpl implements DtuService {
         dtuDAO.insertDtu(dtu);
         return ReturnInfo.createReturnSuccessOne(null);
     }
+
+
+    @Override
+    public ReturnInfo idList() {
+        int projId = 0;
+        List<Dtu> dtus = dtuDAO.selectAllDtuId(projId,Dtu.DEL_NO);
+        return ReturnInfo.createReturnSuccessOne(dtus);
+    }
 }

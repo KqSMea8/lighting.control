@@ -142,4 +142,5 @@ public class Device {
     public void setIsDelete(Byte isDelete) {
         this.isDelete = isDelete;
     }
+
 }

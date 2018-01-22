@@ -22,4 +22,6 @@ public interface DtuService {
     ReturnInfo deleteDtu(Long id);
 
     ReturnInfo addDtu(Dtu dtu);
+
+    ReturnInfo idList();
 }

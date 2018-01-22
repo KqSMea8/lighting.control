@@ -23,6 +23,7 @@ public class DeviceAdd {
     // 通讯调表文件
     private String model;
 
+
     public String getExternalId() {
         return externalId;
     }

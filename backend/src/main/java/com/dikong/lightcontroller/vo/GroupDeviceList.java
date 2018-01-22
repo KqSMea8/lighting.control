@@ -1,53 +1,31 @@
-package com.dikong.lightcontroller.entity;
+package com.dikong.lightcontroller.vo;
 
 /**
  * <p>
- * Description 设备变量表
+ * Description
  * </p>
  * <p>
  *
  * @author lengrongfu
- * @create 2018年01月20日下午1:46
- * @see
- *      </P>
+ * @create 2018年01月22日下午5:15
+ * @see </P>
  */
-public class Register {
-
-    public static final String BV = "BV";
-    public static final String BI = "BI";
-    public static final String AV = "AV";
-    public static final String AI = "AI";
-
-
-    /**
-     * 变量id
-     */
+public class GroupDeviceList {
     private Long id;
-    /**
-     * 设备id,系统变量的设备id用0来代替
-     */
+    //设备id
     private Long deviceId;
-    /**
-     * 变量显示名称
-     */
+    //设备位置
+    private String devicePlace;
+    //变量显示名称
     private String varName;
-    /**
-     * 寄存器名字
-     */
+    //变量名
     private String regisName;
-    /**
-     * 寄存器地址
-     */
+    //对外id
+    private String externalId;
+    //寄存器值
     private String regisAddr;
-    /**
-     * 接口类型，模拟还是数字，BV,AI,AV,BI
-     */
+    //接口类型，模拟还是数字，BV,AI,AV,BI
     private String regisType;
-
-    /**
-     * 项目id
-     */
-    private Integer projId;
 
     public Long getId() {
         return id;
@@ -63,6 +41,14 @@ public class Register {
 
     public void setDeviceId(Long deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getDevicePlace() {
+        return devicePlace;
+    }
+
+    public void setDevicePlace(String devicePlace) {
+        this.devicePlace = devicePlace;
     }
 
     public String getVarName() {
@@ -81,6 +67,14 @@ public class Register {
         this.regisName = regisName;
     }
 
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
     public String getRegisAddr() {
         return regisAddr;
     }
@@ -95,20 +89,5 @@ public class Register {
 
     public void setRegisType(String regisType) {
         this.regisType = regisType;
-    }
-
-    public Integer getProjId() {
-        return projId;
-    }
-
-    public void setProjId(Integer projId) {
-        this.projId = projId;
-    }
-
-    public void addDefault(){
-        this.setVarName("CONNECT");
-        this.setRegisName("CONNECT");
-        this.setRegisAddr("10001");
-        this.setRegisType(BI);
     }
 }
