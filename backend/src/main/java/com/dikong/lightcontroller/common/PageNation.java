@@ -8,7 +8,8 @@ package com.dikong.lightcontroller.common;
  *
  * @author lengrongfu
  * @create 2018年01月20日下午2:33
- * @see </P>
+ * @see
+ *      </P>
  */
 public class PageNation {
     // 总数

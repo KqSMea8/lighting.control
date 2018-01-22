@@ -1,8 +1,8 @@
 package com.dikong.lightcontroller.common;
 
-import com.github.pagehelper.Page;
-
 import java.util.List;
+
+import com.github.pagehelper.Page;
 
 /**
  * <p>
@@ -12,7 +12,8 @@ import java.util.List;
  *
  * @author lengrongfu
  * @create 2018年01月20日下午2:30
- * @see </P>
+ * @see
+ *      </P>
  */
 public class ReturnInfo {
     private Integer code;

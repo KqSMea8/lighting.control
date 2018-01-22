@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -15,7 +16,6 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
-import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -32,25 +32,23 @@ import org.springframework.stereotype.Component;
 public class TcpServer {
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
-
-    private static  String IP = "127.0.0.1";
-
-    private static  int PORT = 9080;
     /** 用于分配处理业务线程的线程组个数 */
     protected static final int BIZGROUPSIZE = Runtime.getRuntime().availableProcessors() * 2; // 默认
     /** 业务出现线程大小 */
     protected static final int BIZTHREADSIZE = 4;
+    private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
     /*
      * NioEventLoopGroup实际上就是个线程池, NioEventLoopGroup在后台启动了n个NioEventLoop来处理Channel事件,
      * 每一个NioEventLoop负责处理m个Channel, NioEventLoopGroup从NioEventLoop数组里挨个取出NioEventLoop来处理Channel
      */
     private static final EventLoopGroup bossGroup = new NioEventLoopGroup(BIZGROUPSIZE);
     private static final EventLoopGroup workerGroup = new NioEventLoopGroup(BIZTHREADSIZE);
+    private static String IP = "127.0.0.1";
+    private static int PORT = 9080;
 
-    public TcpServer(){
-        IP = System.getProperty("tcp.ip",IP);
-        PORT = Integer.parseInt(System.getProperty("tcp.port",String.valueOf(PORT)));
+    public TcpServer() {
+        IP = System.getProperty("tcp.ip", IP);
+        PORT = Integer.parseInt(System.getProperty("tcp.port", String.valueOf(PORT)));
     }
 
     public void run() throws Exception {

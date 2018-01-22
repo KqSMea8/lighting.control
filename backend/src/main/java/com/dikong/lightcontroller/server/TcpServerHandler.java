@@ -25,7 +25,7 @@ public class TcpServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        System.out.println("exceptionCaught!"+cause);
+        System.out.println("exceptionCaught!" + cause);
         ctx.close();
     }
 }

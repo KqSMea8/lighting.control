@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
  *
  * @author lengrongfu
  * @create 2018年01月12日上午8:03
- * @see </P>
+ * @see
+ *      </P>
  */
 @Component
 public class BeanConfig {

@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author lengrongfu
  * @create 2018年01月20日下午1:46
- * @see </P>
+ * @see
+ *      </P>
  */
 @RestController
 public class BeatController {
 
     @RequestMapping(path = "/beat")
-    public String beat(){
+    public String beat() {
         return "alive";
     }
 }
