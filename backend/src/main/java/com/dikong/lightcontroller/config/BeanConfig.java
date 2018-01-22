@@ -1,6 +1,11 @@
 package com.dikong.lightcontroller.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import redis.clients.jedis.Jedis;
 
 /**
  * <p>
@@ -16,4 +21,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class BeanConfig {
 
+    @Autowired
+    private Environment environment;
+
+    @Bean
+    public Jedis jedis() {
+        return new Jedis(environment.getProperty("redis.hosts"),
+                Integer.valueOf(environment.getProperty("redis.port")));
+    }
 }
