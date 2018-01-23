@@ -1,36 +1,32 @@
-package com.dikong.lightcontroller.config;
+package com.dikong.lightcontroller.init;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import com.dikong.lightcontroller.listener.KeyExpiredListener;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
- * <p>
- * Description
- * </p>
- * <p>
- *
- * @author lengrongfu
- * @create 2018年01月12日上午8:03
- * @see
- *      </P>
+ * @author huangwenjun
+ * @version 2018年1月23日 下午9:08:53
  */
 @Component
-public class BeanConfig {
+public class Subscriber {
 
     @Autowired
     private Environment environment;
 
-    @Bean
-    public Jedis jedis() {
+    @Async
+    public void subscriber() {
         JedisPool pool =
                 new JedisPool(new JedisPoolConfig(), environment.getProperty("redis.hosts"),
                         Integer.valueOf(environment.getProperty("redis.port")));
-        return pool.getResource();
+        Jedis jedis = pool.getResource();
+        jedis.psubscribe(new KeyExpiredListener(), "__keyevent@*__:expired");
     }
 }

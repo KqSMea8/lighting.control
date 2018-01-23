@@ -1,5 +1,9 @@
 package com.dikong.lightcontroller.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.CodeEnum;
+import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.LoginReqDto;
 import com.dikong.lightcontroller.entity.User;
+import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.UserService;
 import com.github.pagehelper.util.StringUtil;
 
@@ -18,6 +24,7 @@ import com.github.pagehelper.util.StringUtil;
 @RequestMapping("/light/user")
 public class UserController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserService userService;
 
@@ -31,11 +38,10 @@ public class UserController {
         return userService.login(loginReqDto);
     }
 
-    @RequestMapping("/login-out/{token}")
-    public ReturnInfo loginOut(@PathVariable("token") String token) {
-        // 删除登录用户信息
-        // 删除在线用户列表
-        return userService.loginOut(token);
+    @RequestMapping("/login-out/{user-id}")
+    public ReturnInfo loginOut(HttpServletRequest request, @PathVariable("user-id") String userId) {
+        String token = request.getHeader(Constant.LOGIN.TOKEN);
+        return userService.loginOut(userId, token);
     }
 
     @RequestMapping("/list")
@@ -61,5 +67,20 @@ public class UserController {
     @RequestMapping("/online/list")
     public ReturnInfo onlineUsers() {
         return userService.onlineUserList();
+    }
+
+    @RequestMapping("/project/add")
+    public ReturnInfo userAddProject(@RequestBody UserProject userProjectReq) {
+        return userService.userAddProject(userProjectReq);
+    }
+
+    @RequestMapping("/project/del")
+    public ReturnInfo userDelProject(@RequestBody UserProject userProjectReq) {
+        return userService.userDelProject(userProjectReq);
+    }
+
+    @RequestMapping("/project/enter")
+    public ReturnInfo enterProject() {
+        return null;
     }
 }

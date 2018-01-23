@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.entity;
 
 /**
  * 用户项目关联表
+ * 
  * @author huangwenjun
  * @date 2018年01月20日
  */
@@ -16,6 +17,10 @@ public class UserProject {
      * 项目id
      */
     private Integer projectId;
+    /**
+     * 管理类型 1->可控 2->可配置
+     */
+    private Integer managerTypeId;
 
     private Integer createBy;
 
@@ -24,30 +29,47 @@ public class UserProject {
     public Integer getId() {
         return id;
     }
+
     public void setId(Integer id) {
         this.id = id;
     }
+
     public Integer getUserId() {
         return userId;
     }
+
     public void setUserId(Integer userId) {
         this.userId = userId;
     }
+
     public Integer getProjectId() {
         return projectId;
     }
+
     public void setProjectId(Integer projectId) {
         this.projectId = projectId;
     }
+
+    public Integer getManagerTypeId() {
+        return managerTypeId;
+    }
+
+    public void setManagerTypeId(Integer managerTypeId) {
+        this.managerTypeId = managerTypeId;
+    }
+
     public Integer getCreateBy() {
         return createBy;
     }
+
     public void setCreateBy(Integer createBy) {
         this.createBy = createBy;
     }
+
     public Integer getUpdateBy() {
         return updateBy;
     }
+
     public void setUpdateBy(Integer updateBy) {
         this.updateBy = updateBy;
     }

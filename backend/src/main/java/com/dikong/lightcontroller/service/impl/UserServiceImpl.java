@@ -1,11 +1,13 @@
 package com.dikong.lightcontroller.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -15,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.controller.UserController;
 import com.dikong.lightcontroller.dao.MenuDao;
 import com.dikong.lightcontroller.dao.RoleDao;
 import com.dikong.lightcontroller.dao.RoleMenuDao;
@@ -42,6 +45,7 @@ import tk.mybatis.mapper.entity.Example;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserDao userDao;
 
@@ -76,6 +80,12 @@ public class UserServiceImpl implements UserService {
         if (!userInfo.getPassword().equals(password)) {
             return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
         }
+        String oldToken =
+                jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
+        if (!StringUtils.isEmpty(oldToken)) {
+            jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
+            jedis.del(oldToken);
+        }
         String token = UUID.randomUUID().toString();
         // 角色信息
         List<Integer> roleIds = userRoleDao.roleIds(userInfo.getUserId());
@@ -97,8 +107,9 @@ public class UserServiceImpl implements UserService {
         loginUserInfo.setRoles(roles);
         loginUserInfo.setCurrentProjectId(0);
         jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(loginUserInfo));
-        jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, token, JSON.toJSONString(userInfo));
+        jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()), token);
         // TODO 权限信息
+        LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
         return ReturnInfo.createReturnSuccessOne(loginRes);
     }
 
@@ -108,9 +119,13 @@ public class UserServiceImpl implements UserService {
      * @see com.dikong.lightcontroller.service.UserService#loginOut(java.lang.String)
      */
     @Override
-    public ReturnInfo loginOut(String token) {
+    public ReturnInfo loginOut(String userId, String token) {
+        String oldToken = jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, userId);
+        if (StringUtils.isEmpty(oldToken) || !oldToken.equals(token)) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
         jedis.del(token);
-        jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, token);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -175,13 +190,36 @@ public class UserServiceImpl implements UserService {
         if (onlineUsers == null || onlineUsers.size() == 0) {
             return ReturnInfo.create(CodeEnum.NOT_CONTENT);
         }
-        Collection<String> userInfos = onlineUsers.values();
-        List<User> users = new ArrayList<User>();
-        for (String userInfo : userInfos) {
-            User user = JSON.parseObject(userInfo, User.class);
-            users.add(user);
+        Set<String> userInfos = onlineUsers.keySet();
+        List<Integer> userIds = new ArrayList<Integer>();
+        for (String userId : userInfos) {
+            userIds.add(Integer.valueOf(userId));
         }
+        List<User> users = userDao.userListByIds(userIds);
         return ReturnInfo.createReturnSuccessOne(users);
+    }
+
+    @Override
+    public ReturnInfo userAddProject(UserProject userProjectReq) {
+        userProjectReq.setCreateBy(AuthCurrentUser.getUserId());
+        userProjectDao.insertSelective(userProjectReq);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo userDelProject(UserProject userProjectReq) {
+        Example example = new Example(UserProject.class);
+        example.createCriteria().andEqualTo("userId", userProjectReq.getUserId())
+                .andEqualTo("projectId", userProjectReq.getProjectId())
+                .andEqualTo("managerTypeId", userProjectReq.getManagerTypeId());
+        userProjectDao.deleteByExample(example);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo enterProject() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 

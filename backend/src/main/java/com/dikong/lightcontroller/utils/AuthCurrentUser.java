@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.utils;
 
+import java.util.Objects;
+
 import com.dikong.lightcontroller.dto.LoginRes;
 
 public class AuthCurrentUser {
@@ -22,12 +24,11 @@ public class AuthCurrentUser {
     }
 
     public static int getUserId() {
-        return 1;
-        // LoginRes userInfo = currentUser.get();
-        // if (Objects.isNull(userInfo)) {
-        // throw new NullPointerException();
-        // }
-        // return userInfo.getUserInfo().getUserId();
+        LoginRes userInfo = currentUser.get();
+        if (Objects.isNull(userInfo)) {
+            throw new NullPointerException();
+        }
+        return userInfo.getUserInfo().getUserId();
     }
 }
 
