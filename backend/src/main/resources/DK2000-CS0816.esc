@@ -1,0 +1,5 @@
+ALL_ON_OFF=1,BV;全开/全关
+CLEAR_ALL_VAR=3,BV;恢复出厂设置
+LIGHT1_LOOP_ON_OFF=4,BV;灯光回路一开关
+LIGHT2_LOOP_ON_OFF=5,BV;灯光回路二开关
+CLEAR_ALM=2,BV;系统复位

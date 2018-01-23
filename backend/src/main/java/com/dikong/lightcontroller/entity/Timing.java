@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.entity;
 
 /**
  * 时序表
+ * 
  * @author lengrongfu
  * @date 2018年01月20日
  */
@@ -31,47 +32,72 @@ public class Timing {
      */
     private String validCycle;
 
+    /**
+     * 项目id
+     */
+    private Integer projId;
+
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public Integer getNodeType() {
         return nodeType;
     }
+
     public void setNodeType(Integer nodeType) {
         this.nodeType = nodeType;
     }
+
     public Integer getNodeContentRunTimeType() {
         return nodeContentRunTimeType;
     }
+
     public void setNodeContentRunTimeType(Integer nodeContentRunTimeType) {
         this.nodeContentRunTimeType = nodeContentRunTimeType;
     }
+
     public String getNodeContentCity() {
         return nodeContentCity;
     }
+
     public void setNodeContentCity(String nodeContentCity) {
         this.nodeContentCity = nodeContentCity;
     }
+
     public Long getRunVar() {
         return runVar;
     }
+
     public void setRunVar(Long runVar) {
         this.runVar = runVar;
     }
+
     public Integer getRunType() {
         return runType;
     }
+
     public void setRunType(Integer runType) {
         this.runType = runType;
     }
+
     public String getValidCycle() {
         return validCycle;
     }
+
     public void setValidCycle(String validCycle) {
         this.validCycle = validCycle;
     }
 
+    public Integer getProjId() {
+        return projId;
+    }
+
+    public void setProjId(Integer projId) {
+        this.projId = projId;
+    }
 }

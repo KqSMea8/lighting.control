@@ -8,7 +8,8 @@ package com.dikong.lightcontroller.dto;
  *
  * @author lengrongfu
  * @create 2018年01月20日下午2:48
- * @see </P>
+ * @see
+ *      </P>
  */
-public class DtuList extends BasePage{
+public class DtuList extends BasePage {
 }

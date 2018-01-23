@@ -2,10 +2,15 @@ package com.dikong.lightcontroller.entity;
 
 /**
  * 群组表
+ * 
  * @author lengrongfu
  * @date 2018年01月20日
  */
 public class Group {
+    // 删除
+    public static final Byte DEL_YES = 2;
+    // 未删除
+    public static final Byte DEL_NO = 1;
 
     private Long id;
     /**
@@ -17,23 +22,50 @@ public class Group {
      */
     private String groupCode;
 
+    /**
+     * 项目id
+     */
+    private Integer projId;
+
+    private Byte isDelete;
+
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getGroupName() {
         return groupName;
     }
+
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
+
     public String getGroupCode() {
         return groupCode;
     }
+
     public void setGroupCode(String groupCode) {
         this.groupCode = groupCode;
     }
 
+    public Integer getProjId() {
+        return projId;
+    }
+
+    public void setProjId(Integer projId) {
+        this.projId = projId;
+    }
+
+    public Byte getIsDelete() {
+        return isDelete;
+    }
+
+    public void setIsDelete(Byte isDelete) {
+        this.isDelete = isDelete;
+    }
 }

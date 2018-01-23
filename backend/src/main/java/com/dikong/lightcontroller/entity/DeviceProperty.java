@@ -20,24 +20,31 @@ public class DeviceProperty {
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public Long getDevId() {
         return devId;
     }
+
     public void setDevId(Long devId) {
         this.devId = devId;
     }
+
     public String getSystemName() {
         return systemName;
     }
+
     public void setSystemName(String systemName) {
         this.systemName = systemName;
     }
+
     public String getSystemValue() {
         return systemValue;
     }
+
     public void setSystemValue(String systemValue) {
         this.systemValue = systemValue;
     }

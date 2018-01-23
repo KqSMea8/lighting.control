@@ -39,10 +39,11 @@ public class TimeCalculate {
     public static void main(String[] args) {
         double jd = 116.407526;
         double wd = 39.90403;
-        getSunriseTime(jd,wd);
-        getNoonTime(jd,wd);
-        getDawnTime(jd,wd);
+        getSunriseTime(jd, wd);
+        getNoonTime(jd, wd);
+        getDawnTime(jd, wd);
     }
+
     /**
      * 获取中午时间
      */
@@ -107,7 +108,7 @@ public class TimeCalculate {
     private static double timeCalculate(byte type, double JD, double WD) {
         Calendar cal = Calendar.getInstance();
         int year = cal.get(Calendar.YEAR);// 获取年份
-        int month = cal.get(Calendar.MONTH)+1;// 获取月份
+        int month = cal.get(Calendar.MONTH) + 1;// 获取月份
         int date = cal.get(Calendar.DATE);// 获取日
         double richu;
         double L = -JD / 180 * pi;
@@ -216,13 +217,13 @@ public class TimeCalculate {
     }
 
     private static String timeStr(double time) {
-        double T=time+0.5;
-        T=(T-Math.floor(T))*24;
-        double jwH=Math.floor(T);
-        T=(T-jwH)*60;
-        double jwM=Math.floor(T);
-        T=(T-jwM)*60;
-        double jwS=Math.floor(T+0.5);
+        double T = time + 0.5;
+        T = (T - Math.floor(T)) * 24;
+        double jwH = Math.floor(T);
+        T = (T - jwH) * 60;
+        double jwM = Math.floor(T);
+        T = (T - jwM) * 60;
+        double jwS = Math.floor(T + 0.5);
         StringBuilder builder = new StringBuilder();
         builder.append(jwH).append(":").append(jwM).append(":").append(jwS);
         return builder.toString();

@@ -12,6 +12,8 @@ public interface UserService {
 
     public ReturnInfo login(LoginReqDto loginReqDto);
 
+    public ReturnInfo loginOut(String token);
+
     public ReturnInfo userList();
 
     public ReturnInfo add(User user);
@@ -19,4 +21,6 @@ public interface UserService {
     public ReturnInfo del(int userId);
 
     public ReturnInfo update(User user);
+
+    public ReturnInfo onlineUserList();
 }
