@@ -1,15 +1,19 @@
 package com.dikong.lightcontroller.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
+import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.MenuDao;
 import com.dikong.lightcontroller.dao.RoleDao;
@@ -69,7 +73,6 @@ public class UserServiceImpl implements UserService {
         }
         User userInfo = userEntities.get(0);
         String password = MD5Util.getMD5Str(loginReqDto.getPassword());
-        System.out.println("password=" + password);
         if (!userInfo.getPassword().equals(password)) {
             return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
         }
@@ -88,26 +91,44 @@ public class UserServiceImpl implements UserService {
         } else {
             menus = new ArrayList<Menu>();
         }
+        userInfo.setPassword("");
         LoginRes loginRes = new LoginRes(token, userInfo, menus);
         LoginRes loginUserInfo = new LoginRes(token, userInfo, menus);
         loginUserInfo.setRoles(roles);
         loginUserInfo.setCurrentProjectId(0);
-        jedis.set(token, JSON.toJSONString(loginUserInfo));
+        jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(loginUserInfo));
+        jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, token, JSON.toJSONString(userInfo));
         // TODO 权限信息
         return ReturnInfo.createReturnSuccessOne(loginRes);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.dikong.lightcontroller.service.UserService#loginOut(java.lang.String)
+     */
+    @Override
+    public ReturnInfo loginOut(String token) {
+        jedis.del(token);
+        jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, token);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
     @Override
     public ReturnInfo userList() {
-        List<User> users = userDao.selectAll();
-        for (User user : users) {
-            System.out.println(user);
+        Example example = new Example(User.class);
+        example.selectProperties("userId", "userName", "userStatus", "isDelete");
+        example.createCriteria().andEqualTo("isDelete", "1");
+        List<User> users = userDao.selectByExample(example);
+        if (CollectionUtils.isEmpty(users)) {
+            return ReturnInfo.create(CodeEnum.NOT_CONTENT);
         }
         return ReturnInfo.createReturnSuccessOne(users);
     }
 
     @Override
     public ReturnInfo add(User user) {
+        user.setPassword(MD5Util.getMD5Str(user.getPassword()));
         userDao.insertSelective(user);
         user.setCreateBy(AuthCurrentUser.getUserId());
         return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -134,8 +155,34 @@ public class UserServiceImpl implements UserService {
     @Override
     public ReturnInfo update(User user) {
         user.setUpdateBy(AuthCurrentUser.getUserId());
+        if (!StringUtils.isEmpty(user.getPassword())) {
+            user.setPassword(MD5Util.getMD5Str(user.getPassword()));
+        } else {
+            user.setPassword(null);
+        }
         userDao.updateByPrimaryKeySelective(user);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.dikong.lightcontroller.service.UserService#onlineUserList()
+     */
+    @Override
+    public ReturnInfo onlineUserList() {
+        Map<String, String> onlineUsers = jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
+        if (onlineUsers == null || onlineUsers.size() == 0) {
+            return ReturnInfo.create(CodeEnum.NOT_CONTENT);
+        }
+        Collection<String> userInfos = onlineUsers.values();
+        List<User> users = new ArrayList<User>();
+        for (String userInfo : userInfos) {
+            User user = JSON.parseObject(userInfo, User.class);
+            users.add(user);
+        }
+        return ReturnInfo.createReturnSuccessOne(users);
+    }
+
 
 }
