@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.entity;
 
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 /**
@@ -11,6 +12,7 @@ import javax.persistence.Id;
 public class User {
 
     @Id
+    @GeneratedValue(generator = "JDBC")
     private Integer userId;
     /**
      * 用户名、登录名
