@@ -1,4 +1,4 @@
-package com.dikong.lightcontroller.dao;
+package com.dikong.lightcontroller.entity;
 
 import java.math.BigDecimal;
 
@@ -17,7 +17,7 @@ public class EquipmentMonitor {
      */
     private String caption;
     /**
-     * 监控对象id
+     * 监控对象(串口设备/群组/时序)id
      */
     private Integer sourceId;
     /**
@@ -44,7 +44,7 @@ public class EquipmentMonitor {
     private BigDecimal min;
 
     /**
-     * 所属面板id
+     * 面板id(设备监控为DTUid,自定义监控为自定义面板id)
      */
     private Integer panelId;
     /**

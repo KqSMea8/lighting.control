@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
-import com.dikong.lightcontroller.dao.EquipmentMonitor;
+import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 
 /**
@@ -35,9 +35,12 @@ public class MonitorController {
         return monitorService.del(monitorId);
     }
 
-    @PostMapping("/list")
-    public ReturnInfo list() {
-        return monitorService.list();
+    @PostMapping("/list/{type}/id")
+    public ReturnInfo list(@PathVariable("type") Integer type, @PathVariable("id") Integer id) {
+        if (type == null || id == null) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return monitorService.list(type, id);
     }
 
     @PostMapping("/update")
@@ -45,8 +48,14 @@ public class MonitorController {
         return monitorService.update(equipmentMonitor);
     }
 
+
     @RequestMapping("/change")
     public ReturnInfo chageStatus() {
+        return null;
+    }
+
+    @RequestMapping("/change")
+    public ReturnInfo chageStatusCustom() {
         return null;
     }
 

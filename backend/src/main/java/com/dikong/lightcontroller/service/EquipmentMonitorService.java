@@ -1,7 +1,7 @@
 package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
-import com.dikong.lightcontroller.dao.EquipmentMonitor;
+import com.dikong.lightcontroller.entity.EquipmentMonitor;
 
 /**
  * @author huangwenjun
@@ -12,7 +12,11 @@ public interface EquipmentMonitorService {
 
     public ReturnInfo del(Integer monitorId);
 
-    public ReturnInfo list();
+    public ReturnInfo list(Integer type, Integer id);
 
     public ReturnInfo update(EquipmentMonitor equipmentMonitor);
+
+    public ReturnInfo chageStatus(Integer monitorId, String value);
+
+    public ReturnInfo chageStatusCustom(Integer type, Integer id);
 }
