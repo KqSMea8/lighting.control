@@ -57,19 +57,19 @@ public class TimeCalculate {
     /**
      * 获取天亮时间
      */
-    public static Date getDawnTime(double JD, double WD) {
+    public static String getDawnTime(double JD, double WD) {
         double dawn = timeCalculate(DAWN, JD, WD);
         String sun = timeStr(dawn);
-        System.out.println(sun);
-        return double2Date(dawn);
+        return sun;
     }
 
     /**
      * 获取日落时间
      */
-    public static Date getSunsetTime(double JD, double WD) {
+    public static String getSunsetTime(double JD, double WD) {
         double sunset = timeCalculate(NOON, JD, WD) * 2 - timeCalculate(SUNRISE, JD, WD);
-        return double2Date(sunset);
+        String sun = timeStr(sunset);
+        return sun;
     }
 
     /**
@@ -101,7 +101,6 @@ public class TimeCalculate {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
         return t;
     }
 

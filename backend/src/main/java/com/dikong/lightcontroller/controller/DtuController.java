@@ -35,11 +35,21 @@ public class DtuController {
     @Autowired
     private DeviceService deviceService;
 
+    /**
+     * dtu 列表
+     * @param dtuList
+     * @return
+     */
     @PostMapping("/dtu/list")
     public ReturnInfo dtuList(@RequestBody DtuList dtuList) {
         return dtuService.list(dtuList);
     }
 
+    /**
+     * dtu 删除
+     * @param id
+     * @return
+     */
     @DeleteMapping("/dtu/del/{id}")
     public ReturnInfo delteDtu(@PathVariable("id") Long id) {
         if (null == id || id == 0) {
@@ -48,11 +58,21 @@ public class DtuController {
         return dtuService.deleteDtu(id);
     }
 
+    /**
+     * dtu 添加
+     * @param dtu
+     * @return
+     */
     @PostMapping("/dtu/add")
     public ReturnInfo addDtu(@RequestBody Dtu dtu) {
         return dtuService.addDtu(dtu);
     }
 
+    /**
+     *  获取某个dtu下的所有设备
+     * @param dtuId
+     * @return
+     */
     @GetMapping("/dtu/{id}")
     public ReturnInfo deviceList(@PathVariable("id") Long dtuId) {
         if (null == dtuId || dtuId == 0) {

@@ -12,6 +12,11 @@ public class Device {
     // 未删除
     public static final Byte DEL_NO = 1;
 
+    //离线
+    public static final Integer OFFLINE = 0;
+    //在线
+    public static final Integer ONLINE = 1;
+
     private Long id;
     /**
      * dtu id

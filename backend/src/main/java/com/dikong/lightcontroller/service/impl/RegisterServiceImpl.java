@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.service.impl;
 
 import java.util.List;
 
+import com.dikong.lightcontroller.common.CodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,5 +40,11 @@ public class RegisterServiceImpl implements RegisterService {
     public ReturnInfo searchRegister(RegisterList registerList) {
         List<Register> registers = registerDAO.selectRegisterById(registerList);
         return ReturnInfo.createReturnSuccessOne(registers);
+    }
+
+    @Override
+    public ReturnInfo updateRegister(Register register) {
+        registerDAO.updateByRegisAddrAndDeviceId(register,register.getRegisAddr(),register.getDeviceId());
+        return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 }

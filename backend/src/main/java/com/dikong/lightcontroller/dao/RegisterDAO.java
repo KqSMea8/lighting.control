@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.vo.RegisterList;
@@ -44,4 +45,16 @@ public interface RegisterDAO {
             + "<foreach collection=\"ids\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
             + " #{item} " + "</foreach>" + "</script>"})
     List<Register> selectRegisterInId(@Param("ids") List<Long> ids);
+
+
+    @Select({"select regis_addr from register where id=#{id}"})
+    String selectById(@Param("id") Long id);
+
+    @Select({"select regis_addr from register where device_id=#{deviceId}"})
+    List<String> selectRegisAddrByDeviceId(@Param("deviceId") Long deviceId);
+
+    @Update({"update register set var_name=#{register.varName},regis_name=#{register.regisName},"
+            + "regis_type=#{register.regisType} where regis_addr=#{regisAddr} AND device_id=#{deviceId}"})
+    int updateByRegisAddrAndDeviceId(@Param("register") Register register,
+            @Param("regisAddr") String regisAddr, @Param("deviceId") Long deviceId);
 }

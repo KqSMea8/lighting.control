@@ -28,4 +28,6 @@ public interface DeviceService {
     ReturnInfo uploadPointTableFile(MultipartFile multipartFile, Long id);
 
     ReturnInfo idList(Long dtuId);
+
+    ReturnInfo selectAllSelectDevice();
 }

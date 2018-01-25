@@ -43,4 +43,10 @@ public interface GroupDAO {
     @Select({
             "select group_code from `group` where is_delete = #{isDelete} AND proj_id = #{projId} order by group_code desc "})
     Integer selectLastCode(@Param("isDelete") Byte isDelete,@Param("projId")Integer projId);
+
+    @Select({"select id from `group` where proj_id=#{projId} AND id != #{id}"})
+    List<Long> selectByOtherGroup(@Param("projId")Integer projId,@Param("id")Long id);
+
+    @Select({"select group_code from `group` where id=#{id}"})
+    String selectCodeById(@Param("id")Long id);
 }

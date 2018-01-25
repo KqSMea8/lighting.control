@@ -39,6 +39,11 @@ public class Register {
      * 寄存器地址
      */
     private String regisAddr;
+
+    /**
+     * 变量的值，是开还是关
+     */
+    private String regisValue;
     /**
      * 接口类型，模拟还是数字，BV,AI,AV,BI
      */
@@ -105,10 +110,21 @@ public class Register {
         this.projId = projId;
     }
 
-    public void addDefault(){
-        this.setVarName("CONNECT");
-        this.setRegisName("CONNECT");
-        this.setRegisAddr("10001");
-        this.setRegisType(BI);
+    public String getRegisValue() {
+        return regisValue;
+    }
+
+    public void setRegisValue(String regisValue) {
+        this.regisValue = regisValue;
+    }
+
+    public static Register addDefault(String regisValue){
+        Register register = new Register();
+        register.setVarName("CONNECT");
+        register.setRegisName("CONNECT");
+        register.setRegisAddr("10001");
+        register.setRegisType(BI);
+        register.setRegisValue(regisValue);
+        return register;
     }
 }

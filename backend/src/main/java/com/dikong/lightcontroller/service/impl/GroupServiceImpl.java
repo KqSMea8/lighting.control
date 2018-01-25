@@ -142,4 +142,11 @@ public class GroupServiceImpl implements GroupService {
         });
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
+
+
+    @Override
+    public ReturnInfo addGroupDevice(GroupDeviceMiddle groupDeviceMiddle) {
+        groupDeviceMiddleDAO.insert(groupDeviceMiddle);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
 }

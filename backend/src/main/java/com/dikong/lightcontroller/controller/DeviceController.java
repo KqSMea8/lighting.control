@@ -44,7 +44,7 @@ public class DeviceController {
      */
     @DeleteMapping(path = "/device/del/{id}")
     public ReturnInfo deleteDevice(@PathVariable("id") Long id) {
-        if (null == id || id == 0){
+        if (null == id || id == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return deviceService.deleteDevice(id);
@@ -63,9 +63,10 @@ public class DeviceController {
 
     /**
      * 上传点表文件
-     * 
+     * 重复上传的时候就先去判断数据库是否存在，如果存在就看之前的是否变化，如果有就更新，
+     * 不存在就插入
      * @param uploadfile
-     * @param id
+     * @param id 设备id
      * @return
      */
     @PostMapping(path = "/device/point/table/upload/{id}")
@@ -77,12 +78,28 @@ public class DeviceController {
         return deviceService.uploadPointTableFile(uploadfile, id);
     }
 
+    /***
+     * 变量编辑功能处 获取dtu下的所有下拉设备
+     * 
+     * @param dtuId
+     * @return
+     */
     @GetMapping(path = "/device/list/{dtuId}")
-    public ReturnInfo dtuIdList(@PathVariable("dtuId")Long dtuId){
-        if (null == dtuId || dtuId == 0){
+    public ReturnInfo dtuIdList(@PathVariable("dtuId") Long dtuId) {
+        if (null == dtuId || dtuId == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return deviceService.idList(dtuId);
+    }
+
+    /**
+     * 选择所有的设备
+     * 一个设备可以被多个组选中
+     * @return
+     */
+    @GetMapping(path = "/device/all")
+    public ReturnInfo selectAllDeviceNoSelect() {
+        return deviceService.selectAllSelectDevice();
     }
 
 }

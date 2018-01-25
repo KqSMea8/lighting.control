@@ -31,6 +31,10 @@ public class ReturnInfo {
         this.msg = msg;
     }
 
+    public static ReturnInfo create(Object data,PageNation pageNation){
+        return create(CodeEnum.SUCCESS.getCode(),CodeEnum.SUCCESS.getMsg(),data,pageNation);
+    }
+
     public static ReturnInfo create(int code, String msg, Object data, PageNation paginNation) {
         ReturnInfo returnInfo = new ReturnInfo();
         returnInfo.code = code;
@@ -69,6 +73,9 @@ public class ReturnInfo {
     }
 
     public static PageNation create(List<?> result) {
+        if (null == result){
+            return new PageNation();
+        }
         PageNation paginnation = new PageNation();
         paginnation.setTotal(new Long(((Page<?>) result).getTotal()).intValue());
         paginnation.setPageNo(((Page<?>) result).getPageNum());

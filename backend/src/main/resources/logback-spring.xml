@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- @desc: lixin360 日志定义模版 @author: houxiaolong @date: 2017-05-26 -->
+
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+	<!-- 属性设置 -->
+	<property name="appName" value="light-control" />
+
+	<!-- 应用名称 -->
+	<contextName>${appName}</contextName>
+
+	<!-- 控制台输出日志 appender类型：ConsoleAppender、FileAppender、RollingFileAppender -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<!-- encoder 默认配置为PatternLayoutEncoder example: 15:47:33 [main] INFO com.lixin.credit.logback.TestLog 
+			- === info -->
+		<encoder>
+			<pattern>${appName}#-#%d{yyyy-MM-dd HH:mm:ss.SSS}#-#[%thread]#-#%-5level#-#%logger{35}#-#%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- RollingFileAppender 自动切割文件 -->
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+		<!-- filer只收集info级别， EvaluatorFilter暂时不用，另需导入2 libs -->
+		<!-- 
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch> <onMismatch>DENY</onMismatch> 
+		</filter>
+		-->
+		
+		<encoder>
+			<pattern>${appName}#-#%d{yyyy-MM-dd HH:mm:ss.SSS}#-#[%thread]#-#%-5level#-#%logger{35}#-#%msg%n</pattern>
+		</encoder>
+
+		<file>logs/${appName}.log</file>
+		<!-- rollingPolicy：TimeBasedRollingPolicy、FixedWindowRollingPolicy -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${appName}.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- 归档文件的最大数量 保存2个月 -->
+			<maxHistory>2</maxHistory>
+		</rollingPolicy>
+
+		<!-- 合适触发文件滚动切割 -->
+		<!-- <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy"> 
+			<maxFileSize>200MB</maxFileSize> </triggeringPolicy> -->
+	</appender>
+
+	<!-- 打印com.lixin包下的info信息，并且不向上级logger传递 -->
+	<logger name="com.dikong.lightcontroller" level="INFO" additivity="true">
+		<appender-ref ref="FILE" />
+	</logger>
+	<logger name="com.dikong.lightcontroller.dao" level="DEBUG" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<!-- 根logger -->
+	<logger name="org.apache.zookeeper" level="INFO" additivity="true">
+	</logger>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>

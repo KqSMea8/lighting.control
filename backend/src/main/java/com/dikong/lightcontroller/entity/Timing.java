@@ -8,7 +8,42 @@ package com.dikong.lightcontroller.entity;
  */
 public class Timing {
 
+    // 普通节点
+    public static final Integer ORDINARY_NODE = 1;
+    // 指定节点
+    public static final Integer SPECIFIED_NODE = 2;
+    // 指定假日
+    public static final Integer DESIGNATED_HOLIDAYS_NODE = 3;
+
+    // 普通时间
+    public static final Integer ORDINDRY_TIME = 1;
+    // 天亮时间
+    public static final Integer DAWN_TIME = 2;
+    // 天黑时间
+    public static final Integer DARK_TIME = 3;
+
+    // 群组类型
+    public static final Integer GROUP_TYPE = 1;
+    // 设备类型
+    public static final Integer DEVICE_TYPE = 2;
+    // 变量类型
+    public static final Integer REGISTER_TYPE = 3;
+
+    // 1->停止
+    public static final Byte STOP_YES = 1;
+    // 0->不停止
+    public static final Byte STOP_NO = 0;
+
+    // 删除
+    public static final Byte DEL_YES = 2;
+    // 未删除
+    public static final Byte DEL_NO = 1;
+
     private Long id;
+    /**
+     * 节点名称
+     */
+    private String nodeName;
     /**
      * 节点类型，1->普通节点，2->指定日节点，3->指定假日
      */
@@ -17,7 +52,14 @@ public class Timing {
      * 执行时间类型，1->普通时间，2->天亮时间，3->天黑时间
      */
     private Integer nodeContentRunTimeType;
+    /**
+     * 执行时间
+     */
+    private String nodeContentRunTime;
 
+    /**
+     * 选定执行城市
+     */
     private String nodeContentCity;
     /**
      * 执行变量,可以是组id,设备id,变量id
@@ -28,6 +70,10 @@ public class Timing {
      */
     private Integer runType;
     /**
+     * 执行类型的id,群组id,设备id,变量id
+     */
+    private Long runId;
+    /**
      * 有效执行周期
      */
     private String validCycle;
@@ -37,8 +83,41 @@ public class Timing {
      */
     private Integer projId;
 
+    /**
+     * 是否在节假日停止 1->停止 0->不停止
+     */
+    private Byte stopWork;
+    /**
+     * 普通节点中的周几执行,多个之间用,分割
+     */
+    private String weekList;
+
+    /**
+     * 变量或者群组的设定值 选定变量执行值。开关量（BV）为0或1[开：１关：０]；模拟量(AV)可设定为相应的数值
+     */
+    private String runVarlue;
+
+
+    /**
+     * 是否删除
+     */
+    private Byte isDelete;
+
+    /**
+     * 指定节点中的月list
+     */
+    private String monthList;
+
     public Long getId() {
         return id;
+    }
+
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 
     public void setId(Long id) {
@@ -99,5 +178,61 @@ public class Timing {
 
     public void setProjId(Integer projId) {
         this.projId = projId;
+    }
+
+    public String getNodeContentRunTime() {
+        return nodeContentRunTime;
+    }
+
+    public void setNodeContentRunTime(String nodeContentRunTime) {
+        this.nodeContentRunTime = nodeContentRunTime;
+    }
+
+    public Long getRunId() {
+        return runId;
+    }
+
+    public void setRunId(Long runId) {
+        this.runId = runId;
+    }
+
+    public Byte getStopWork() {
+        return stopWork;
+    }
+
+    public void setStopWork(Byte stopWork) {
+        this.stopWork = stopWork;
+    }
+
+    public String getWeekList() {
+        return weekList;
+    }
+
+    public void setWeekList(String weekList) {
+        this.weekList = weekList;
+    }
+
+    public String getRunVarlue() {
+        return runVarlue;
+    }
+
+    public void setRunVarlue(String runVarlue) {
+        this.runVarlue = runVarlue;
+    }
+
+    public Byte getIsDelete() {
+        return isDelete;
+    }
+
+    public void setIsDelete(Byte isDelete) {
+        this.isDelete = isDelete;
+    }
+
+    public String getMonthList() {
+        return monthList;
+    }
+
+    public void setMonthList(String monthList) {
+        this.monthList = monthList;
     }
 }
