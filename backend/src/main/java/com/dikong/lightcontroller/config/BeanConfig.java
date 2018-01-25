@@ -1,13 +1,11 @@
 package com.dikong.lightcontroller.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
+import java.util.Properties;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import tk.mybatis.spring.mapper.MapperScannerConfigurer;
 
 /**
  * <p>
@@ -20,17 +18,18 @@ import redis.clients.jedis.JedisPoolConfig;
  * @see
  *      </P>
  */
-@Component
+@Configuration
 public class BeanConfig {
 
-    @Autowired
-    private Environment environment;
-
     @Bean
-    public Jedis jedis() {
-        JedisPool pool =
-                new JedisPool(new JedisPoolConfig(), environment.getProperty("redis.hosts"),
-                        Integer.valueOf(environment.getProperty("redis.port")));
-        return pool.getResource();
+    public MapperScannerConfigurer getMapperScannerConfigurer() {
+        MapperScannerConfigurer configurer = new MapperScannerConfigurer();
+        configurer.setBasePackage("com.dikong.lightcontroller.dao");
+        Properties properties = new Properties();
+        properties.setProperty("mappers", "com.dikong.lightcontroller.dao.ManagerTypeMenuDao");
+        configurer.setProperties(properties);
+        return configurer;
     }
+
+
 }

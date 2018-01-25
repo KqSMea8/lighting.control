@@ -49,10 +49,12 @@
 	</appender>
 
 	<!-- 打印com.lixin包下的info信息，并且不向上级logger传递 -->
-	<logger name="com.yooli.usercenter" level="INFO" additivity="true">
+	<logger name="com.dikong.lightcontroller" level="INFO" additivity="true">
 		<appender-ref ref="FILE" />
 	</logger>
-	
+	<logger name="com.dikong.lightcontroller.dao" level="DEBUG" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
 	<!-- 根logger -->
 	<logger name="org.apache.zookeeper" level="INFO" additivity="true">
 	</logger>

@@ -3,6 +3,7 @@ package com.dikong.lightcontroller.dto;
 import java.util.List;
 
 import com.dikong.lightcontroller.entity.Menu;
+import com.dikong.lightcontroller.entity.Resource;
 import com.dikong.lightcontroller.entity.Role;
 import com.dikong.lightcontroller.entity.User;
 
@@ -15,17 +16,19 @@ public class LoginRes {
     private User userInfo;
     private List<Role> roles;
     private List<Menu> menus;
+    private List<Resource> resources;
     private Integer currentProjectId;
 
     public LoginRes() {
         super();
     }
 
-    public LoginRes(String token, User userInfo, List<Menu> menus) {
+    public LoginRes(String token, User userInfo, List<Menu> menus, List<Resource> resources) {
         super();
         this.token = token;
         this.userInfo = userInfo;
         this.menus = menus;
+        this.resources = resources;
     }
 
     public String getToken() {
@@ -58,6 +61,14 @@ public class LoginRes {
 
     public void setMenus(List<Menu> menus) {
         this.menus = menus;
+    }
+
+    public List<Resource> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<Resource> resources) {
+        this.resources = resources;
     }
 
     public Integer getCurrentProjectId() {

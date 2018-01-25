@@ -26,6 +26,7 @@ public class ProjectController {
 
     @PostMapping("/add")
     public ReturnInfo add(@RequestBody Project project) {
+        project.setProjectId(null);
         return projectService.projectAdd(project);
     }
 

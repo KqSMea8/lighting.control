@@ -38,10 +38,10 @@ public class UserController {
         return userService.login(loginReqDto);
     }
 
-    @RequestMapping("/login-out/{user-id}")
-    public ReturnInfo loginOut(HttpServletRequest request, @PathVariable("user-id") String userId) {
+    @RequestMapping("/login-out")
+    public ReturnInfo loginOut(HttpServletRequest request) {
         String token = request.getHeader(Constant.LOGIN.TOKEN);
-        return userService.loginOut(userId, token);
+        return userService.loginOut(token);
     }
 
     @RequestMapping("/list")
@@ -51,6 +51,7 @@ public class UserController {
 
     @RequestMapping("/add")
     public ReturnInfo add(@RequestBody User user) {
+        user.setUserId(null);
         return userService.add(user);
     }
 
@@ -79,8 +80,13 @@ public class UserController {
         return userService.userDelProject(userProjectReq);
     }
 
-    @RequestMapping("/project/enter")
-    public ReturnInfo enterProject() {
-        return null;
+    @RequestMapping("/project/enter/{project-id}")
+    public ReturnInfo enterProject(@PathVariable("project-id") Integer projectId,
+            HttpServletRequest request) {
+        if (projectId == null) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        String token = request.getHeader(Constant.LOGIN.TOKEN);
+        return userService.enterProject(token, projectId);
     }
 }

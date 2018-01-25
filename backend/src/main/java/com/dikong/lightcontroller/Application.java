@@ -1,6 +1,5 @@
 package com.dikong.lightcontroller;
 
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -14,7 +13,6 @@ import com.dikong.lightcontroller.utils.SpringContextUtil;
  *
  */
 @SpringBootApplication
-@MapperScan(basePackages = {"com.dikong.lightcontroller.dao"})
 @EnableTransactionManagement
 @EnableAsync
 public class Application {

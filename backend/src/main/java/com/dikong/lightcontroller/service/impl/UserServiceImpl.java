@@ -18,7 +18,9 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.controller.UserController;
+import com.dikong.lightcontroller.dao.ManagerTypeMenuDao;
 import com.dikong.lightcontroller.dao.MenuDao;
+import com.dikong.lightcontroller.dao.ResourceDao;
 import com.dikong.lightcontroller.dao.RoleDao;
 import com.dikong.lightcontroller.dao.RoleMenuDao;
 import com.dikong.lightcontroller.dao.UserDao;
@@ -27,6 +29,7 @@ import com.dikong.lightcontroller.dao.UserRoleDao;
 import com.dikong.lightcontroller.dto.LoginReqDto;
 import com.dikong.lightcontroller.dto.LoginRes;
 import com.dikong.lightcontroller.entity.Menu;
+import com.dikong.lightcontroller.entity.Resource;
 import com.dikong.lightcontroller.entity.Role;
 import com.dikong.lightcontroller.entity.User;
 import com.dikong.lightcontroller.entity.UserProject;
@@ -67,6 +70,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserProjectDao userProjectDao;
 
+    @Autowired
+    private ManagerTypeMenuDao manageTypeMenuDao;
+
+    @Autowired
+    private ResourceDao resourceDao;
+
     @Override
     public ReturnInfo login(LoginReqDto loginReqDto) {
         Example userExample = new Example(User.class);
@@ -101,14 +110,14 @@ public class UserServiceImpl implements UserService {
         } else {
             menus = new ArrayList<Menu>();
         }
+        List<Resource> resources = resourceDao.resourceList(menuIds);
         userInfo.setPassword("");
-        LoginRes loginRes = new LoginRes(token, userInfo, menus);
-        LoginRes loginUserInfo = new LoginRes(token, userInfo, menus);
+        LoginRes loginRes = new LoginRes(token, userInfo, menus, resources);
+        LoginRes loginUserInfo = new LoginRes(token, userInfo, menus, resources);
         loginUserInfo.setRoles(roles);
         loginUserInfo.setCurrentProjectId(0);
         jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(loginUserInfo));
         jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()), token);
-        // TODO 权限信息
         LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
         return ReturnInfo.createReturnSuccessOne(loginRes);
     }
@@ -119,7 +128,8 @@ public class UserServiceImpl implements UserService {
      * @see com.dikong.lightcontroller.service.UserService#loginOut(java.lang.String)
      */
     @Override
-    public ReturnInfo loginOut(String userId, String token) {
+    public ReturnInfo loginOut(String token) {
+        String userId = String.valueOf(AuthCurrentUser.getUserId());
         String oldToken = jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, userId);
         if (StringUtils.isEmpty(oldToken) || !oldToken.equals(token)) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
@@ -146,6 +156,10 @@ public class UserServiceImpl implements UserService {
         user.setPassword(MD5Util.getMD5Str(user.getPassword()));
         userDao.insertSelective(user);
         user.setCreateBy(AuthCurrentUser.getUserId());
+        UserRole userRole = new UserRole();
+        userRole.setUserId(user.getUserId());
+        userRole.setRoleId(2);
+        userRoleDao.insertSelective(userRole);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -217,10 +231,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ReturnInfo enterProject() {
-        // TODO Auto-generated method stub
-        return null;
+    public ReturnInfo enterProject(String token, Integer projectId) {
+        String userInfo = jedis.get(token);
+        if (StringUtils.isEmpty(userInfo)) {
+            return ReturnInfo.create(CodeEnum.NO_LOGIN);
+        }
+        LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        currentUserInfo.setCurrentProjectId(projectId);
+        List<Integer> manageTypeIds =
+                userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
+        List<Integer> menuIds = manageTypeMenuDao.menuIds(manageTypeIds);
+        List<Menu> menus = null;
+        if (!CollectionUtils.isEmpty(menuIds)) {
+            menus = menuDao.menuList(menuIds);
+        } else {
+            menus = new ArrayList<Menu>();
+        }
+        return ReturnInfo.createReturnSuccessOne(menus);
     }
-
-
 }

@@ -13,7 +13,7 @@ public interface UserService {
 
     public ReturnInfo login(LoginReqDto loginReqDto);
 
-    public ReturnInfo loginOut(String userId, String token);
+    public ReturnInfo loginOut(String token);
 
     public ReturnInfo userList();
 
@@ -29,5 +29,5 @@ public interface UserService {
 
     public ReturnInfo userDelProject(UserProject userProjectReq);
 
-    public ReturnInfo enterProject();
+    public ReturnInfo enterProject(String token, Integer projectId);
 }
