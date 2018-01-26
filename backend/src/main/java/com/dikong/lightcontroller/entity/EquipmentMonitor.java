@@ -25,7 +25,15 @@ public class EquipmentMonitor {
      */
     private Integer sourceType;
 
+    /**
+     * 当前值
+     */
     private BigDecimal currentValue;
+
+    /**
+     * 当前值类型
+     */
+    private String valueType;
     /**
      * 单位
      */
@@ -60,6 +68,15 @@ public class EquipmentMonitor {
     private Integer createBy;
 
     private Integer updateBy;
+
+
+    public String getValueType() {
+        return valueType;
+    }
+
+    public void setValueType(String valueType) {
+        this.valueType = valueType;
+    }
 
     public Integer getMonitorId() {
         return monitorId;

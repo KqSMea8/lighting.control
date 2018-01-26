@@ -18,5 +18,4 @@ public interface EquipmentMonitorService {
 
     public ReturnInfo chageStatus(Integer monitorId, String value);
 
-    public ReturnInfo chageStatusCustom(Integer type, Integer id);
 }

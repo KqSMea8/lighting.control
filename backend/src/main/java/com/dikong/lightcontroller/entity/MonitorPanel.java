@@ -2,14 +2,18 @@ package com.dikong.lightcontroller.entity;
 
 import java.util.Date;
 
+import javax.persistence.Id;
+
 /**
  * @author huangwenjun
  * @Datetime 2018年1月25日
  */
 public class MonitorPanel {
+
+    @Id
     private Integer panelId;
     private Integer projectId;
-    private Integer panelName;
+    private String panelName;
     /**
      * 1->未删除 2->删除
      */
@@ -36,11 +40,11 @@ public class MonitorPanel {
         this.projectId = projectId;
     }
 
-    public Integer getPanelName() {
+    public String getPanelName() {
         return panelName;
     }
 
-    public void setPanelName(Integer panelName) {
+    public void setPanelName(String panelName) {
         this.panelName = panelName;
     }
 

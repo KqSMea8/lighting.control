@@ -27,6 +27,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     public ReturnInfo add(EquipmentMonitor equipmentMonitor) {
         equipmentMonitor.setPanelId(AuthCurrentUser.getCurrentProjectId());
         equipmentMonitor.setCreateBy(AuthCurrentUser.getUserId());
+        equipmentMonitor.setProjectId(AuthCurrentUser.getCurrentProjectId());
         monitorDao.insertSelective(equipmentMonitor);
         return ReturnInfo.createReturnSuccessOne(null);
     }
@@ -48,7 +49,6 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 .andEqualTo("projectId", AuthCurrentUser.getCurrentProjectId())
                 .andEqualTo("panelId", id);
         List<EquipmentMonitor> monitors = monitorDao.selectByExample(example);
-        // TODO 变量信息 // 查询 var 类型 类型不同，界面显示不同
         return ReturnInfo.createReturnSuccessOne(monitors);
     }
 
@@ -91,12 +91,6 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     break;
             }
         }
-        return null;
-    }
-
-    @Override
-    public ReturnInfo chageStatusCustom(Integer type, Integer id) {
-        // TODO Auto-generated method stub
         return null;
     }
 }

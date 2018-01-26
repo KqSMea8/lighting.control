@@ -44,6 +44,9 @@ public class PanelController {
 
     @PostMapping("/update")
     public ReturnInfo update(@RequestBody MonitorPanel monitorPanel) {
+        if (monitorPanel.getPanelId() == null) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
         return panelService.update(monitorPanel);
     }
 }

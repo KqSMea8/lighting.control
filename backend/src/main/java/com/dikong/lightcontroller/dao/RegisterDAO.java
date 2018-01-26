@@ -57,4 +57,7 @@ public interface RegisterDAO {
             + "regis_type=#{register.regisType} where regis_addr=#{regisAddr} AND device_id=#{deviceId}"})
     int updateByRegisAddrAndDeviceId(@Param("register") Register register,
             @Param("regisAddr") String regisAddr, @Param("deviceId") Long deviceId);
+
+    @Select({"select * from register where id=#{id}"})
+    Register selectRegisById(@Param("id") Long id);
 }
