@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.service;
 
+import java.util.List;
+
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 
 /**
@@ -7,11 +9,17 @@ import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
  * @version 2018年1月27日 下午5:28:24
  */
 public interface CmdService {
-    public void readSwitch(String deviceCode, long devId, long varId, SwitchEnum switchEnum);
+    public String readOneSwitch(String deviceCode, long devId, long varId);
 
-    public void writeSwitch();
+    public List<String> readMuchSwitch(String deviceCode, long devId, long varId, int varNum);
 
-    public void readAnalog();
+    public boolean writeSwitch(String deviceCode, long devId, long varId,SwitchEnum switchEnum);
 
-    public void writeAnalog();
+    public String readOneAnalog(String deviceCode, long devId, long varId);
+
+    public List<String> readMuchAnalog(String deviceCode, long devId, long varId, int varNum);
+
+    public boolean writeAnalog(String deviceCode, long devId, long varId,int value);
 }
+
+
