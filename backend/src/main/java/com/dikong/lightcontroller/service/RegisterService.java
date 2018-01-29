@@ -18,4 +18,6 @@ public interface RegisterService {
     ReturnInfo searchRegister(RegisterList registerList);
 
     ReturnInfo updateRegister(Register register);
+
+    ReturnInfo updateRegisterValue(Long id,String regisValue);
 }

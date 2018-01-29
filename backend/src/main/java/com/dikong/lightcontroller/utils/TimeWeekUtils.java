@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.utils;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -87,6 +88,30 @@ public class TimeWeekUtils {
         return sdf.format(cal.getTime());
     }
 
+    /**
+     * 获取当天时间是周几
+     * @return
+     */
+    public static String getWeekNowDate() {
+        Date dt = new Date();
+        String[] weekDays = {"7", "1", "2", "3", "4", "5", "6"};
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        int w = cal.get(Calendar.DAY_OF_WEEK) - 1;
+        if (w < 0)
+            w = 0;
+        return weekDays[w];
+    }
+
+    /**
+     * 获取当天时期
+     * @return
+     */
+    public static String getNowDateYearMonthDay(){
+        Date dt = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return dateFormat.format(dt);
+    }
 
     private static Calendar getCalendar(String nowtime) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // 设置时间格式
