@@ -32,6 +32,11 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         equipmentMonitor.setPanelId(AuthCurrentUser.getCurrentProjectId());
         equipmentMonitor.setCreateBy(AuthCurrentUser.getUserId());
         equipmentMonitor.setProjectId(AuthCurrentUser.getCurrentProjectId());
+        if (equipmentMonitor.getMonitorType() == 1) {
+
+        }
+        // 如果是模拟量，且是单个变量，查询该变量当前值
+        // 开关量默认 关
         monitorDao.insertSelective(equipmentMonitor);
         return ReturnInfo.createReturnSuccessOne(null);
     }
@@ -69,7 +74,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         EquipmentMonitor monitor = monitorDao.selectByPrimaryKey(monitorId);
         // 获取发送命令相关信息调用相关方法
         int sourceId = monitor.getSourceId();
-        if (monitor.getMonitorType() == 1) {
+        if (monitor.getMonitorType() == 1) {// 设备监控
             int dtuId = monitor.getPanelId();
             // 查询 var 类型 如果是开关量则,根据类型,转换value为0,1,或者bigdecimal
 

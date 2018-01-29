@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 
 import com.dikong.lightcontroller.dao.CmdRecordDao;
 import com.dikong.lightcontroller.dao.DeviceDAO;
+import com.dikong.lightcontroller.dao.DtuDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dto.SendMsgReq;
 import com.dikong.lightcontroller.entity.CmdRecord;
 import com.dikong.lightcontroller.entity.Device;
+import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
@@ -34,11 +36,14 @@ public class CmdServiceImpl implements CmdService {
     @Autowired
     private RegisterDAO registerDao;
 
+    @Autowired
+    private DtuDAO dtuDao;
+
 
     @Override
-    public String readOneSwitch(String deviceCode, long devId, long varId) {
+    public String readOneSwitch(long varId) {
         int varNum = 1;
-        String reqResult = reqUtil(deviceCode, devId, varId, ReadWriteEnum.READ, varNum);
+        String reqResult = reqUtil(varId, ReadWriteEnum.READ, varNum);
         List<String> results = CmdMsgUtils.analysisSwitchCmd(reqResult, varNum);
         if (results.size() >= 0) {
             return results.get(0);
@@ -47,18 +52,20 @@ public class CmdServiceImpl implements CmdService {
     }
 
     @Override
-    public List<String> readMuchSwitch(String deviceCode, long devId, long varId, int varNum) {
-        String reqResult = reqUtil(deviceCode, devId, varId, ReadWriteEnum.READ, varNum);
+    public List<String> readMuchSwitch(long varId, int varNum) {
+        String reqResult = reqUtil(varId, ReadWriteEnum.READ, varNum);
         List<String> results = CmdMsgUtils.analysisSwitchCmd(reqResult, varNum);
         return results;
     }
 
     @Override
-    public boolean writeSwitch(String deviceCode, long devId, long varId, SwitchEnum switchEnum) {
-        // 根据devId查询串口设备编码
-        Device device = deviceDAO.selectDeviceById(devId);
+    public boolean writeSwitch(long varId, SwitchEnum switchEnum) {
         // 根据 long varId,查询变量信息
         Register register = registerDao.selectRegisById(varId);
+        // 根据devId查询串口设备编码
+        Device device = deviceDAO.selectDeviceById(register.getDeviceId());
+        // 查询DTU信息
+        Dtu dtu = dtuDao.selectDtuById(device.getDtuId());
         // 查询一个变量当前值，默认为1
         String sendMsg = CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
                 register.getRegisType(), Integer.valueOf(register.getRegisAddr()), switchEnum);
@@ -68,8 +75,8 @@ public class CmdServiceImpl implements CmdService {
     }
 
     @Override
-    public String readOneAnalog(String deviceCode, long devId, long varId) {
-        String reqResult = reqUtil(deviceCode, devId, varId, ReadWriteEnum.READ, 1);
+    public String readOneAnalog(long varId) {
+        String reqResult = reqUtil(varId, ReadWriteEnum.READ, 1);
         List<String> results = CmdMsgUtils.analysisAnalogCmd(reqResult);
         if (results.size() >= 0) {
             return results.get(0);
@@ -78,30 +85,31 @@ public class CmdServiceImpl implements CmdService {
     }
 
     @Override
-    public List<String> readMuchAnalog(String deviceCode, long devId, long varId, int varNum) {
-        String reqResult = reqUtil(deviceCode, devId, varId, ReadWriteEnum.READ, varNum);
+    public List<String> readMuchAnalog(long varId, int varNum) {
+        String reqResult = reqUtil(varId, ReadWriteEnum.READ, varNum);
         List<String> results = CmdMsgUtils.analysisAnalogCmd(reqResult);
         return results;
     }
 
     @Override
-    public boolean writeAnalog(String deviceCode, long devId, long varId, int value) {
-        String reqResult = reqUtil(deviceCode, devId, varId, ReadWriteEnum.WRITE, value);
+    public boolean writeAnalog(long varId, int value) {
+        String reqResult = reqUtil(varId, ReadWriteEnum.WRITE, value);
         if (reqResult.equals("true")) {
             return true;
         }
         return false;
     }
 
-    private String reqUtil(String deviceCode, long devId, long varId, ReadWriteEnum readWriteEnum,
-            int varNum) {
-        // 根据devId查询串口设备编码
-        Device device = deviceDAO.selectDeviceById(devId);
+    private String reqUtil(long varId, ReadWriteEnum readWriteEnum, int varNum) {
         // 根据 long varId,查询变量信息
         Register register = registerDao.selectRegisById(varId);
+        // 根据devId查询串口设备编码
+        Device device = deviceDAO.selectDeviceById(register.getDeviceId());
+        // 查询DTU信息
+        Dtu dtu = dtuDao.selectDtuById(device.getDtuId());
         // 查询一个变量当前值，默认为1
-        return reqUtil(deviceCode, device.getCode(), readWriteEnum, register.getRegisType(),
-                register.getRegisAddr(), varNum);
+        return reqUtil(dtu.getDeviceCode(), device.getCode(), readWriteEnum,
+                register.getRegisType(), register.getRegisAddr(), varNum);
     }
 
     private String reqUtil(String deviceCode, String devAddr, ReadWriteEnum readWriteEnum,
