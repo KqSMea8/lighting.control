@@ -238,6 +238,7 @@ public class UserServiceImpl implements UserService {
         }
         LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
         currentUserInfo.setCurrentProjectId(projectId);
+        jedis.set(token, JSON.toJSONString(currentUserInfo));
         List<Integer> manageTypeIds =
                 userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
         List<Integer> menuIds = manageTypeMenuDao.menuIds(manageTypeIds);

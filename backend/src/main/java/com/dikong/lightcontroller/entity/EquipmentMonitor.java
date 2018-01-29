@@ -1,4 +1,4 @@
-package com.dikong.lightcontroller.dao;
+package com.dikong.lightcontroller.entity;
 
 import java.math.BigDecimal;
 
@@ -17,7 +17,7 @@ public class EquipmentMonitor {
      */
     private String caption;
     /**
-     * 监控对象id
+     * 监控对象(串口设备/群组/时序)id
      */
     private Integer sourceId;
     /**
@@ -25,7 +25,15 @@ public class EquipmentMonitor {
      */
     private Integer sourceType;
 
+    /**
+     * 当前值
+     */
     private BigDecimal currentValue;
+
+    /**
+     * 当前值类型
+     */
+    private String valueType;
     /**
      * 单位
      */
@@ -44,7 +52,7 @@ public class EquipmentMonitor {
     private BigDecimal min;
 
     /**
-     * 所属面板id
+     * 面板id(设备监控为DTUid,自定义监控为自定义面板id)
      */
     private Integer panelId;
     /**
@@ -60,6 +68,15 @@ public class EquipmentMonitor {
     private Integer createBy;
 
     private Integer updateBy;
+
+
+    public String getValueType() {
+        return valueType;
+    }
+
+    public void setValueType(String valueType) {
+        this.valueType = valueType;
+    }
 
     public Integer getMonitorId() {
         return monitorId;

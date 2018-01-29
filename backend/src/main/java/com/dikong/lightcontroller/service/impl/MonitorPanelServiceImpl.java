@@ -51,7 +51,6 @@ public class MonitorPanelServiceImpl implements MonitorPanelService {
 
     @Override
     public ReturnInfo update(MonitorPanel monitorPanel) {
-        monitorPanel.setIsDelete(2);
         monitorPanel.setUpdateBy(AuthCurrentUser.getUserId());
         panelDao.updateByPrimaryKeySelective(monitorPanel);
         return ReturnInfo.createReturnSuccessOne(null);

@@ -65,4 +65,7 @@ public interface RegisterDAO {
 
     @Update({"update register set regis_value=#{regisValue} where id=#{id}"})
     int updateRegisValueById(@Param("regisValue")String regisValue,@Param("id")Long id);
+    
+    @Select({"select * from register where id=#{id}"})
+    Register selectRegisById(@Param("id") Long id);
 }

@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.dao;
 
+import com.dikong.lightcontroller.entity.EquipmentMonitor;
+
 import tk.mybatis.mapper.common.Mapper;
 
 /**

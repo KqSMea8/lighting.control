@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
-import com.dikong.lightcontroller.dao.EquipmentMonitor;
+import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 
 /**
@@ -19,6 +20,7 @@ import com.dikong.lightcontroller.service.EquipmentMonitorService;
 @RequestMapping("/light/monitor")
 public class MonitorController {
 
+    @Autowired
     private EquipmentMonitorService monitorService;
 
     @PostMapping("/add")
@@ -35,9 +37,12 @@ public class MonitorController {
         return monitorService.del(monitorId);
     }
 
-    @PostMapping("/list")
-    public ReturnInfo list() {
-        return monitorService.list();
+    @PostMapping("/list/{type}/{id}")
+    public ReturnInfo list(@PathVariable("type") Integer type, @PathVariable("id") Integer id) {
+        if (type == null || id == null) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return monitorService.list(type, id);
     }
 
     @PostMapping("/update")
@@ -45,9 +50,11 @@ public class MonitorController {
         return monitorService.update(equipmentMonitor);
     }
 
-    @RequestMapping("/change")
-    public ReturnInfo chageStatus() {
-        return null;
+
+    @RequestMapping("/change/{monitor-id}/{value}")
+    public ReturnInfo chageStatus(@PathVariable("monitor-id") Integer monitorId,
+            @PathVariable("value") String value) {
+        return monitorService.chageStatus(monitorId, value);
     }
 
 }

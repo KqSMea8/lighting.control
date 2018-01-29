@@ -29,7 +29,6 @@ public class KeyExpiredInit implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        LOG.info("开始用户登陆时间过期监听");
         subscriber.subscriber();
     }
 }
