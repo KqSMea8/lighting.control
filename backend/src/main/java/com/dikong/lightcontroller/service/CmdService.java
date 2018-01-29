@@ -10,18 +10,17 @@ import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
  */
 public interface CmdService {
 
-    public String readOneSwitch(String deviceCode, long devId, long varId);
+    public String readOneSwitch(long varId);
 
+    public List<String> readMuchSwitch(long varId, int varNum);
 
-    public List<String> readMuchSwitch(String deviceCode, long devId, long varId, int varNum);
+    public boolean writeSwitch(long varId, SwitchEnum switchEnum);
 
-    public boolean writeSwitch(String deviceCode, long devId, long varId, SwitchEnum switchEnum);
+    public String readOneAnalog(long varId);
 
-    public String readOneAnalog(String deviceCode, long devId, long varId);
+    public List<String> readMuchAnalog(long varId, int varNum);
 
-    public List<String> readMuchAnalog(String deviceCode, long devId, long varId, int varNum);
-
-    public boolean writeAnalog(String deviceCode, long devId, long varId, int value);
+    public boolean writeAnalog(long varId, int value);
 }
 
 
