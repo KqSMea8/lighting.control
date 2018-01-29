@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.EquipmentMonitorDao;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
+import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 
@@ -22,6 +23,9 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
 
     @Autowired
     private EquipmentMonitorDao monitorDao;
+
+    @Autowired
+    private CmdService cmdService;
 
     @Override
     public ReturnInfo add(EquipmentMonitor equipmentMonitor) {

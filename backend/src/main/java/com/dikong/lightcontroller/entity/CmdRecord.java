@@ -7,9 +7,21 @@ package com.dikong.lightcontroller.entity;
 public class CmdRecord {
 
     private Long recordId;
-    private Long dtuId;
-    private Long devId;
-    private Long varId;
+    /**
+     * dtu注册码
+     */
+    private String deviceCode;
+    /**
+     * 串口设备地址
+     */
+    private String devCode;
+    /**
+     * 变量地址
+     */
+    private String regisAddr;
+    /**
+     * 发送的命令内容
+     */
     private String cmdInfo;
     private int createBy;
 
@@ -21,28 +33,28 @@ public class CmdRecord {
         this.recordId = recordId;
     }
 
-    public Long getDtuId() {
-        return dtuId;
+    public String getDeviceCode() {
+        return deviceCode;
     }
 
-    public void setDtuId(Long dtuId) {
-        this.dtuId = dtuId;
+    public void setDeviceCode(String deviceCode) {
+        this.deviceCode = deviceCode;
     }
 
-    public Long getDevId() {
-        return devId;
+    public String getDevCode() {
+        return devCode;
     }
 
-    public void setDevId(Long devId) {
-        this.devId = devId;
+    public void setDevCode(String devCode) {
+        this.devCode = devCode;
     }
 
-    public Long getVarId() {
-        return varId;
+    public String getRegisAddr() {
+        return regisAddr;
     }
 
-    public void setVarId(Long varId) {
-        this.varId = varId;
+    public void setRegisAddr(String regisAddr) {
+        this.regisAddr = regisAddr;
     }
 
     public String getCmdInfo() {
@@ -60,4 +72,5 @@ public class CmdRecord {
     public void setCreateBy(int createBy) {
         this.createBy = createBy;
     }
+
 }
