@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.EquipmentMonitorDao;
 import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
@@ -92,6 +94,40 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         return ReturnInfo.createReturnSuccessOne(null);
     }
 
+    @Override
+    public ReturnInfo refreshStatus(Integer type, Integer panelId) {
+        Example example = new Example(EquipmentMonitor.class);
+        example.createCriteria().andEqualTo("isDelete", 1).andEqualTo("monitorType", type)
+                .andEqualTo("projectId", AuthCurrentUser.getCurrentProjectId())
+                .andEqualTo("panelId", panelId);
+        List<EquipmentMonitor> monitors = monitorDao.selectByExample(example);
+        List<EquipmentMonitor> resultMonitors = new ArrayList<EquipmentMonitor>();
+        if (type == 1) {// 设备监控
+            String result = "";
+            for (EquipmentMonitor temp : monitors) {
+                if (isSwitch(temp.getValueType())) {
+                    result = cmdService.readOneSwitch(temp.getSourceId());
+                } else {
+                    result = cmdService.readOneAnalog(temp.getSourceId());
+                }
+                temp.setCurrentValue(new BigDecimal(result));
+                resultMonitors.add(temp);
+                monitorDao.updateByPrimaryKeySelective(temp);
+            }
+            return ReturnInfo.createReturnSuccessOne(resultMonitors);
+        } else if (type == 2) {// 自定义监控
+            for (EquipmentMonitor temp : monitors) {
+                if (temp.getSourceType() == 1) {
+                    String result = cmdService.readOneSwitch(temp.getSourceId());
+                    temp.setCurrentValue(new BigDecimal(result));
+                    monitorDao.updateByPrimaryKeySelective(temp);
+                }
+                resultMonitors.add(temp);
+            }
+            return ReturnInfo.createReturnSuccessOne(resultMonitors);
+        }
+        return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+    }
 
     @Override
     public ReturnInfo chageStatus(Integer monitorId, String value) {
@@ -173,11 +209,5 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         } else {
             return false;
         }
-    }
-
-    @Override
-    public ReturnInfo refreshStatus(Integer type, Integer panelId) {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

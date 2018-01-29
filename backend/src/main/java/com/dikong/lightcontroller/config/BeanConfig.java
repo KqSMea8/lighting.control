@@ -27,6 +27,7 @@ public class BeanConfig {
         configurer.setBasePackage("com.dikong.lightcontroller.dao");
         Properties properties = new Properties();
         properties.setProperty("mappers", "com.dikong.lightcontroller.dao.ManagerTypeMenuDao");
+        properties.setProperty("mappers", "com.dikong.lightcontroller.dao.EquipmentMonitorDao");
         configurer.setProperties(properties);
         return configurer;
     }

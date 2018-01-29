@@ -69,6 +69,8 @@ public class CmdServiceImpl implements CmdService {
         // 查询一个变量当前值，默认为1
         String sendMsg = CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
                 register.getRegisType(), Integer.valueOf(register.getRegisAddr()), switchEnum);
+        SendMsgReq sendMsgReq =
+                new SendMsgReq(ReadWriteEnum.WRITE.getCode(), device.getCode(), sendMsg);
         String response = "";
         // 判断是否成功
         return true;
@@ -116,7 +118,7 @@ public class CmdServiceImpl implements CmdService {
             String varType, String varAddr, int varNum) {
         String sendMsg = CmdMsgUtils.assembleSendCmd(devAddr, readWriteEnum, varType,
                 Integer.valueOf(varAddr), varNum);
-        SendMsgReq sendMsgReq = new SendMsgReq(deviceCode, sendMsg);
+        SendMsgReq sendMsgReq = new SendMsgReq(readWriteEnum.getCode(), deviceCode, sendMsg);
         // TODO 命令执行记录
         CmdRecord cmdRecord = new CmdRecord();
         cmdRecord.setDeviceCode(deviceCode);
