@@ -21,7 +21,9 @@ import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
+import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.service.GroupService;
+import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.vo.GroupDeviceList;
 import com.dikong.lightcontroller.vo.GroupList;
 import com.github.pagehelper.PageHelper;
@@ -52,6 +54,10 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private RegisterDAO registerDAO;
 
+
+    @Autowired
+    private SysVarService sysVarService;
+
     @Override
     public ReturnInfo list(GroupList groupList) {
         int projId = 0;
@@ -73,6 +79,14 @@ public class GroupServiceImpl implements GroupService {
         group.setGroupCode(String.valueOf(lastGroupCode));
         group.setProjId(projId);
         groupDAO.addGroup(group);
+
+        SysVar sysVar = new SysVar();
+        sysVar.setSysVarType(SysVar.GROUP);
+        sysVar.setVarValue(SysVar.DEFAULT_SYS_VALUE);
+        sysVar.setVarName(group.getGroupName());
+        sysVar.setVarId(group.getId());
+        sysVar.setProjId(projId);
+        sysVarService.addSysVar(sysVar);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -80,6 +94,8 @@ public class GroupServiceImpl implements GroupService {
     public ReturnInfo deleteGroup(Long id) {
         groupDAO.updateIsDelete(id, Group.DEL_YES);
         groupDeviceMiddleDAO.deleteByGroupId(id);
+
+        sysVarService.deleteSysVar(id, SysVar.GROUP);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

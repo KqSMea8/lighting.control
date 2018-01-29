@@ -18,6 +18,7 @@ public class Register {
     public static final String AV = "AV";
     public static final String AI = "AI";
 
+    public static final String DEFAULT_VALUE = "0";
 
     /**
      * 变量id
@@ -118,13 +119,14 @@ public class Register {
         this.regisValue = regisValue;
     }
 
-    public static Register addDefault(String regisValue){
+    public static Register addDefault(String regisValue,Long deviceId){
         Register register = new Register();
         register.setVarName("CONNECT");
         register.setRegisName("CONNECT");
         register.setRegisAddr("10001");
         register.setRegisType(BI);
         register.setRegisValue(regisValue);
+        register.setDeviceId(deviceId);
         return register;
     }
 }

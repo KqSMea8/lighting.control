@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BeatController {
 
-    @RequestMapping(path = "/beat")
+    @RequestMapping(path = "/light/beat")
     public String beat() {
         return "alive";
     }

@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +133,9 @@ public class DeviceServiceImpl implements DeviceService {
             InputStream inputStream = multipartFile.getInputStream();
             List<String> multiLine = FileUtils.readFileByLine(inputStream);
             for (String item : multiLine) {
+                if (StringUtils.isEmpty(item)) {
+                    continue;
+                }
                 Register register = new Register();
                 String[] regisName = item.split("=");
                 register.setRegisName(regisName[0]);
@@ -149,9 +151,9 @@ public class DeviceServiceImpl implements DeviceService {
             Integer conntionStatus = deviceDAO.selectConntionStatus(id);
             Register defaultRegister = null;
             if (null == conntionStatus || conntionStatus == 0) {
-                defaultRegister = Register.addDefault(String.valueOf(Device.OFFLINE));
+                defaultRegister = Register.addDefault(String.valueOf(Device.OFFLINE), id);
             } else {
-                defaultRegister = Register.addDefault(String.valueOf(Device.ONLINE));
+                defaultRegister = Register.addDefault(String.valueOf(Device.ONLINE), id);
             }
             registers.add(defaultRegister);
         } catch (IOException e) {
@@ -179,7 +181,10 @@ public class DeviceServiceImpl implements DeviceService {
                 }
             }
         }
-        registerDAO.insertMultiItem(registers);
+        if (!CollectionUtils.isEmpty(registers)){
+            registers.forEach(item->item.setRegisValue(Register.DEFAULT_VALUE));
+            registerDAO.insertMultiItem(registers);
+        }
         String modilFilePath = filePath + fileName;
         deviceDAO.updateModeFilePathById(id, modilFilePath);
         return ReturnInfo.create(CodeEnum.SUCCESS);

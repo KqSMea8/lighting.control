@@ -22,7 +22,9 @@ import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Cnarea2016;
 import com.dikong.lightcontroller.entity.Holiday;
+import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
+import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.utils.ArraysUtils;
 import com.dikong.lightcontroller.utils.TimeCalculate;
@@ -69,10 +71,15 @@ public class TimingServiceImpl implements TimingService {
     @Autowired
     private HolidayDAO holidayDAO;
 
+    @Autowired
+    private SysVarService sysVarService;
+
     @SuppressWarnings("all")
     @Override
     public ReturnInfo addOrdinaryNode(TimeOrdinaryNodeAdd ordinaryNodeAdd) {
         int projId = 0;
+        addSysVar(projId);
+
         Timing timing = new Timing();
         timing.setNodeType(Timing.ORDINARY_NODE);
         timing.setProjId(projId);
@@ -121,6 +128,8 @@ public class TimingServiceImpl implements TimingService {
     @Override
     public ReturnInfo addSpecifiedNode(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd) {
         int projId = 0;
+        addSysVar(projId);
+
         Timing timing = new Timing();
         timing.setNodeType(Timing.SPECIFIED_NODE);
         timing.setProjId(projId);
@@ -342,5 +351,15 @@ public class TimingServiceImpl implements TimingService {
         return timingLists;
     }
 
+
+    private void addSysVar(int projId){
+        SysVar sysVar = new SysVar();
+        sysVar.setSysVarType(SysVar.SEQUENCE);
+        sysVar.setVarName("Sequence_EN");
+        sysVar.setVarId(new Long(1));
+        sysVar.setVarValue(SysVar.DEFAULT_SYS_VALUE);
+        sysVar.setProjId(projId);
+        sysVarService.addSysVarWherNotExist(sysVar);
+    }
 
 }

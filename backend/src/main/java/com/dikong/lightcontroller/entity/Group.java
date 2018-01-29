@@ -1,17 +1,24 @@
 package com.dikong.lightcontroller.entity;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /**
  * 群组表
  * 
  * @author lengrongfu
  * @date 2018年01月20日
  */
+@Table(name = "group")
 public class Group {
     // 删除
     public static final Byte DEL_YES = 2;
     // 未删除
     public static final Byte DEL_NO = 1;
 
+    @Id
+    @GeneratedValue(generator = "JDBC")
     private Long id;
     /**
      * 群组名称

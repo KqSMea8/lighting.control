@@ -53,11 +53,19 @@ public interface RegisterDAO {
     @Select({"select regis_addr from register where device_id=#{deviceId}"})
     List<String> selectRegisAddrByDeviceId(@Param("deviceId") Long deviceId);
 
-    @Update({"update register set var_name=#{register.varName},regis_name=#{register.regisName},"
-            + "regis_type=#{register.regisType} where regis_addr=#{regisAddr} AND device_id=#{deviceId}"})
+    @Update({"<script>" + "update register " + "<trim prefix=\"set\" suffixOverrides=\",\">"
+            + "var_name=#{register.varName}," + "regis_name=#{register.regisName},"
+            + "regis_type=#{register.regisType},"
+            + "<if test=\"register.regisValue != null\">regis_value=#{register.regisValue},"
+            + "</if>" + "</trim>" + "where regis_addr=#{regisAddr} AND device_id=#{deviceId}"
+            + "</script>"})
     int updateByRegisAddrAndDeviceId(@Param("register") Register register,
             @Param("regisAddr") String regisAddr, @Param("deviceId") Long deviceId);
 
+
+    @Update({"update register set regis_value=#{regisValue} where id=#{id}"})
+    int updateRegisValueById(@Param("regisValue")String regisValue,@Param("id")Long id);
+    
     @Select({"select * from register where id=#{id}"})
     Register selectRegisById(@Param("id") Long id);
 }
