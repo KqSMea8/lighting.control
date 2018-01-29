@@ -53,6 +53,14 @@ public class CmdServiceImpl implements CmdService {
         return results;
     }
 
+    /**
+     *
+     * @param deviceCode dtu deviceCode
+     * @param devId devId 设备表id
+     * @param varId 变量id
+     * @param switchEnum
+     * @return
+     */
     @Override
     public boolean writeSwitch(String deviceCode, long devId, long varId, SwitchEnum switchEnum) {
         // 根据devId查询串口设备编码

@@ -26,7 +26,7 @@ public class ScanNewTask {
     @Autowired
     private SysVarService sysVarService;
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "5 0 0 * * *")
     public void scanTimingNewTask(){
         ReturnInfo returnInfo = sysVarService.searchAll();
         if (null != returnInfo.getData() && returnInfo.getData() instanceof List){

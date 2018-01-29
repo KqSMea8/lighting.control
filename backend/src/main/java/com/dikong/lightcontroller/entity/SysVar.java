@@ -23,6 +23,7 @@ public class SysVar {
     private String varType;
     /**
      * 变量地址,群组变量时这个值就是群组id
+     *  时序变量时这个值为null
      */
     private Long varId;
     private String varValue;

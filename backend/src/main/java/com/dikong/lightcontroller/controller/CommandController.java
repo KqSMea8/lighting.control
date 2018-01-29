@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
-import com.dikong.lightcontroller.service.CommandService;
+import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.utils.ValidateLogUtil;
 import com.dikong.lightcontroller.vo.CommandSend;
 
@@ -23,7 +23,8 @@ import com.dikong.lightcontroller.vo.CommandSend;
  *
  * @author lengrongfu
  * @create 2018年01月26日下午9:00
- * @see </P>
+ * @see
+ *      </P>
  */
 @RestController
 public class CommandController {
@@ -31,13 +32,14 @@ public class CommandController {
     private static final Logger LOG = LoggerFactory.getLogger(CommandController.class);
 
     @Autowired
-    private CommandService commandService;
+    private CmdService cmdService;
 
     @PutMapping(path = "/command/send")
-    public ReturnInfo commandSend(@RequestBody@Valid CommandSend commandSend,BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            return ValidateLogUtil.paramError(bindingResult,LOG);
+    public ReturnInfo commandSend(@RequestBody @Valid CommandSend commandSend,
+            BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ValidateLogUtil.paramError(bindingResult, LOG);
         }
-        return commandService.sendCommand(commandSend);
+        return null;
     }
 }

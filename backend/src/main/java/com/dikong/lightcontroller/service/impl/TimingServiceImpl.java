@@ -254,7 +254,7 @@ public class TimingServiceImpl implements TimingService {
 
     @Override
     public ReturnInfo timingView(String viewTime) throws ParseException {
-
+        int projId = 0;
         List<String> weekTime = TimeWeekUtils.getWeekTime(viewTime);
         List<Holiday> holidays = holidayDAO.selectAllHoliday(weekTime);
         Map<String, String> holidaMap = new HashMap<>();
@@ -266,9 +266,9 @@ public class TimingServiceImpl implements TimingService {
         for (String holidayTime : weekTime) {
             List<TimingList> dayList = new ArrayList<>();
             if (null == holidaMap.get(holidayTime)) {
-                List<TimingList> dayOrdinary = searchOrdinary(day, null, Timing.ORDINARY_NODE);
+                List<TimingList> dayOrdinary = searchOrdinary(projId,day, null, Timing.ORDINARY_NODE);
                 List<TimingList> daySpecified =
-                        searchOrdinary(day, holidayTime, Timing.SPECIFIED_NODE);
+                        searchOrdinary(projId,day, holidayTime, Timing.SPECIFIED_NODE);
                 dayList.addAll(dayOrdinary);
                 dayList.addAll(daySpecified);
             }
@@ -294,7 +294,7 @@ public class TimingServiceImpl implements TimingService {
 
 
     @SuppressWarnings("all")
-    private List<TimingList> searchOrdinary(int day, String monthTime, int nodeType) {
+    private List<TimingList> searchOrdinary(int projId ,int day, String monthTime, int nodeType) {
         Example example = new Example(Timing.class);
         if (Timing.ORDINARY_NODE.equals(nodeType)) {
             example.createCriteria().andEqualTo("nodeType", Timing.ORDINARY_NODE);
@@ -305,6 +305,7 @@ public class TimingServiceImpl implements TimingService {
             example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO);
             example.createCriteria().andLike("weekList", "%" + monthTime + "%");
         }
+        example.createCriteria().andEqualTo("projId",projId);
         List<Timing> timings = timingDAO.selectByExample(example);
         List<TimingList> timingLists = new ArrayList<>();
         timings.forEach(item -> {
