@@ -48,6 +48,9 @@ public interface DeviceDAO {
     @Select({"select id,code from device where dtu_id=#{dtuId} AND is_delete=#{isDelete} "})
     List<Device> selectIdList(@Param("dtuId") Long dtuId, @Param("isDelete") Byte isDelete);
 
+    @Select({"select * from device where id=#{devId}"})
+    Device selectDeviceById(@Param("devId") long devId);
+
 
     @Select({"<script>"
             + "SELECT d.id,dt.device AS `dtu_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where d.id in "
@@ -64,9 +67,10 @@ public interface DeviceDAO {
     Integer selectConntionStatus(@Param("id") Long id);
 
 
-    @Select({"SELECT d.code AS `device_code`,dt.device AS `dtu_name` FROM device d LEFT JOIN dtu dt ON d.dtu_id=dt.id WHERE d.id=#{id}"})
-    DeviceDtu selectById(@Param("id")Long id);
+    @Select({
+            "SELECT d.code AS `device_code`,dt.device AS `dtu_name` FROM device d LEFT JOIN dtu dt ON d.dtu_id=dt.id WHERE d.id=#{id}"})
+    DeviceDtu selectById(@Param("id") Long id);
 
     @Select({"select model_file from device where id=#{id}"})
-    String selectModeFile(@Param("id")Long id);
+    String selectModeFile(@Param("id") Long id);
 }

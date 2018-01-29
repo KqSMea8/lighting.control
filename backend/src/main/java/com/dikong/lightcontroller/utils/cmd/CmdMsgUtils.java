@@ -11,25 +11,23 @@ public class CmdMsgUtils {
 
     public static final Integer MAXVALUE = 65535;
 
-    public static String assembleSendCmd(int equipmentOrder, ReadWriteEnum operationType,
+    public static String assembleSendCmd(String dtuAddr, ReadWriteEnum operationType,
             String varType, int addressInfo, SwitchEnum switchEnum) {
-        return assembleSendCmd(equipmentOrder, operationType, varType, addressInfo,
-                switchEnum.getValue());
+        return assembleSendCmd(dtuAddr, operationType, varType, addressInfo, switchEnum.getValue());
     }
 
-    public static String assembleSendCmd(int equipmentOrder, ReadWriteEnum operationType,
+    public static String assembleSendCmd(String dtuAddr, ReadWriteEnum operationType,
             String varType, int addressInfo, int value) {
         if (value > MAXVALUE) {
             return null;
         }
-        return assembleSendCmd(equipmentOrder, operationType, varType, addressInfo,
+        return assembleSendCmd(dtuAddr, operationType, varType, addressInfo,
                 Integer.toHexString(value));
     }
 
 
-    public static String assembleSendCmd(int equipmentOrder, ReadWriteEnum operationType,
+    public static String assembleSendCmd(String dtuAddr, ReadWriteEnum operationType,
             String varType, int addressInfo, String value) {
-        String equipmentAddr = SimpleStringUtils.repairChar(2, Integer.toHexString(equipmentOrder));
         String functionCode = "";
         if (operationType == ReadWriteEnum.READ) {
             functionCode = choiceReadFuncCode(varType);
@@ -43,7 +41,9 @@ public class CmdMsgUtils {
         }
         String address = SimpleStringUtils.repair4Char(Integer.toHexString(addressInfo - 1));
         value = SimpleStringUtils.repair4Char(value);
-        return equipmentAddr + functionCode + address + value;
+        String cmdHalf = dtuAddr + functionCode + address + value;
+        String crc = crcCheck(cmdHalf);
+        return cmdHalf + crc;
     }
 
     /**
