@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.entity;
 
+import javax.persistence.Id;
+
 /**
  * 时序表
  * 
@@ -39,6 +41,7 @@ public class Timing {
     // 未删除
     public static final Byte DEL_NO = 1;
 
+    @Id
     private Long id;
     /**
      * 节点名称

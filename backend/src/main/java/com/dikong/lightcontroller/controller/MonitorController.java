@@ -57,4 +57,13 @@ public class MonitorController {
         return monitorService.chageStatus(monitorId, value);
     }
 
+    @RequestMapping("/change/{type}/{panel-id}")
+    public ReturnInfo refreshStatus(@PathVariable("type") Integer type,
+            @PathVariable("panel-id") Integer panelId) {
+        if (type == null || panelId == null) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return null;
+    }
+
 }

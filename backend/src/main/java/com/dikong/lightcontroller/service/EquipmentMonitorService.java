@@ -18,4 +18,6 @@ public interface EquipmentMonitorService {
 
     public ReturnInfo chageStatus(Integer monitorId, String value);
 
+    public ReturnInfo refreshStatus(Integer type, Integer panelId);
+
 }
