@@ -182,8 +182,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     SysVar sysVar = new SysVar();
                     sysVar.setId((long) sourceId);
                     sysVar.setSysVarType(2);
-                    sysVar.setVarValue("1");
+                    sysVar.setVarValue(value);
                     sysVarService.updateSysVar(sysVar);
+                    monitor.setCurrentValue(new BigDecimal(value));
+                    monitorDao.updateByPrimaryKeySelective(monitor);
                     break;
 
                 default:
