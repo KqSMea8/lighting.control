@@ -42,6 +42,6 @@ public class SendMsgReq {
 
     @Override
     public String toString() {
-        return "SendMsgReq [devCode=" + devCode + ", cmd=" + cmd + "]";
+        return "SendMsgReq [type=" + type + ", devCode=" + devCode + ", cmd=" + cmd + "]";
     }
 }

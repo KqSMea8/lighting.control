@@ -16,7 +16,7 @@ public interface EquipmentMonitorService {
 
     public ReturnInfo update(EquipmentMonitor equipmentMonitor);
 
-    public ReturnInfo chageStatus(Integer monitorId, String value);
+    public ReturnInfo changeStatus(Integer monitorId, String value);
 
     public ReturnInfo refreshStatus(Integer type, Integer panelId);
 
