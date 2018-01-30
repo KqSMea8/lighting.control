@@ -18,9 +18,11 @@ import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
+import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
+import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 
@@ -47,6 +49,9 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
 
     @Autowired
     private GroupDeviceMiddleDAO groupDeviceMiddleDao;
+
+    @Autowired
+    private SysVarService sysVarService;
 
     @Override
     public ReturnInfo add(EquipmentMonitor equipmentMonitor) {
@@ -174,6 +179,11 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                         long varId = timing.getRunId();// 变量id
                         sendCmd(monitorId, varId, Integer.valueOf(value), sendResult);
                     }
+                    SysVar sysVar = new SysVar();
+                    sysVar.setId((long) sourceId);
+                    sysVar.setSysVarType(2);
+                    sysVar.setVarValue("1");
+                    sysVarService.updateSysVar(sysVar);
                     break;
 
                 default:
