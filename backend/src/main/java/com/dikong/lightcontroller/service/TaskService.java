@@ -18,4 +18,8 @@ public interface TaskService {
     ReturnInfo addTask(Long id,String taskName,String jsonParams,String cron);
 
     ReturnInfo addTask(CommandSend commandSend,String cron);
+
+    ReturnInfo callBack(CommandSend commandSend);
+
+    ReturnInfo removeTask(String taskName);
 }

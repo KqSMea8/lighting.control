@@ -20,12 +20,16 @@ public class SysVar {
     public static final String OPEN_SYS_VALUE = "1";
     private Long id;
     private String varName;
+    //模拟量还是数子量
     private String varType;
     /**
      * 变量地址,群组变量时这个值就是群组id
      *  时序变量时这个值为null
      */
     private Long varId;
+    /**
+     * 变量值,是开还是关
+     */
     private String varValue;
     private Integer projId;
     /**

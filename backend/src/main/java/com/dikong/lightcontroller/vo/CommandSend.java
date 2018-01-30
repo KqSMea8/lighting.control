@@ -26,6 +26,9 @@ public class CommandSend {
 
     private String taskName;
 
+
+    private Integer projId;
+
     public Long getTimingId() {
         return timingId;
     }
@@ -48,5 +51,13 @@ public class CommandSend {
 
     public void setTaskName(String taskName) {
         this.taskName = taskName;
+    }
+
+    public Integer getProjId() {
+        return projId;
+    }
+
+    public void setProjId(Integer projId) {
+        this.projId = projId;
     }
 }

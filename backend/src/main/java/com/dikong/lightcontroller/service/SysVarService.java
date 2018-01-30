@@ -19,7 +19,7 @@ public interface SysVarService {
 
     ReturnInfo addSysVar(SysVar sysVar);
 
-    ReturnInfo deleteSysVar(Long varAddr,Integer sysVarType);
+    ReturnInfo deleteSysVar(Long varId,Integer sysVarType);
 
     ReturnInfo searchAll();
 

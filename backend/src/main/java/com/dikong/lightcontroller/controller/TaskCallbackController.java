@@ -1,6 +1,5 @@
 package com.dikong.lightcontroller.controller;
 
-import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
-import com.dikong.lightcontroller.service.CmdService;
+import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.vo.CommandSend;
 
 /**
@@ -29,22 +28,10 @@ public class TaskCallbackController {
     private static final Logger LOG = LoggerFactory.getLogger(TaskCallbackController.class);
 
     @Autowired
-    private CmdService cmdService;
+    private TaskService taskService;
 
     @PostMapping(path = "/command/send")
     public ReturnInfo commandSend(@RequestBody CommandSend commandSend) {
-//        String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-//        int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
-//        if (todayIsHoliday > 0) {
-//            return;
-//        }
-
-        boolean sentStatus = false;
-        if (SwitchEnum.OPEN.getCode() == commandSend.getSwitchEnum()){
-            sentStatus = cmdService.writeSwitch(0,SwitchEnum.OPEN );
-        }else {
-            sentStatus = cmdService.writeSwitch(0,SwitchEnum.CLOSE );
-        }
-        return ReturnInfo.createReturnSuccessOne(sentStatus);
+        return taskService.callBack(commandSend);
     }
 }

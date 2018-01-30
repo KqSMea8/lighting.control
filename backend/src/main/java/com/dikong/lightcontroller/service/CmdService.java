@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 
@@ -15,6 +16,8 @@ public interface CmdService {
     public List<String> readMuchSwitch(long varId, int varNum);
 
     public boolean writeSwitch(long varId, SwitchEnum switchEnum);
+
+    public boolean writeSwitch(Map<Long, Integer> allRegis);
 
     public String readOneAnalog(long varId);
 

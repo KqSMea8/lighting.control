@@ -7,6 +7,9 @@ import com.dikong.lightcontroller.dto.QuartzJobDto;
 import feign.Headers;
 import feign.RequestLine;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * <p>
  * Description
@@ -23,4 +26,8 @@ public interface TaskServiceApi {
 
     @RequestLine("POST /jobs")
     boolean addTask(@RequestBody QuartzJobDto quartzJobDto);
+
+
+    @RequestLine("DELETE /jobs")
+    boolean delTask(@RequestBody Map<String,List<String>> jobKeyGroups);
 }

@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.service.impl;
 
+import com.dikong.lightcontroller.entity.SysVar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,22 @@ public class HistoryServiceImpl implements HistoryService {
             history.setCreateBy(useId);
             historyDAO.insertHistory(history);
         }
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo updateHistory(SysVar sysVar) {
+        History history = new History();
+        history.setVarId(sysVar.getVarId());
+        if (SysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
+            history.setVarType(History.SEQUENCE_TYPE);
+        } else if (SysVar.GROUP.equals(sysVar.getSysVarType())) {
+            history.setVarType(History.GROUP_TYPE);
+        } else {
+            history.setVarType(History.REGISTER_TYPE);
+        }
+        history.setVarValue(sysVar.getVarValue());
+        updateHistory(history);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 }

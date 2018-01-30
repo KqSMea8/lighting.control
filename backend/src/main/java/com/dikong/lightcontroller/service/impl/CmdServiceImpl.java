@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,6 +80,18 @@ public class CmdServiceImpl implements CmdService {
                 new SendMsgReq(ReadWriteEnum.WRITE.getCode(), device.getCode(), sendMsg);
         String response = "";
         // 判断是否成功
+        return true;
+    }
+
+
+    @Override
+    public boolean writeSwitch(Map<Long, Integer> allRegis) {
+        if (null == allRegis) {
+            return false;
+        }
+        for (Map.Entry<Long, Integer> map : allRegis.entrySet()) {
+            writeSwitch(map.getKey(), SwitchEnum.getByCode(map.getValue()));
+        }
         return true;
     }
 
