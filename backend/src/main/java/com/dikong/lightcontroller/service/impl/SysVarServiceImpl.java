@@ -1,13 +1,18 @@
 package com.dikong.lightcontroller.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.dikong.lightcontroller.service.CmdService;
+import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.HolidayDAO;
 import com.dikong.lightcontroller.dao.SysVarDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
@@ -17,7 +22,9 @@ import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.HistoryService;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.service.SysVarService;
-import com.dikong.lightcontroller.utils.TimeWeekUtils;
+import com.dikong.lightcontroller.service.TaskService;
+import com.dikong.lightcontroller.utils.DateToCronUtils;
+import com.dikong.lightcontroller.vo.CommandSend;
 
 import tk.mybatis.mapper.entity.Example;
 
@@ -49,6 +56,17 @@ public class SysVarServiceImpl implements SysVarService {
 
     @Autowired
     private HolidayDAO holidayDAO;
+
+    @Autowired
+    private TaskService taskService;
+
+
+    @Autowired
+    private GroupDeviceMiddleDAO groupDeviceMiddleDAO;
+
+    @Autowired
+    private CmdService cmdService;
+
 
     @Override
     public ReturnInfo addSysVarWherNotExist(SysVar sysVar) {
@@ -102,28 +120,81 @@ public class SysVarServiceImpl implements SysVarService {
         return null;
     }
 
-
+    /**
+     * 生成所有的crontable
+     * 
+     * @param projId
+     * @param value
+     */
     private void processSequence(int projId, String value) {
-        // 节假日
-        String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-        int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
-        if (todayIsHoliday > 0) {
-            return;
-        }
         // 指定节点
         Example example = new Example(Timing.class);
-        example.createCriteria().andEqualTo("nodeType", Timing.SPECIFIED_NODE);
         example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO);
-        example.createCriteria().andLike("weekList", "%" + nowDateYearMonthDay + "%");
         example.createCriteria().andEqualTo("projId", projId);
         List<Timing> timings = timingDAO.selectByExample(example);
-        if (!CollectionUtils.isEmpty(timings)) {
-            timings.forEach(item->{
-
-            });
-            return;
+        if (SysVar.OPEN_SYS_VALUE.equals(value)){
+            if (!CollectionUtils.isEmpty(timings)) {
+                timings.forEach(item -> {
+                    if (Timing.ORDINARY_NODE.equals(item.getNodeType())) {
+                        String weekList = item.getWeekList();
+                        String nodeContentRunTime = item.getNodeContentRunTime();
+                        String cron = DateToCronUtils.cronFormtHHssMM(nodeContentRunTime, weekList);
+                        CommandSend commandSend = new CommandSend();
+                        commandSend.setTimingId(item.getId());
+                        commandSend.setVarIdS(seachAllRegisId(item, value));
+                        taskService.addTask(commandSend, cron);
+                    } else if (Timing.SPECIFIED_NODE.equals(item.getNodeType())) {
+                        String monthList = item.getMonthList();
+                        if (null != monthList && !monthList.isEmpty()) {
+                            String[] month = monthList.split(",");
+                            for (String ymd : month) {
+                                String date = ymd + " " + item.getNodeContentRunTime();
+                                String cron = DateToCronUtils.cronFormt(date);
+                                CommandSend commandSend = new CommandSend();
+                                commandSend.setTimingId(item.getId());
+                                commandSend.setVarIdS(seachAllRegisId(item, value));
+                                taskService.addTask(commandSend, cron);
+                            }
+                        }
+                    }
+                });
+            }
+        }else if (SysVar.CLOSE_SYS_VALUE.equals(value)){
+            
         }
-        // 普通节点
-        String weekNowDate = TimeWeekUtils.getWeekNowDate();
+        return;
+    }
+
+
+
+
+    /**
+     * 通过时序查找所有关联的变量id
+     * 
+     * @param timing
+     * @return
+     */
+    private Map<Long, Integer> seachAllRegisId(Timing timing, String value) {
+        Map<Long, Integer> idAndSwitchValue = new HashMap<>();
+        if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
+            if (SysVar.CLOSE_SYS_VALUE.equals(value)){
+                idAndSwitchValue.put(timing.getRunVar(), SwitchEnum.CLOSE.getCode());
+            }else {
+                idAndSwitchValue.put(timing.getRunVar(), Integer.valueOf(timing.getRunVarlue()));
+            }
+        } else if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
+            Long groupId = timing.getRunId();
+            List<Long> regisIds = groupDeviceMiddleDAO.selectAllRegisId(groupId);
+            if (!CollectionUtils.isEmpty(regisIds)) {
+                regisIds.forEach(item -> {
+                    if (SysVar.CLOSE_SYS_VALUE.equals(value)){
+                        idAndSwitchValue.put(item, SwitchEnum.CLOSE.getCode());
+                    }else {
+                        idAndSwitchValue.put(item, Integer.valueOf(timing.getRunVarlue()));
+                    }
+                });
+            }
+        }
+        return idAndSwitchValue;
     }
 }

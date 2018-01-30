@@ -82,7 +82,7 @@ public class GroupServiceImpl implements GroupService {
 
         SysVar sysVar = new SysVar();
         sysVar.setSysVarType(SysVar.GROUP);
-        sysVar.setVarValue(SysVar.DEFAULT_SYS_VALUE);
+        sysVar.setVarValue(SysVar.CLOSE_SYS_VALUE);
         sysVar.setVarName(group.getGroupName());
         sysVar.setVarId(group.getId());
         sysVar.setProjId(projId);

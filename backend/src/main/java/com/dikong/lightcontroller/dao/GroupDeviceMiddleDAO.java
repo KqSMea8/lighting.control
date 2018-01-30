@@ -43,4 +43,7 @@ public interface GroupDeviceMiddleDAO {
             + "<foreach collection=\"groupIds\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
             + " #{item} " + "</foreach>" + "</script>"})
     List<Long> selectDeviceId(@Param("groupIds") List<Long> groupIds);
+
+    @Select({"select regis_id from group_device_middle where group_id=#{groupId}"})
+    List<Long> selectAllRegisId(@Param("groupId")Long groupId);
 }

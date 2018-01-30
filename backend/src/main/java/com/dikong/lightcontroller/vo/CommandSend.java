@@ -1,6 +1,6 @@
 package com.dikong.lightcontroller.vo;
 
-import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
  * <p>
@@ -10,40 +10,43 @@ import javax.validation.constraints.NotNull;
  *
  * @author lengrongfu
  * @create 2018年01月26日下午9:01
- * @see </P>
+ * @see
+ *      </P>
  */
 public class CommandSend {
-    //变量id
-    @NotNull
-    private Long varId;
-    //变量类型
-    @NotNull
-    private Integer varType;
-    //变量值
-    @NotNull
-    private String varValue;
 
-    public Long getVarId() {
-        return varId;
+    // 时序表id
+    private Long timingId;
+
+    // 执行的变量id,可以是一个群组下面的所有变量
+    /**
+     * 存储每个变量对应要执行的值
+     */
+    private Map<Long, Integer> varIdS;
+
+    private String taskName;
+
+    public Long getTimingId() {
+        return timingId;
     }
 
-    public void setVarId(Long varId) {
-        this.varId = varId;
+    public void setTimingId(Long timingId) {
+        this.timingId = timingId;
     }
 
-    public Integer getVarType() {
-        return varType;
+    public Map<Long, Integer> getVarIdS() {
+        return varIdS;
     }
 
-    public void setVarType(Integer varType) {
-        this.varType = varType;
+    public void setVarIdS(Map<Long, Integer> varIdS) {
+        this.varIdS = varIdS;
     }
 
-    public String getVarValue() {
-        return varValue;
+    public String getTaskName() {
+        return taskName;
     }
 
-    public void setVarValue(String varValue) {
-        this.varValue = varValue;
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 }

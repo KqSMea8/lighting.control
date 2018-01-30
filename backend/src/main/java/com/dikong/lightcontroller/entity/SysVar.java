@@ -16,7 +16,7 @@ public class SysVar {
     public static final Integer SEQUENCE = 1;
     public static final Integer GROUP = 2;
 
-    public static final String DEFAULT_SYS_VALUE = "0";
+    public static final String CLOSE_SYS_VALUE = "0";
     public static final String OPEN_SYS_VALUE = "1";
     private Long id;
     private String varName;

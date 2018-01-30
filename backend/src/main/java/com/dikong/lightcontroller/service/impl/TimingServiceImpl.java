@@ -358,7 +358,7 @@ public class TimingServiceImpl implements TimingService {
         sysVar.setSysVarType(SysVar.SEQUENCE);
         sysVar.setVarName("Sequence_EN");
         sysVar.setVarId(new Long(1));
-        sysVar.setVarValue(SysVar.DEFAULT_SYS_VALUE);
+        sysVar.setVarValue(SysVar.CLOSE_SYS_VALUE);
         sysVar.setProjId(projId);
         sysVarService.addSysVarWherNotExist(sysVar);
     }

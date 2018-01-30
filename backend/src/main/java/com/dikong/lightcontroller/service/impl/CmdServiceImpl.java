@@ -60,8 +60,6 @@ public class CmdServiceImpl implements CmdService {
 
     /**
      *
-     * @param deviceCode dtu deviceCode
-     * @param devId devId 设备表id
      * @param varId 变量id
      * @param switchEnum
      * @return
