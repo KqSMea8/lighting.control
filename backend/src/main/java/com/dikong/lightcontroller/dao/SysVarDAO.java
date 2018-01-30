@@ -35,6 +35,6 @@ public interface SysVarDAO {
     @Select({"select * from sys_var where sys_var_type=#{sysVarType}"})
     List<SysVar> selectAll(@Param("sysVarType") Integer sysVarType);
 
-    @Delete({"delete from sys_var where var_id=#{var_id} AND sys_var_type=#{sysVarType}"})
-    int delete(@Param("varAddr") Long varAddr,@Param("sysVarType") Integer sysVarType);
+    @Delete({"delete from sys_var where var_id=#{varAddr} AND sys_var_type=#{sysVarType}"})
+    int delete(@Param("varId") Long varId,@Param("sysVarType") Integer sysVarType);
 }

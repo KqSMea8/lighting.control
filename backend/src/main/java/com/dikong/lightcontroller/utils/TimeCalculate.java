@@ -36,12 +36,15 @@ public class TimeCalculate {
         return double2Date(sunrise);
     }
 
-    public static void main(String[] args) {
-        double jd = 116.407526;
-        double wd = 39.90403;
-        getSunriseTime(jd, wd);
-        getNoonTime(jd, wd);
-        getDawnTime(jd, wd);
+    public static void main(String[] args) throws ParseException {
+//        double jd = 116.407526;
+//        double wd = 39.90403;
+//        getSunriseTime(jd, wd);
+//        getNoonTime(jd, wd);
+//        getDawnTime(jd, wd);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date parse = dateFormat.parse("2018-01-30 6:34:5");
+        System.out.println(parse);
     }
 
     /**
@@ -224,7 +227,7 @@ public class TimeCalculate {
         T = (T - jwM) * 60;
         double jwS = Math.floor(T + 0.5);
         StringBuilder builder = new StringBuilder();
-        builder.append(jwH).append(":").append(jwM).append(":").append(jwS);
+        builder.append(String.valueOf((int)jwH)).append(":").append(String.valueOf((int)jwM)).append(":").append(String.valueOf((int)jwS));
         return builder.toString();
     }
 

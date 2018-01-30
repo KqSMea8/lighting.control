@@ -40,7 +40,6 @@ public class Timing {
     public static final Byte DEL_YES = 2;
     // 未删除
     public static final Byte DEL_NO = 1;
-
     @Id
     private Long id;
     /**
@@ -65,11 +64,11 @@ public class Timing {
      */
     private String nodeContentCity;
     /**
-     * 执行变量,可以是组id,设备id,变量id
+     * 执行变量,可以是组id,设备id
      */
     private Long runVar;
     /**
-     * 执行类型，1->群组类型，2->设备类型，3->变量类型
+     * 执行类型，1->群组类型，2->设备类型
      */
     private Integer runType;
     /**
@@ -110,6 +109,11 @@ public class Timing {
      * 指定节点中的月list
      */
     private String monthList;
+
+    /**
+     * 创建的定时任务名称
+     */
+    private String taskName;
 
     public Long getId() {
         return id;
@@ -237,5 +241,13 @@ public class Timing {
 
     public void setMonthList(String monthList) {
         this.monthList = monthList;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 }

@@ -25,6 +25,7 @@ import com.dikong.lightcontroller.entity.Holiday;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.SysVarService;
+import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.utils.ArraysUtils;
 import com.dikong.lightcontroller.utils.TimeCalculate;
@@ -73,6 +74,9 @@ public class TimingServiceImpl implements TimingService {
 
     @Autowired
     private SysVarService sysVarService;
+
+    @Autowired
+    private TaskService taskService;
 
     @SuppressWarnings("all")
     @Override
@@ -175,13 +179,21 @@ public class TimingServiceImpl implements TimingService {
 
     @Override
     public ReturnInfo deleteNode(Long id) {
-        timingDAO.updateDeleteById(id, Timing.DEL_YES);
-        return ReturnInfo.create(CodeEnum.SUCCESS);
+        Timing timing = timingDAO.selectById(id);
+        if (null != timing) {
+            ReturnInfo removeReturn = taskService.removeTask(timing.getTaskName());
+            if (null != removeReturn.getData() && (boolean) removeReturn.getData()) {
+                timingDAO.updateDeleteById(id, Timing.DEL_YES);
+                return ReturnInfo.create(CodeEnum.SUCCESS);
+            }
+        }
+        return ReturnInfo.create(CodeEnum.SERVER_ERROR);
     }
 
     @SuppressWarnings("all")
     @Override
     public ReturnInfo listNodeType(TimingListSearch timingListSearch) {
+
         Timing search = new Timing();
         search.setNodeType(timingListSearch.getNodeType());
         search.setIsDelete(Timing.DEL_NO);
@@ -254,7 +266,7 @@ public class TimingServiceImpl implements TimingService {
 
     @Override
     public ReturnInfo timingView(String viewTime) throws ParseException {
-
+        int projId = 0;
         List<String> weekTime = TimeWeekUtils.getWeekTime(viewTime);
         List<Holiday> holidays = holidayDAO.selectAllHoliday(weekTime);
         Map<String, String> holidaMap = new HashMap<>();
@@ -266,9 +278,10 @@ public class TimingServiceImpl implements TimingService {
         for (String holidayTime : weekTime) {
             List<TimingList> dayList = new ArrayList<>();
             if (null == holidaMap.get(holidayTime)) {
-                List<TimingList> dayOrdinary = searchOrdinary(day, null, Timing.ORDINARY_NODE);
+                List<TimingList> dayOrdinary =
+                        searchOrdinary(projId, day, null, Timing.ORDINARY_NODE);
                 List<TimingList> daySpecified =
-                        searchOrdinary(day, holidayTime, Timing.SPECIFIED_NODE);
+                        searchOrdinary(projId, day, holidayTime, Timing.SPECIFIED_NODE);
                 dayList.addAll(dayOrdinary);
                 dayList.addAll(daySpecified);
             }
@@ -294,7 +307,7 @@ public class TimingServiceImpl implements TimingService {
 
 
     @SuppressWarnings("all")
-    private List<TimingList> searchOrdinary(int day, String monthTime, int nodeType) {
+    private List<TimingList> searchOrdinary(int projId, int day, String monthTime, int nodeType) {
         Example example = new Example(Timing.class);
         if (Timing.ORDINARY_NODE.equals(nodeType)) {
             example.createCriteria().andEqualTo("nodeType", Timing.ORDINARY_NODE);
@@ -303,8 +316,9 @@ public class TimingServiceImpl implements TimingService {
         } else {
             example.createCriteria().andEqualTo("nodeType", Timing.SPECIFIED_NODE);
             example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO);
-            example.createCriteria().andLike("weekList", "%" + monthTime + "%");
+            example.createCriteria().andLike("monthList", "%" + monthTime + "%");
         }
+        example.createCriteria().andEqualTo("projId", projId);
         List<Timing> timings = timingDAO.selectByExample(example);
         List<TimingList> timingLists = new ArrayList<>();
         timings.forEach(item -> {
@@ -352,12 +366,12 @@ public class TimingServiceImpl implements TimingService {
     }
 
 
-    private void addSysVar(int projId){
+    private void addSysVar(int projId) {
         SysVar sysVar = new SysVar();
         sysVar.setSysVarType(SysVar.SEQUENCE);
         sysVar.setVarName("Sequence_EN");
         sysVar.setVarId(new Long(1));
-        sysVar.setVarValue(SysVar.DEFAULT_SYS_VALUE);
+        sysVar.setVarValue(SysVar.CLOSE_SYS_VALUE);
         sysVar.setProjId(projId);
         sysVarService.addSysVarWherNotExist(sysVar);
     }

@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,12 @@ public class CmdServiceImpl implements CmdService {
         return results;
     }
 
+    /**
+     *
+     * @param varId 变量id
+     * @param switchEnum
+     * @return
+     */
     @Override
     public boolean writeSwitch(long varId, SwitchEnum switchEnum) {
         // 根据 long varId,查询变量信息
@@ -84,6 +91,18 @@ public class CmdServiceImpl implements CmdService {
         cmdRecordDao.insert(cmdRecord);
         String response = "";
         // 判断是否成功
+        return true;
+    }
+
+
+    @Override
+    public boolean writeSwitch(Map<Long, Integer> allRegis) {
+        if (null == allRegis) {
+            return false;
+        }
+        for (Map.Entry<Long, Integer> map : allRegis.entrySet()) {
+            writeSwitch(map.getKey(), SwitchEnum.getByCode(map.getValue()));
+        }
         return true;
     }
 
