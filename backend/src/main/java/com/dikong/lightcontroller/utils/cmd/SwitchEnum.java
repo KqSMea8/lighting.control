@@ -27,4 +27,16 @@ public enum SwitchEnum {
         return value;
     }
 
+    /**
+     * 
+     * @Datetime 2018年1月29日
+     */
+    public static SwitchEnum getByCode(int code) {
+        for (SwitchEnum temp : SwitchEnum.values()) {
+            if (temp.getCode() == code) {
+                return temp;
+            }
+        }
+        return null;
+    }
 }

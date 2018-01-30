@@ -39,7 +39,7 @@ public class EquipmentMonitor {
      */
     private String unit;
     /**
-     * 进制换算
+     * 进制
      */
     private BigDecimal factor;
     /**

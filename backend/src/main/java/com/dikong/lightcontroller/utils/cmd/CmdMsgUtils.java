@@ -52,8 +52,6 @@ public class CmdMsgUtils {
      * @param recieveCmd
      */
     public static List<String> analysisSwitchCmd(String recieveCmd, int length) {
-        String equipmentAddr = recieveCmd.substring(0, 2);
-        String functionCode = recieveCmd.substring(2, 4);
         int byteNum = Integer.parseInt(recieveCmd.substring(4, 6), 16);
         int[] currentIndex = new int[1];
         List<String> switchInfo = new ArrayList<String>();
@@ -64,8 +62,6 @@ public class CmdMsgUtils {
                     .toBinaryString(Integer.parseInt(recieveCmd.substring(i + 7, i + 8), 16));
             String bin4CharLow = SimpleStringUtils.repair4Char(binLowStr);
             String bin4CharHigh = SimpleStringUtils.repair4Char(binHighStr);
-            System.out.println(recieveCmd.substring(i + 7, i + 8) + ":" + bin4CharLow);
-            System.out.println(recieveCmd.substring(i + 6, i + 7) + ":" + bin4CharHigh);
             switchChange(bin4CharLow, currentIndex, length, switchInfo);
             switchChange(bin4CharHigh, currentIndex, length, switchInfo);
         }
@@ -88,8 +84,6 @@ public class CmdMsgUtils {
     }
 
     public static List<String> analysisAnalogCmd(String recieveCmd) {
-        String equipmentAddr = recieveCmd.substring(0, 2);
-        String functionCode = recieveCmd.substring(2, 4);
         List<String> values = new ArrayList<>();
         int byteNum = Integer.parseInt(recieveCmd.substring(4, 6), 16);
         for (int i = 0; i < byteNum / 2; i++) {
@@ -135,10 +129,7 @@ public class CmdMsgUtils {
     public static String crcCheck(String msg) {
         int crc = 0XFFFF;
         for (int i = 0; i < msg.length() / 2; i++) {
-            // System.out.println("char:" + msg.substring(i * 2, i * 2 + 2));
-            // System.out.println(crc);
             crc = crc ^ Integer.parseInt(msg.substring(i * 2, i * 2 + 2), 16);
-            // System.out.println(crc);
             for (int j = 0; j < 8; j++) {
                 int result = crc & 1;
                 if (result != 0) {
@@ -148,7 +139,6 @@ public class CmdMsgUtils {
                     crc >>= 1;
             }
         }
-        // System.out.println(crc);
         return SimpleStringUtils.repair4Char(Integer.toHexString(crc));
     }
 }
