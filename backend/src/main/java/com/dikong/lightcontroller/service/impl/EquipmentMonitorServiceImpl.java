@@ -55,13 +55,15 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         equipmentMonitor.setProjectId(AuthCurrentUser.getCurrentProjectId());
         if (equipmentMonitor.getMonitorType() == 1) {
             if (isSwitch(equipmentMonitor.getValueType())) {
+                String value = cmdService.readOneSwitch(equipmentMonitor.getSourceId());
+                equipmentMonitor.setCurrentValue(new BigDecimal(value));
+            } else {
                 String value = cmdService.readOneAnalog(equipmentMonitor.getSourceId());
                 equipmentMonitor.setCurrentValue(new BigDecimal(String.valueOf(new BigDecimal(value)
                         .multiply(equipmentMonitor.getFactor()).doubleValue())));
-            } else {
-                String value = cmdService.readOneSwitch(equipmentMonitor.getSourceId());
-                equipmentMonitor.setCurrentValue(new BigDecimal(value));
             }
+        } else {
+            equipmentMonitor.setCurrentValue(new BigDecimal(SwitchEnum.CLOSE.getCode()));
         }
         monitorDao.insertSelective(equipmentMonitor);
         return ReturnInfo.createReturnSuccessOne(null);
@@ -130,8 +132,12 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     }
 
     @Override
-    public ReturnInfo chageStatus(Integer monitorId, String value) {
+    public ReturnInfo changeStatus(Integer monitorId, String value) {
         EquipmentMonitor monitor = monitorDao.selectByPrimaryKey(monitorId);
+        if (monitor.getValueType().equals(Register.AI)
+                || monitor.getValueType().equals(Register.BI)) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
         int[] sendResult = new int[2];
         // 获取发送命令相关信息调用相关方法
         int sourceId = monitor.getSourceId();
@@ -155,7 +161,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     break;
                 case 3:
                     // 查询时序信息和ID
-                    Timing timing = timingDao.selectByPrimaryKey(sourceId);
+                    Timing timing = timingDao.selectByPrimaryKey((long) sourceId);
                     if (timing.getRunType() == 1) {// 群组
                         long groupId = timing.getRunVar();// 群组id
                         List<GroupDeviceMiddle> middles2 =
@@ -204,7 +210,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     }
 
     boolean isSwitch(String valueType) {
-        if (valueType.equals(Register.AV) || valueType.equals(Register.AI)) {
+        if (valueType.equals(Register.BI) || valueType.equals(Register.BV)) {
             return true;
         } else {
             return false;

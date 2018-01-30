@@ -54,16 +54,16 @@ public class MonitorController {
     @RequestMapping("/change/{monitor-id}/{value}")
     public ReturnInfo chageStatus(@PathVariable("monitor-id") Integer monitorId,
             @PathVariable("value") String value) {
-        return monitorService.chageStatus(monitorId, value);
+        return monitorService.changeStatus(monitorId, value);
     }
 
-    @RequestMapping("/change/{type}/{panel-id}")
+    @RequestMapping("/refresh/{type}/{panel-id}")
     public ReturnInfo refreshStatus(@PathVariable("type") Integer type,
             @PathVariable("panel-id") Integer panelId) {
         if (type == null || panelId == null) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
-        return null;
+        return monitorService.refreshStatus(type, panelId);
     }
 
 }

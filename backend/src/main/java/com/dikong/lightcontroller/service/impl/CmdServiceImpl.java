@@ -3,6 +3,8 @@ package com.dikong.lightcontroller.service.impl;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 @Service
 public class CmdServiceImpl implements CmdService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CmdServiceImpl.class);
     @Autowired
     private CmdRecordDao cmdRecordDao;
 
@@ -78,6 +81,14 @@ public class CmdServiceImpl implements CmdService {
                 register.getRegisType(), Integer.valueOf(register.getRegisAddr()), switchEnum);
         SendMsgReq sendMsgReq =
                 new SendMsgReq(ReadWriteEnum.WRITE.getCode(), device.getCode(), sendMsg);
+        LOG.info("发送信息：" + sendMsgReq.toString());
+        CmdRecord cmdRecord = new CmdRecord();
+        cmdRecord.setDeviceCode(dtu.getDeviceCode());
+        cmdRecord.setDevCode(device.getCode());
+        cmdRecord.setRegisAddr(register.getRegisAddr());
+        cmdRecord.setCmdInfo(sendMsg);
+        cmdRecord.setCreateBy(AuthCurrentUser.getUserId());
+        cmdRecordDao.insert(cmdRecord);
         String response = "";
         // 判断是否成功
         return true;
@@ -138,6 +149,7 @@ public class CmdServiceImpl implements CmdService {
         String sendMsg = CmdMsgUtils.assembleSendCmd(devAddr, readWriteEnum, varType,
                 Integer.valueOf(varAddr), varNum);
         SendMsgReq sendMsgReq = new SendMsgReq(readWriteEnum.getCode(), deviceCode, sendMsg);
+        LOG.info("发送信息：" + sendMsgReq.toString());
         // TODO 命令执行记录
         CmdRecord cmdRecord = new CmdRecord();
         cmdRecord.setDeviceCode(deviceCode);
@@ -146,7 +158,7 @@ public class CmdServiceImpl implements CmdService {
         cmdRecord.setCmdInfo(sendMsg);
         cmdRecord.setCreateBy(AuthCurrentUser.getUserId());
         cmdRecordDao.insert(cmdRecord);
-        String response = "";
+        String response = "110105CD6BB20E1B";
         if (readWriteEnum == ReadWriteEnum.WRITE) {
             // 判断是否成功
             return "true";
