@@ -1,9 +1,9 @@
 package com.dikong.lightcontroller.service;
 
 import java.util.List;
-import java.util.Map;
 
 import com.dikong.lightcontroller.dto.CmdRes;
+import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 
 /**
