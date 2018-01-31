@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dto.CmdRes;
+import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.dto.SendCmdRes;
 import com.dikong.lightcontroller.entity.CmdRecord;
 import com.dikong.lightcontroller.entity.Device;
@@ -37,7 +39,7 @@ import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 @Service
 public class CmdServiceImpl implements CmdService {
 
-    private static final String serviceIpKey = "net.service.ip";
+    private static final String serviceIpKey = "collection.host";
 
     private static final Logger LOG = LoggerFactory.getLogger(CmdServiceImpl.class);
     @Autowired

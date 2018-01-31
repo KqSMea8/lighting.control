@@ -103,7 +103,7 @@ public class TaskServiceImpl implements TaskService {
 
     }
 
-    private QuartzJobDto createTask(String taskName, String jsonParams, String cron,
+    private QuartzJobDto createTask(String method,String taskName, String jsonParams, String cron,
             String groupName, String triggerGroup, String description, String callback) {
         QuartzJobDto quartzJobDto = new QuartzJobDto();
         QuartzJobDto.JobDo jobDo = new QuartzJobDto.JobDo();
@@ -111,7 +111,7 @@ public class TaskServiceImpl implements TaskService {
         jobDo.setGroup(groupName);
         String jobName = taskName;
         jobDo.setName(jobName);
-        jobDo.setExtInfo(new QuartzJobDto.ExtInfo(callback, jsonParams));
+        jobDo.setExtInfo(new QuartzJobDto.ExtInfo(method, callback, jsonParams));
         quartzJobDto.setJobDO(jobDo);
         QuartzJobDto.TriggerDos triggerDos = new QuartzJobDto.TriggerDos();
         triggerDos.setCronExpression(cron);
@@ -133,9 +133,10 @@ public class TaskServiceImpl implements TaskService {
     public ReturnInfo addDeviceTask(Long id) {
         String taskName = UUID.randomUUID().toString();
         deviceCallBackUrl = deviceCallBackUrl + "/" + id;
-        createTask(taskName, "", DEFAULT_DEVICE_CRON, DEFAULT_DEVICE_JOB_GROUP,
-                DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, deviceCallBackUrl);
-        return ReturnInfo.create(CodeEnum.SUCCESS);
+        QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,
+                DEFAULT_DEVICE_JOB_GROUP, DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION,
+                deviceCallBackUrl);
+        return ReturnInfo.createReturnSuccessOne(task);
     }
 
     @Override
@@ -156,8 +157,8 @@ public class TaskServiceImpl implements TaskService {
         String uuid = UUID.randomUUID().toString();
         commandSend.setTaskName(uuid);
         String jsonParams = JSON.toJSONString(commandSend);
-        QuartzJobDto quartzJobDto = createTask(uuid, jsonParams, cron, DEFAULT_JOB_GROUP,
-                DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, callBackUrl);
+        QuartzJobDto quartzJobDto = createTask(QuartzJobDto.METHOD_POST, uuid, jsonParams, cron,
+                DEFAULT_JOB_GROUP, DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, callBackUrl);
         if (null != quartzJobDto) {
             TimingCron timingCron = new TimingCron();
             timingCron.setTimingId(id);

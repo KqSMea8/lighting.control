@@ -17,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,9 +27,9 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
-import com.dikong.lightcontroller.dao.GroupDAO;
-import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
+import com.dikong.lightcontroller.dto.CmdRes;
+import com.dikong.lightcontroller.dto.QuartzJobDto;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.CmdService;
@@ -65,12 +66,6 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Autowired
     private RegisterDAO registerDAO;
-
-    @Autowired
-    private GroupDAO groupDAO;
-
-    @Autowired
-    private GroupDeviceMiddleDAO groupDeviceMiddleDAO;
 
     @Autowired
     private Environment environment;
@@ -118,6 +113,7 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     @Override
+    @Transactional
     public ReturnInfo addDevice(DeviceAdd deviceAdd) {
         int existNum = deviceDAO.selectByDtuIdAndCode(deviceAdd.getDtuId(), deviceAdd.getCode());
         if (existNum > 0) {
@@ -126,7 +122,14 @@ public class DeviceServiceImpl implements DeviceService {
         }
         deviceDAO.insertDevice(deviceAdd);
         // 增加任务
-        taskService.addDeviceTask(deviceAdd.getId());
+        ReturnInfo returnInfo = taskService.addDeviceTask(deviceAdd.getId());
+        if (null != returnInfo.getData()) {
+            Device device = new Device();
+            device.setId(deviceAdd.getId());
+            QuartzJobDto quartzJobDto = (QuartzJobDto) returnInfo.getData();
+            device.setTaskName(quartzJobDto.getJobDO().getName());
+            deviceDAO.updateByPrimaryKeySelective(device);
+        }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -241,7 +244,7 @@ public class DeviceServiceImpl implements DeviceService {
         if (null == register) {
             return ReturnInfo.create(CodeEnum.SUCCESS);
         }
-        String readResult = null;
+        CmdRes<String> readResult = null;
         if (Register.BI.equals(register.getRegisType())
                 || Register.BV.equals(register.getRegisType())) {
             readResult = cmdService.readOneSwitch(register.getId());
@@ -250,7 +253,7 @@ public class DeviceServiceImpl implements DeviceService {
         }
         Device device = deviceDAO.selectDeviceById(deviceId);
         Device update = new Device();
-        if (StringUtils.isEmpty(readResult)) {
+        if (null != readResult && !readResult.isSuccess()) {
             // 掉线
             if (Device.ONLINE.equals(device.getStatus())) {
                 update.setDisconnectCount(

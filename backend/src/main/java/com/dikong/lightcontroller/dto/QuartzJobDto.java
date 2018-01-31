@@ -15,6 +15,9 @@ import java.util.Set;
  */
 public class QuartzJobDto {
 
+    public static final String METHOD_POST = "post";
+    public static final String METHOD_GET = "get";
+
 
     private JobDo jobDO;
 
@@ -124,7 +127,6 @@ public class QuartzJobDto {
     public static class ExtInfo {
 
         private static final String DEFAULT_TYPE = "http_job";
-        private static final String DEFAULT_METHOD = "post";
 
         private String type;
 
@@ -139,10 +141,17 @@ public class QuartzJobDto {
 
         }
 
+        public ExtInfo(String method, String url, String jsonParams) {
+            this.method = method;
+            this.url = url;
+            this.jsonParams = jsonParams;
+            this.type = DEFAULT_TYPE;
+        }
+
         public ExtInfo(String url, String jsonParams) {
             this.url = url;
             this.jsonParams = jsonParams;
-            this.method = DEFAULT_METHOD;
+            this.method = METHOD_POST;
             this.type = DEFAULT_TYPE;
         }
 
