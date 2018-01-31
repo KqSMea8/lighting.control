@@ -3,6 +3,8 @@ package com.dikong.lightcontroller.utils.cmd;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.util.StringUtils;
+
 /**
  * @author huangwenjun
  * @Datetime 2018年1月26日
@@ -52,9 +54,12 @@ public class CmdMsgUtils {
      * @param recieveCmd
      */
     public static List<String> analysisSwitchCmd(String recieveCmd, int length) {
+        List<String> switchInfo = new ArrayList<String>();
+        if (StringUtils.isEmpty(recieveCmd)) {
+            return switchInfo;
+        }
         int byteNum = Integer.parseInt(recieveCmd.substring(4, 6), 16);
         int[] currentIndex = new int[1];
-        List<String> switchInfo = new ArrayList<String>();
         for (int i = 0; i < byteNum * 2; i += 2) {
             String binHighStr = Integer
                     .toBinaryString(Integer.parseInt(recieveCmd.substring(i + 6, i + 7), 16));
@@ -85,6 +90,9 @@ public class CmdMsgUtils {
 
     public static List<String> analysisAnalogCmd(String recieveCmd) {
         List<String> values = new ArrayList<>();
+        if (StringUtils.isEmpty(recieveCmd)) {
+            return values;
+        }
         int byteNum = Integer.parseInt(recieveCmd.substring(4, 6), 16);
         for (int i = 0; i < byteNum / 2; i++) {
             int value = Integer.parseInt(recieveCmd.substring(i * 4 + 6, i * 4 + 10), 16);

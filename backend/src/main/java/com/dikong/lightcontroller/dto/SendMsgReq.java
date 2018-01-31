@@ -1,8 +1,8 @@
 package com.dikong.lightcontroller.dto;
 
 public class SendMsgReq {
-    private int type;
-    private String devCode;
+    private int cmdType;
+    private String registerMsg;
     private String cmd;
 
     public SendMsgReq() {
@@ -11,25 +11,25 @@ public class SendMsgReq {
 
     public SendMsgReq(int type, String devCode, String cmd) {
         super();
-        this.type = type;
-        this.devCode = devCode;
+        this.cmdType = type;
+        this.registerMsg = devCode;
         this.cmd = cmd;
     }
 
     public int getType() {
-        return type;
+        return cmdType;
     }
 
     public void setType(int type) {
-        this.type = type;
+        this.cmdType = type;
     }
 
     public String getDevCode() {
-        return devCode;
+        return registerMsg;
     }
 
     public void setDevCode(String devCode) {
-        this.devCode = devCode;
+        this.registerMsg = devCode;
     }
 
     public String getCmd() {
@@ -42,6 +42,7 @@ public class SendMsgReq {
 
     @Override
     public String toString() {
-        return "SendMsgReq [type=" + type + ", devCode=" + devCode + ", cmd=" + cmd + "]";
+        return "SendMsgReq [cmdType=" + cmdType + ", registerMsg=" + registerMsg + ", cmd=" + cmd
+                + "]";
     }
 }
