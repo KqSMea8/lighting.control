@@ -45,3 +45,4 @@ target/
 
 ./*.iml
 
+backend/LOG_PATH_IS_UNDEFINED/*
