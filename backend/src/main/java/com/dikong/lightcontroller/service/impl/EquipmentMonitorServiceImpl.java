@@ -63,9 +63,15 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         if (equipmentMonitor.getMonitorType() == 1) {
             if (isSwitch(equipmentMonitor.getValueType())) {
                 CmdRes<String> value = cmdService.readOneSwitch(equipmentMonitor.getSourceId());
+                if (!value.isSuccess()) {
+                    value.setData("0");
+                }
                 equipmentMonitor.setCurrentValue(new BigDecimal(value.getData()));
             } else {
                 CmdRes<String> value = cmdService.readOneAnalog(equipmentMonitor.getSourceId());
+                if (!value.isSuccess()) {
+                    value.setData("0");
+                }
                 equipmentMonitor.setCurrentValue(
                         new BigDecimal(String.valueOf(new BigDecimal(value.getData())
                                 .multiply(equipmentMonitor.getFactor()).doubleValue())));
@@ -119,6 +125,9 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     result = cmdService.readOneSwitch(temp.getSourceId());
                 } else {
                     result = cmdService.readOneAnalog(temp.getSourceId());
+                }
+                if (!result.isSuccess()) {
+                    return ReturnInfo.create(CodeEnum.ACCESS_REFULE, result.getData());
                 }
                 if (StringUtils.isEmpty(result)) {
                     return ReturnInfo.create(CodeEnum.NOT_CONTENT);
