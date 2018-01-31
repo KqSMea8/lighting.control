@@ -49,7 +49,7 @@ public class UserController {
         return userService.userList();
     }
 
-    @RequestMapping("/add")
+    @PostMapping("/add")
     public ReturnInfo add(@RequestBody User user) {
         user.setUserId(null);
         return userService.add(user);
@@ -60,7 +60,7 @@ public class UserController {
         return userService.del(userId);
     }
 
-    @RequestMapping("/update")
+    @PostMapping("/update")
     public ReturnInfo update(@RequestBody User user) {
         return userService.update(user);
     }

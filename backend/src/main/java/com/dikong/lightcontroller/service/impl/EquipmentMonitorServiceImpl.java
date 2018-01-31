@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
@@ -15,6 +16,7 @@ import com.dikong.lightcontroller.dao.EquipmentMonitorDao;
 import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
+import com.dikong.lightcontroller.dto.CmdRes;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
@@ -60,12 +62,13 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         equipmentMonitor.setProjectId(AuthCurrentUser.getCurrentProjectId());
         if (equipmentMonitor.getMonitorType() == 1) {
             if (isSwitch(equipmentMonitor.getValueType())) {
-                String value = cmdService.readOneSwitch(equipmentMonitor.getSourceId());
-                equipmentMonitor.setCurrentValue(new BigDecimal(value));
+                CmdRes<String> value = cmdService.readOneSwitch(equipmentMonitor.getSourceId());
+                equipmentMonitor.setCurrentValue(new BigDecimal(value.getData()));
             } else {
-                String value = cmdService.readOneAnalog(equipmentMonitor.getSourceId());
-                equipmentMonitor.setCurrentValue(new BigDecimal(String.valueOf(new BigDecimal(value)
-                        .multiply(equipmentMonitor.getFactor()).doubleValue())));
+                CmdRes<String> value = cmdService.readOneAnalog(equipmentMonitor.getSourceId());
+                equipmentMonitor.setCurrentValue(
+                        new BigDecimal(String.valueOf(new BigDecimal(value.getData())
+                                .multiply(equipmentMonitor.getFactor()).doubleValue())));
             }
         } else {
             equipmentMonitor.setCurrentValue(new BigDecimal(SwitchEnum.CLOSE.getCode()));
@@ -110,14 +113,17 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         List<EquipmentMonitor> monitors = monitorDao.selectByExample(example);
         List<EquipmentMonitor> resultMonitors = new ArrayList<EquipmentMonitor>();
         if (type == 1) {// 设备监控
-            String result = "";
+            CmdRes<String> result = null;
             for (EquipmentMonitor temp : monitors) {
                 if (isSwitch(temp.getValueType())) {
                     result = cmdService.readOneSwitch(temp.getSourceId());
                 } else {
                     result = cmdService.readOneAnalog(temp.getSourceId());
                 }
-                temp.setCurrentValue(new BigDecimal(result));
+                if (StringUtils.isEmpty(result)) {
+                    return ReturnInfo.create(CodeEnum.NOT_CONTENT);
+                }
+                temp.setCurrentValue(new BigDecimal(result.getData()));
                 resultMonitors.add(temp);
                 monitorDao.updateByPrimaryKeySelective(temp);
             }
@@ -125,8 +131,8 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         } else if (type == 2) {// 自定义监控
             for (EquipmentMonitor temp : monitors) {
                 if (temp.getSourceType() == 1) {
-                    String result = cmdService.readOneSwitch(temp.getSourceId());
-                    temp.setCurrentValue(new BigDecimal(result));
+                    CmdRes<String> result = cmdService.readOneSwitch(temp.getSourceId());
+                    temp.setCurrentValue(new BigDecimal(result.getData()));
                     monitorDao.updateByPrimaryKeySelective(temp);
                 }
                 resultMonitors.add(temp);
@@ -201,13 +207,13 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     boolean sendCmd(int monitorId, long sourceId, int value, int[] sendResult) {
         Register register = registerDao.selectRegisById(sourceId);
         // 查询 var 类型 如果是开关量则,根据类型,转换value为0,1,或者bigdecimal
-        boolean result = false;
+        CmdRes<String> result = null;
         if (isSwitch(register.getRegisType())) {
             result = cmdService.writeSwitch(register.getId(), SwitchEnum.getByCode(value));
         } else {
             result = cmdService.writeAnalog(register.getId(), value);
         }
-        if (result) {
+        if (result.isSuccess()) {
             // 成功
             EquipmentMonitor monitor = new EquipmentMonitor();
             monitor.setMonitorId(monitorId);

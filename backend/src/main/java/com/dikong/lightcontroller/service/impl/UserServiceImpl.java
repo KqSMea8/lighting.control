@@ -153,6 +153,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ReturnInfo add(User user) {
+        Example example = new Example(User.class);
+        example.createCriteria().andEqualTo("userName", user.getUserName());
+        List<User> users = userDao.selectByExample(example);
+        if (users.size() > 0) {
+            return ReturnInfo.create(CodeEnum.USER_EXIST);
+        }
         user.setPassword(MD5Util.getMD5Str(user.getPassword()));
         userDao.insertSelective(user);
         user.setCreateBy(AuthCurrentUser.getUserId());
