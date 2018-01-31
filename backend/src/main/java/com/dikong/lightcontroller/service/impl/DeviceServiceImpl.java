@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -30,8 +31,11 @@ import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.Register;
+import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.DeviceService;
 import com.dikong.lightcontroller.service.RegisterService;
+import com.dikong.lightcontroller.service.TaskService;
+import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.FileUtils;
 import com.dikong.lightcontroller.vo.DeviceAdd;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
@@ -74,6 +78,12 @@ public class DeviceServiceImpl implements DeviceService {
     @Autowired
     private RegisterService registerService;
 
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private CmdService cmdService;
+
     /**
      * 只有16个不需要分页
      * 
@@ -98,6 +108,10 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public ReturnInfo deleteDevice(Long id) {
+        Device device = deviceDAO.selectDeviceById(id);
+        if (null != device && !StringUtils.isEmpty(device.getTaskName())) {
+            taskService.removeDeviceTask(device.getTaskName());
+        }
         deviceDAO.updateDeleteById(id, Device.DEL_YES);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -111,6 +125,8 @@ public class DeviceServiceImpl implements DeviceService {
                     BussinessCode.DEVICE_EXIST.getMsg());
         }
         deviceDAO.insertDevice(deviceAdd);
+        // 增加任务
+        taskService.addDeviceTask(deviceAdd.getId());
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -124,7 +140,7 @@ public class DeviceServiceImpl implements DeviceService {
         }
 
         String fileName = multipartFile.getOriginalFilename();
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         List<Register> registers = new LinkedList<>();
         try {
             fileName = id + "_" + fileName;
@@ -181,8 +197,8 @@ public class DeviceServiceImpl implements DeviceService {
                 }
             }
         }
-        if (!CollectionUtils.isEmpty(registers)){
-            registers.forEach(item->item.setRegisValue(Register.DEFAULT_VALUE));
+        if (!CollectionUtils.isEmpty(registers)) {
+            registers.forEach(item -> item.setRegisValue(Register.DEFAULT_VALUE));
             registerDAO.insertMultiItem(registers);
         }
         String modilFilePath = filePath + fileName;
@@ -206,7 +222,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public ReturnInfo selectAllSelectDevice() {
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId);
         if (!CollectionUtils.isEmpty(deviceBoardLists)) {
             deviceBoardLists.forEach(item -> {
@@ -216,5 +232,59 @@ public class DeviceServiceImpl implements DeviceService {
             });
         }
         return ReturnInfo.createReturnSuccessOne(deviceBoardLists);
+    }
+
+
+    @Override
+    public ReturnInfo conncationInfo(Long deviceId) {
+        Register register = registerDAO.selectIdAndTypeByDeviceId(deviceId);
+        if (null == register) {
+            return ReturnInfo.create(CodeEnum.SUCCESS);
+        }
+        String readResult = null;
+        if (Register.BI.equals(register.getRegisType())
+                || Register.BV.equals(register.getRegisType())) {
+            readResult = cmdService.readOneSwitch(register.getId());
+        } else {
+            readResult = cmdService.readOneAnalog(register.getId());
+        }
+        Device device = deviceDAO.selectDeviceById(deviceId);
+        Device update = new Device();
+        if (StringUtils.isEmpty(readResult)) {
+            // 掉线
+            if (Device.ONLINE.equals(device.getStatus())) {
+                update.setDisconnectCount(
+                        device.getDisconnectCount() == null ? 0 : device.getDisconnectCount() + 1);
+                update.setUseTimes(device.getUseTimes() == null ? 0
+                        : device.getUseTimes()
+                                + calLastedTime(device.getLastOfflineTime(), new Date()));
+            }
+            update.setLastOfflineTime(new Date());
+            update.setStatus(Device.OFFLINE);
+        } else {
+            if (Device.OFFLINE.equals(device.getStatus())) {
+                update.setConnectCount(
+                        device.getConnectCount() == null ? 0 : device.getConnectCount() + 1);
+                update.setUseTimes(device.getUseTimes() == null ? 0
+                        : device.getUseTimes()
+                                + calLastedTime(device.getLastOnlineTime(), new Date()));
+            }
+            update.setStatus(Device.ONLINE);
+            update.setLastOnlineTime(new Date());
+        }
+        update.setId(deviceId);
+        deviceDAO.updateByPrimaryKeySelective(device);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+
+    private long calLastedTime(Date startDate, Date lastTime) {
+        if (null == startDate || null == lastTime) {
+            return 0;
+        }
+        long a = lastTime.getTime();
+        long b = startDate.getTime();
+        long c = ((a - b) / 1000);
+        return c;
     }
 }

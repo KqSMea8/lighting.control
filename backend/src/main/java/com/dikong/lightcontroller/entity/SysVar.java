@@ -8,11 +8,14 @@ package com.dikong.lightcontroller.entity;
  *
  * @author lengrongfu
  * @create 2018年01月26日下午10:46
- * @see </P>
+ * @see
+ *      </P>
  */
 public class SysVar {
 
-    //变量类型,1 时序变量
+    public static final Long SEQUENCE_VAR_ID = new Long(1);
+
+    // 变量类型,1 时序变量
     public static final Integer SEQUENCE = 1;
     public static final Integer GROUP = 2;
 
@@ -20,17 +23,17 @@ public class SysVar {
     public static final String OPEN_SYS_VALUE = "1";
     private Long id;
     private String varName;
-    //模拟量还是数子量
+    // 模拟量还是数子量
     private String varType;
     /**
-     * 变量地址,群组变量时这个值就是群组id
-     *  时序变量时这个值为null
+     * 变量地址,群组变量时这个值就是群组id 时序变量时这个值为指定的默认值,
      */
     private Long varId;
     /**
      * 变量值,是开还是关
      */
     private String varValue;
+
     private Integer projId;
     /**
      * 系统变量类型,1->时序变量,2->群组变量

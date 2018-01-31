@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.dto;
 
+import java.util.Set;
+
 /**
  * <p>
  * Description
@@ -8,32 +10,33 @@ package com.dikong.lightcontroller.dto;
  *
  * @author lengrongfu
  * @create 2018年01月29日下午9:56
- * @see </P>
+ * @see
+ *      </P>
  */
 public class QuartzJobDto {
 
 
-    private JobDo jobDo;
+    private JobDo jobDO;
 
-    private TriggerDos triggerDOs;
+    private Set<TriggerDos> triggerDOs;
 
-    public JobDo getJobDo() {
-        return jobDo;
+    public JobDo getJobDO() {
+        return jobDO;
     }
 
-    public void setJobDo(JobDo jobDo) {
-        this.jobDo = jobDo;
+    public void setJobDO(JobDo jobDO) {
+        this.jobDO = jobDO;
     }
 
-    public TriggerDos getTriggerDOs() {
+    public Set<TriggerDos> getTriggerDOs() {
         return triggerDOs;
     }
 
-    public void setTriggerDOs(TriggerDos triggerDOs) {
+    public void setTriggerDOs(Set<TriggerDos> triggerDOs) {
         this.triggerDOs = triggerDOs;
     }
 
-    public static class JobDo{
+    public static class JobDo {
         private String description;
 
         private String group;
@@ -75,7 +78,7 @@ public class QuartzJobDto {
         }
     }
 
-    public static class TriggerDos{
+    public static class TriggerDos {
 
         private String cronExpression;
 
@@ -118,7 +121,7 @@ public class QuartzJobDto {
         }
     }
 
-    public static class ExtInfo{
+    public static class ExtInfo {
 
         private static final String DEFAULT_TYPE = "http_job";
         private static final String DEFAULT_METHOD = "post";
@@ -132,7 +135,7 @@ public class QuartzJobDto {
 
         private String jsonParams;
 
-        public ExtInfo(){
+        public ExtInfo() {
 
         }
 

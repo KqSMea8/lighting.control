@@ -24,4 +24,8 @@ public interface DtuService {
     ReturnInfo addDtu(Dtu dtu);
 
     ReturnInfo idList();
+
+    ReturnInfo updateDtu(Dtu dtu);
+
+    ReturnInfo conncationInfo(String deviceCode,Integer line);
 }

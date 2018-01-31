@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.service;
 
+import com.dikong.lightcontroller.entity.Dtu;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
@@ -30,4 +31,7 @@ public interface DeviceService {
     ReturnInfo idList(Long dtuId);
 
     ReturnInfo selectAllSelectDevice();
+
+    ReturnInfo conncationInfo(Long id);
+
 }

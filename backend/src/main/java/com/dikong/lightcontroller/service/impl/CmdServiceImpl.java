@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,12 +144,12 @@ public class CmdServiceImpl implements CmdService {
 
 
     @Override
-    public boolean writeSwitch(Map<Long, Integer> allRegis) {
+    public boolean writeSwitch(List<CmdSendDto> allRegis) {
         if (null == allRegis) {
             return false;
         }
-        for (Map.Entry<Long, Integer> map : allRegis.entrySet()) {
-            writeSwitch(map.getKey(), SwitchEnum.getByCode(map.getValue()));
+        for (CmdSendDto regis : allRegis) {
+            writeSwitch(regis.getRegisId(), SwitchEnum.getByCode(regis.getSwitchValue()));
         }
         return true;
     }

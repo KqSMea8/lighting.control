@@ -12,8 +12,8 @@ import com.dikong.lightcontroller.interceptor.LoginHandleInterceptor;
 public class AuthInterceptor extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginHandleInterceptor()).addPathPatterns("/**")
-                .excludePathPatterns("/light/user/login", "/light/beat");
+//        registry.addInterceptor(new LoginHandleInterceptor()).addPathPatterns("/**")
+//                .excludePathPatterns("/light/user/login", "/light/beat");
         super.addInterceptors(registry);
     }
 }

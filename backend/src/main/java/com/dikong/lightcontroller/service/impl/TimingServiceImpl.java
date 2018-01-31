@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.dikong.lightcontroller.common.CodeEnum;
@@ -18,16 +19,19 @@ import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.GroupDAO;
 import com.dikong.lightcontroller.dao.HolidayDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
+import com.dikong.lightcontroller.dao.TimingCronDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Cnarea2016;
 import com.dikong.lightcontroller.entity.Holiday;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
+import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.utils.ArraysUtils;
+import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.TimeCalculate;
 import com.dikong.lightcontroller.utils.TimeWeekUtils;
 import com.dikong.lightcontroller.vo.TimeOrdinaryNodeAdd;
@@ -61,6 +65,9 @@ public class TimingServiceImpl implements TimingService {
     private TimingDAO timingDAO;
 
     @Autowired
+    private TimingCronDAO timingCronDAO;
+
+    @Autowired
     private GroupDAO groupDAO;
 
     @Autowired
@@ -81,7 +88,7 @@ public class TimingServiceImpl implements TimingService {
     @SuppressWarnings("all")
     @Override
     public ReturnInfo addOrdinaryNode(TimeOrdinaryNodeAdd ordinaryNodeAdd) {
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         addSysVar(projId);
 
         Timing timing = new Timing();
@@ -131,7 +138,7 @@ public class TimingServiceImpl implements TimingService {
     @SuppressWarnings("all")
     @Override
     public ReturnInfo addSpecifiedNode(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd) {
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         addSysVar(projId);
 
         Timing timing = new Timing();
@@ -178,16 +185,16 @@ public class TimingServiceImpl implements TimingService {
 
 
     @Override
+    @Transactional
     public ReturnInfo deleteNode(Long id) {
-        Timing timing = timingDAO.selectById(id);
-        if (null != timing) {
-            ReturnInfo removeReturn = taskService.removeTask(timing.getTaskName());
-            if (null != removeReturn.getData() && (boolean) removeReturn.getData()) {
-                timingDAO.updateDeleteById(id, Timing.DEL_YES);
-                return ReturnInfo.create(CodeEnum.SUCCESS);
+        List<TimingCron> timingCrons = timingCronDAO.selectAllByTimingId(id);
+        if (!CollectionUtils.isEmpty(timingCrons)) {
+            timingDAO.updateDeleteById(id, Timing.DEL_YES);
+            for (TimingCron timingCron : timingCrons) {
+                taskService.removeTimingTask(timingCron.getTaskName());
             }
         }
-        return ReturnInfo.create(CodeEnum.SERVER_ERROR);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
     @SuppressWarnings("all")
@@ -254,7 +261,7 @@ public class TimingServiceImpl implements TimingService {
 
     @Override
     public ReturnInfo addHolidayNode(String[] holidayTimes) {
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         List<Holiday> holidays = new ArrayList<>();
         for (String holidayTime : holidayTimes) {
             holidays.add(new Holiday(holidayTime, projId));
@@ -266,7 +273,7 @@ public class TimingServiceImpl implements TimingService {
 
     @Override
     public ReturnInfo timingView(String viewTime) throws ParseException {
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         List<String> weekTime = TimeWeekUtils.getWeekTime(viewTime);
         List<Holiday> holidays = holidayDAO.selectAllHoliday(weekTime);
         Map<String, String> holidaMap = new HashMap<>();
@@ -310,15 +317,15 @@ public class TimingServiceImpl implements TimingService {
     private List<TimingList> searchOrdinary(int projId, int day, String monthTime, int nodeType) {
         Example example = new Example(Timing.class);
         if (Timing.ORDINARY_NODE.equals(nodeType)) {
-            example.createCriteria().andEqualTo("nodeType", Timing.ORDINARY_NODE);
-            example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO);
-            example.createCriteria().andLike("weekList", "%" + day + "%");
+            example.createCriteria().andEqualTo("nodeType", Timing.ORDINARY_NODE)
+                    .andEqualTo("projId", projId).andEqualTo("isDelete", Timing.DEL_NO)
+                    .andLike("weekList", "%" + day + "%");
+
         } else {
-            example.createCriteria().andEqualTo("nodeType", Timing.SPECIFIED_NODE);
-            example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO);
-            example.createCriteria().andLike("monthList", "%" + monthTime + "%");
+            example.createCriteria().andEqualTo("nodeType", Timing.SPECIFIED_NODE)
+                    .andEqualTo("isDelete", Timing.DEL_NO).andEqualTo("projId", projId)
+                    .andLike("monthList", "%" + monthTime + "%");
         }
-        example.createCriteria().andEqualTo("projId", projId);
         List<Timing> timings = timingDAO.selectByExample(example);
         List<TimingList> timingLists = new ArrayList<>();
         timings.forEach(item -> {
@@ -370,7 +377,7 @@ public class TimingServiceImpl implements TimingService {
         SysVar sysVar = new SysVar();
         sysVar.setSysVarType(SysVar.SEQUENCE);
         sysVar.setVarName("Sequence_EN");
-        sysVar.setVarId(new Long(1));
+        sysVar.setVarId(SysVar.SEQUENCE_VAR_ID);
         sysVar.setVarValue(SysVar.CLOSE_SYS_VALUE);
         sysVar.setProjId(projId);
         sysVarService.addSysVarWherNotExist(sysVar);

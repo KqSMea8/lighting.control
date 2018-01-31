@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +20,11 @@ import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.HolidayDAO;
+import com.dikong.lightcontroller.dao.TimingCronDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.QuartzJobDto;
 import com.dikong.lightcontroller.entity.Timing;
+import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.api.TaskServiceApi;
@@ -50,15 +54,24 @@ public class TaskServiceImpl implements TaskService {
     private static final String DEFAULT_JOB_GROUP = "LIGHT_CONTROLLER_JOB";
     private static final String DEFAULT_TRIGGER_GROUP = "LIGHT_CONTROLLER_TRIGGER";
 
-
+    // 每五分钟查一次
+    private static final String DEFAULT_DEVICE_CRON = "0 */5 * * * ? *";
+    private static final String DEFAULT_DEVICE_JOB_GROUP = "LIGHT_DEVICE_STATUS_JOB";
+    private static final String DEFAULT_DEVICE_TRIGGER_GROUP = "LIGHT_DEVICE_STATUS_TRIGGER";
     private TaskServiceApi taskServiceApi;
 
-    // 任务调度回调地址
+    // 时序任务调度回调地址
     private String callBackUrl;
+    // 设备回调url
+    private String deviceCallBackUrl;
 
 
     @Autowired
     private TimingDAO timingDAO;
+
+
+    @Autowired
+    private TimingCronDAO timingCronDAO;
 
 
     // 节假日 db
@@ -81,53 +94,78 @@ public class TaskServiceImpl implements TaskService {
         if (StringUtils.isEmpty(callBackUrl)) {
             throw new NullPointerException("schedule.controller.callbackurl is not null");
         }
+        deviceCallBackUrl = properties.getProperty("schedule.controller.deviceCallBackUrl");
+        if (StringUtils.isEmpty(deviceCallBackUrl)) {
+            throw new NullPointerException("schedule.controller.deviceCallBackUrl is not null");
+        }
         this.taskServiceApi = Feign.builder().decoder(new JacksonDecoder())
                 .encoder(new JacksonEncoder()).target(TaskServiceApi.class, host);
 
     }
 
-    /**
-     * 添加任务
-     * 
-     * @param id timing id
-     * @param jsonParams 回调参数
-     * @param cron cron表达式
-     * @return
-     */
-    @Override
-    public ReturnInfo addTask(Long id, String taskName, String jsonParams, String cron) {
+    private QuartzJobDto createTask(String taskName, String jsonParams, String cron,
+            String groupName, String triggerGroup, String description, String callback) {
         QuartzJobDto quartzJobDto = new QuartzJobDto();
         QuartzJobDto.JobDo jobDo = new QuartzJobDto.JobDo();
-        jobDo.setDescription(DEFAULT_DESCRIPTION);
-        jobDo.setGroup(DEFAULT_JOB_GROUP);
+        jobDo.setDescription(description);
+        jobDo.setGroup(groupName);
         String jobName = taskName;
         jobDo.setName(jobName);
-        jobDo.setExtInfo(new QuartzJobDto.ExtInfo(callBackUrl, jsonParams));
-        quartzJobDto.setJobDo(jobDo);
+        jobDo.setExtInfo(new QuartzJobDto.ExtInfo(callback, jsonParams));
+        quartzJobDto.setJobDO(jobDo);
         QuartzJobDto.TriggerDos triggerDos = new QuartzJobDto.TriggerDos();
         triggerDos.setCronExpression(cron);
-        triggerDos.setDescription(DEFAULT_DESCRIPTION);
-        triggerDos.setGroup(DEFAULT_TRIGGER_GROUP);
+        triggerDos.setDescription(description);
+        triggerDos.setGroup(triggerGroup);
         String triggerName = taskName + "_trigger";
         triggerDos.setName(triggerName);
-        quartzJobDto.setTriggerDOs(triggerDos);
+        Set<QuartzJobDto.TriggerDos> triggerDosSet = new HashSet<>();
+        triggerDosSet.add(triggerDos);
+        quartzJobDto.setTriggerDOs(triggerDosSet);
         boolean addSuccess = taskServiceApi.addTask(quartzJobDto);
         if (addSuccess) {
-            Timing timing = new Timing();
-            timing.setTaskName(jobName);
-            timing.setId(id);
-            timingDAO.updateByPrimaryKey(timing);
+            return quartzJobDto;
         }
+        return null;
+    }
+
+    @Override
+    public ReturnInfo addDeviceTask(Long id) {
+        String taskName = UUID.randomUUID().toString();
+        deviceCallBackUrl = deviceCallBackUrl + "/" + id;
+        createTask(taskName, "", DEFAULT_DEVICE_CRON, DEFAULT_DEVICE_JOB_GROUP,
+                DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, deviceCallBackUrl);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
     @Override
-    public ReturnInfo addTask(CommandSend commandSend, String cron) {
+    public ReturnInfo removeDeviceTask(String taskName) {
+        boolean delTask = removeTask(taskName, DEFAULT_DEVICE_JOB_GROUP);
+        return ReturnInfo.createReturnSuccessOne(delTask);
+    }
+
+    /**
+     *
+     * @param commandSend 发送命令
+     * @param cron cron 表达式
+     * @return
+     */
+    @Override
+    public ReturnInfo addTimingTask(CommandSend commandSend, String cron) {
         long id = commandSend.getTimingId();
         String uuid = UUID.randomUUID().toString();
         commandSend.setTaskName(uuid);
         String jsonParams = JSON.toJSONString(commandSend);
-        return addTask(id, uuid, jsonParams, cron);
+        QuartzJobDto quartzJobDto = createTask(uuid, jsonParams, cron, DEFAULT_JOB_GROUP,
+                DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, callBackUrl);
+        if (null != quartzJobDto) {
+            TimingCron timingCron = new TimingCron();
+            timingCron.setTimingId(id);
+            timingCron.setTaskName(uuid);
+            timingCron.setCronJson(JSON.toJSONString(quartzJobDto));
+            timingCronDAO.insertSelective(timingCron);
+        }
+        return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
 
@@ -142,10 +180,9 @@ public class TaskServiceImpl implements TaskService {
         }
         // 判断是否有指定日运行
         Example example = new Example(Timing.class);
-        example.createCriteria().andEqualTo("nodeType", Timing.SPECIFIED_NODE);
-        example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO);
-        example.createCriteria().andLike("monthList", "%" + nowDateYearMonthDay + "%");
-        example.createCriteria().andEqualTo("projId", projId);
+        example.createCriteria().andEqualTo("nodeType", Timing.SPECIFIED_NODE)
+                .andEqualTo("isDelete", Timing.DEL_NO).andEqualTo("projId", projId)
+                .andLike("monthList", "%" + nowDateYearMonthDay + "%");
         List<Timing> timings = timingDAO.selectByExample(example);
         if (!CollectionUtils.isEmpty(timings)) {
             // 有指定日节点
@@ -163,12 +200,16 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public ReturnInfo removeTask(String taskName) {
+    public ReturnInfo removeTimingTask(String taskName) {
+        boolean delTask = removeTask(taskName, DEFAULT_JOB_GROUP);
+        return ReturnInfo.createReturnSuccessOne(delTask);
+    }
+
+    private boolean removeTask(String taskName, String jobGroup) {
         Map<String, List<String>> jobKeyGroups = new HashMap<>();
         List<String> names = new ArrayList<>();
         names.add(taskName);
-        jobKeyGroups.put(DEFAULT_JOB_GROUP, names);
-        boolean delTask = taskServiceApi.delTask(jobKeyGroups);
-        return ReturnInfo.createReturnSuccessOne(delTask);
+        jobKeyGroups.put(jobGroup, names);
+        return taskServiceApi.delTask(jobKeyGroups);
     }
 }

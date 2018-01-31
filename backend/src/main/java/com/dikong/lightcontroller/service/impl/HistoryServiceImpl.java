@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service.impl;
 
-import com.dikong.lightcontroller.entity.SysVar;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,9 +9,8 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.HistoryDAO;
 import com.dikong.lightcontroller.entity.History;
+import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.service.HistoryService;
-
-import java.util.List;
 
 /**
  * <p>
@@ -40,8 +40,8 @@ public class HistoryServiceImpl implements HistoryService {
         int useId = 0;
         History lastHistory =
                 historyDAO.selectLastHistory(history.getVarId(), history.getVarType());
-        if (null != history.getVarValue()
-                    && !history.getVarValue().equals(lastHistory.getVarValue())) {
+        if (null != history.getVarValue() && (null == lastHistory
+                || !history.getVarValue().equals(lastHistory.getVarValue()))) {
             history.setCreateBy(useId);
             historyDAO.insertHistory(history);
         }
@@ -51,12 +51,14 @@ public class HistoryServiceImpl implements HistoryService {
     @Override
     public ReturnInfo updateHistory(SysVar sysVar) {
         History history = new History();
-        history.setVarId(sysVar.getVarId());
         if (SysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
+            history.setVarId(SysVar.SEQUENCE_VAR_ID);
             history.setVarType(History.SEQUENCE_TYPE);
         } else if (SysVar.GROUP.equals(sysVar.getSysVarType())) {
+            history.setVarId(sysVar.getVarId());
             history.setVarType(History.GROUP_TYPE);
         } else {
+            history.setVarId(sysVar.getVarId());
             history.setVarType(History.REGISTER_TYPE);
         }
         history.setVarValue(sysVar.getVarValue());
