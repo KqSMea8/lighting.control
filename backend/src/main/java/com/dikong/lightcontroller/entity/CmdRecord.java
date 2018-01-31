@@ -23,6 +23,7 @@ public class CmdRecord {
      * 发送的命令内容
      */
     private String cmdInfo;
+    private String result;
     private int createBy;
 
     public Long getRecordId() {
@@ -63,6 +64,14 @@ public class CmdRecord {
 
     public void setCmdInfo(String cmdInfo) {
         this.cmdInfo = cmdInfo;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
     }
 
     public int getCreateBy() {

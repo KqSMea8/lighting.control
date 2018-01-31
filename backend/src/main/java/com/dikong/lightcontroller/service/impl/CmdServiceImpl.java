@@ -67,7 +67,7 @@ public class CmdServiceImpl implements CmdService {
         if (results.size() > 0) {
             return new CmdRes<String>(true, results.get(0));
         }
-        return null;
+        return new CmdRes<String>(false, results.get(0));
     }
 
     @Override
@@ -105,7 +105,7 @@ public class CmdServiceImpl implements CmdService {
         cmdRecord.setRegisAddr(register.getRegisAddr());
         cmdRecord.setCmdInfo(sendMsg);
         cmdRecord.setCreateBy(AuthCurrentUser.getUserId());
-        cmdRecordDao.insert(cmdRecord);
+
         Map<String, String> req = new HashMap<String, String>();
         req.put("cmdType", String.valueOf(ReadWriteEnum.WRITE.getCode()));
         req.put("registerMsg", dtu.getDeviceCode());
@@ -116,16 +116,24 @@ public class CmdServiceImpl implements CmdService {
             response = OkhttpUtils
                     .postFrom(envioroment.getProperty(serviceIpKey) + "/device/command", req, null);
         } catch (IOException e) {
-            LOG.error("发送命令异常" + e.toString());
+            String info = "发送命令异常" + e.toString();
+            LOG.error(info);
             e.printStackTrace();
+            cmdRecord.setResult(info);
+            cmdRecordDao.insert(cmdRecord);
             return new CmdRes<String>(false, "发送命令异常");
         }
         LOG.info("命令发送响应：" + response);
         if (StringUtils.isEmpty(response)) {
-            return new CmdRes<String>(false, "返回值为空");
+            String info = "返回值为空";
+            cmdRecord.setResult(info);
+            cmdRecordDao.insert(cmdRecord);
+            return new CmdRes<String>(false, info);
         }
         SendCmdRes sendCmdRes = JSON.parseObject(response, SendCmdRes.class);
         if (sendCmdRes.getCode() == -1) {
+            cmdRecord.setResult(sendCmdRes.getData());
+            cmdRecordDao.insert(cmdRecord);
             return new CmdRes<String>(false, sendCmdRes.getData());
         }
         // 判断是否成功
@@ -157,7 +165,7 @@ public class CmdServiceImpl implements CmdService {
         if (results.size() > 0) {
             return new CmdRes<String>(false, results.get(0));
         }
-        return null;
+        return new CmdRes<String>(false, results.get(0));
     }
 
     @Override
@@ -207,7 +215,6 @@ public class CmdServiceImpl implements CmdService {
         cmdRecord.setRegisAddr(varAddr);
         cmdRecord.setCmdInfo(sendMsg);
         cmdRecord.setCreateBy(AuthCurrentUser.getUserId());
-        cmdRecordDao.insert(cmdRecord);
         String response = "";
         Map<String, String> req = new HashMap<String, String>();
         req.put("cmdType", String.valueOf(readWriteEnum.getCode()));
@@ -218,15 +225,23 @@ public class CmdServiceImpl implements CmdService {
             response = OkhttpUtils
                     .postFrom(envioroment.getProperty(serviceIpKey) + "/device/command", req, null);
         } catch (IOException e) {
-            LOG.error("发送命令异常" + e.toString());
+            String info = "发送命令异常" + e.toString();
+            LOG.error(info);
             e.printStackTrace();
+            cmdRecord.setResult(info);
+            cmdRecordDao.insert(cmdRecord);
             return new CmdRes<String>(false, "发送命令异常");
         }
         LOG.info("命令发送响应：" + response);
         if (StringUtils.isEmpty(response)) {
-            return new CmdRes<String>(false, "返回值为空");
+            String info = "返回值为空";
+            cmdRecord.setResult(info);
+            cmdRecordDao.insert(cmdRecord);
+            return new CmdRes<String>(false, info);
         }
         SendCmdRes sendCmdRes = JSON.parseObject(response, SendCmdRes.class);
+        cmdRecord.setResult(sendCmdRes.getData());
+        cmdRecordDao.insert(cmdRecord);
         if (sendCmdRes.getCode() == -1) {
             return new CmdRes<String>(false, sendCmdRes.getData());
         }
