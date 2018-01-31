@@ -1,5 +1,8 @@
 package com.dikong.lightcontroller.entity;
 
+import javax.persistence.Id;
+import java.util.Date;
+
 /**
  * 设备表 串口设备
  * 
@@ -17,6 +20,7 @@ public class Device {
     //在线
     public static final Integer ONLINE = 1;
 
+    @Id
     private Long id;
     /**
      * dtu id
@@ -55,10 +59,31 @@ public class Device {
      * 未连接的统计次数
      */
     private Integer disconnectCount;
+
+
+    /**
+     * 最后一次在线时间
+     */
+    private Date lastOnlineTime;
+
+    /**
+     * 最后一次离线时间
+     */
+    private Date lastOfflineTime;
+
+    /**
+     * 设备使用时间
+     */
+    private Long useTimes;
     /**
      * 删除标记位
      */
     private Byte isDelete;
+
+    /**
+     * 定时读取调用设备是否在线的任务名称
+     */
+    private String taskName;
 
     public Long getId() {
         return id;
@@ -148,4 +173,35 @@ public class Device {
         this.isDelete = isDelete;
     }
 
+    public Date getLastOnlineTime() {
+        return lastOnlineTime;
+    }
+
+    public void setLastOnlineTime(Date lastOnlineTime) {
+        this.lastOnlineTime = lastOnlineTime;
+    }
+
+    public Date getLastOfflineTime() {
+        return lastOfflineTime;
+    }
+
+    public void setLastOfflineTime(Date lastOfflineTime) {
+        this.lastOfflineTime = lastOfflineTime;
+    }
+
+    public Long getUseTimes() {
+        return useTimes;
+    }
+
+    public void setUseTimes(Long useTimes) {
+        this.useTimes = useTimes;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
+    }
 }

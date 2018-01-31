@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -60,7 +61,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ReturnInfo list(GroupList groupList) {
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         groupList.setProjId(projId);
         groupList.setIsDelete(Group.DEL_NO);
         PageHelper.startPage(groupList.getPageNo(), groupList.getPageSize());
@@ -70,7 +71,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ReturnInfo add(Group group) {
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         Integer lastGroupCode = groupDAO.selectLastCode(Group.DEL_NO, projId);
         if (null == lastGroupCode) {
             lastGroupCode = 0;

@@ -1,5 +1,8 @@
 package com.dikong.lightcontroller.vo;
 
+import com.dikong.lightcontroller.dto.CmdSendDto;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +25,7 @@ public class CommandSend {
     /**
      * 存储每个变量对应要执行的值
      */
-    private Map<Long, Integer> varIdS;
+    private List<CmdSendDto> varIdS;
 
     private String taskName;
 
@@ -37,11 +40,11 @@ public class CommandSend {
         this.timingId = timingId;
     }
 
-    public Map<Long, Integer> getVarIdS() {
+    public List<CmdSendDto> getVarIdS() {
         return varIdS;
     }
 
-    public void setVarIdS(Map<Long, Integer> varIdS) {
+    public void setVarIdS(List<CmdSendDto> varIdS) {
         this.varIdS = varIdS;
     }
 

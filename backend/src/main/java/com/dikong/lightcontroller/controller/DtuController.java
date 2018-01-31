@@ -1,10 +1,12 @@
 package com.dikong.lightcontroller.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,6 +39,7 @@ public class DtuController {
 
     /**
      * dtu 列表
+     * 
      * @param dtuList
      * @return
      */
@@ -47,6 +50,7 @@ public class DtuController {
 
     /**
      * dtu 删除
+     * 
      * @param id
      * @return
      */
@@ -60,6 +64,7 @@ public class DtuController {
 
     /**
      * dtu 添加
+     * 
      * @param dtu
      * @return
      */
@@ -69,7 +74,8 @@ public class DtuController {
     }
 
     /**
-     *  获取某个dtu下的所有设备
+     * 获取某个dtu下的所有设备
+     * 
      * @param dtuId
      * @return
      */
@@ -83,10 +89,32 @@ public class DtuController {
 
     /**
      * dtu列表选择框
+     * 
      * @return
      */
     @GetMapping(path = "/dtu/id/list")
-    public ReturnInfo dtuIdList(){
+    public ReturnInfo dtuIdList() {
         return dtuService.idList();
+    }
+
+    @PutMapping("/dtu/update")
+    public ReturnInfo updateDtu(@RequestBody Dtu dtu) {
+        return dtuService.updateDtu(dtu);
+    }
+
+
+    /**
+     *
+     * @param deviceCode dtu 注册码
+     * @param line 在线(0)/离线(1)
+     * @return
+     */
+    @GetMapping(path = "/api/dtu/connection/{deviceCode}/{line}")
+    public ReturnInfo online(@PathVariable("deviceCode") String deviceCode,
+            @PathVariable("line") Integer line) {
+        if (StringUtils.isEmpty(deviceCode) || null == line) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return dtuService.conncationInfo(deviceCode, line);
     }
 }

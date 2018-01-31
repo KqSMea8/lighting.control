@@ -29,7 +29,7 @@ public interface SysVarDAO {
     @Insert({"insert into sys_var (var_name,var_type,var_id,var_value,proj_id,sys_var_type) values (#{sysVar.varName},#{sysVar.varType},#{sysVar.varAddr},#{sysVar.varValue},#{sysVar.projId},#{sysVar.sysVarType})"})
     int insertSysVar(@Param("sysVar") SysVar sysVar);
 
-    @Update({"update sys_var set(var_value=#{varValue}) where id=#{id}"})
+    @Update({"update sys_var set var_value=#{varValue} where id=#{id}"})
     int updateSysVar(@Param("varValue")String String,@Param("id")Long id);
 
     @Select({"select * from sys_var where sys_var_type=#{sysVarType}"})

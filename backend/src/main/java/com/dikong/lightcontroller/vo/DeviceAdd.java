@@ -12,6 +12,8 @@ package com.dikong.lightcontroller.vo;
  *      </P>
  */
 public class DeviceAdd {
+    //用于生成主键
+    private Long id;
     // 对外id
     private String externalId;
     // dtu id
@@ -23,6 +25,13 @@ public class DeviceAdd {
     // 通讯调表文件
     private String model;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getExternalId() {
         return externalId;

@@ -21,7 +21,7 @@ import java.util.Map;
  * @see
  *      </P>
  */
-@Headers({"Content-Type:application/json"})
+@Headers({"Content-Type: application/json"})
 public interface TaskServiceApi {
 
     @RequestLine("POST /jobs")

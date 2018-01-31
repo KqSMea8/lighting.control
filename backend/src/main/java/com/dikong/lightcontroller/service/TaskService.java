@@ -15,11 +15,13 @@ import com.dikong.lightcontroller.vo.CommandSend;
  */
 public interface TaskService {
 
-    ReturnInfo addTask(Long id,String taskName,String jsonParams,String cron);
+    ReturnInfo addDeviceTask(Long id);
 
-    ReturnInfo addTask(CommandSend commandSend,String cron);
+    ReturnInfo removeDeviceTask(String taskName);
+
+    ReturnInfo addTimingTask(CommandSend commandSend,String cron);
 
     ReturnInfo callBack(CommandSend commandSend);
 
-    ReturnInfo removeTask(String taskName);
+    ReturnInfo removeTimingTask(String taskName);
 }

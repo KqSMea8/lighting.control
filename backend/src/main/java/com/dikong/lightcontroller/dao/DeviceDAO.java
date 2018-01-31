@@ -3,15 +3,17 @@ package com.dikong.lightcontroller.dao;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.springframework.stereotype.Repository;
 
 import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.vo.DeviceAdd;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
+import tk.mybatis.mapper.common.Mapper;
 
 /**
  * <p>
@@ -24,8 +26,8 @@ import com.dikong.lightcontroller.vo.DeviceBoardList;
  * @see
  *      </P>
  */
-@Mapper
-public interface DeviceDAO {
+@Repository
+public interface DeviceDAO extends Mapper<Device>{
 
     @Select({
             "select id,external_id,name,code,model from device where dtu_id=#{dtuId} AND is_delete=#{isDelete}"})
@@ -39,7 +41,8 @@ public interface DeviceDAO {
 
     @Insert({"insert into device (dtu_id,external_id,name,code,model) "
             + "values (#{add.dtuId},#{add.externalId},#{add.name},#{add.code},#{add.model})"})
-    int insertDevice(@Param("add") DeviceAdd deviceAdd);
+    @Options(useGeneratedKeys = true, keyProperty = "add.id")
+    Long insertDevice(@Param("add") DeviceAdd deviceAdd);
 
     @Update({"update device set model_file=#{filePath} where id=#{id}"})
     int updateModeFilePathById(@Param("id") Long id, @Param("filePath") String filePath);

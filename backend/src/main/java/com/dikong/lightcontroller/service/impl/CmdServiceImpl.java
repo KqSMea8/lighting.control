@@ -1,7 +1,6 @@
 package com.dikong.lightcontroller.service.impl;
 
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +11,7 @@ import com.dikong.lightcontroller.dao.CmdRecordDao;
 import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
+import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.dto.SendMsgReq;
 import com.dikong.lightcontroller.entity.CmdRecord;
 import com.dikong.lightcontroller.entity.Device;
@@ -96,12 +96,12 @@ public class CmdServiceImpl implements CmdService {
 
 
     @Override
-    public boolean writeSwitch(Map<Long, Integer> allRegis) {
+    public boolean writeSwitch(List<CmdSendDto> allRegis) {
         if (null == allRegis) {
             return false;
         }
-        for (Map.Entry<Long, Integer> map : allRegis.entrySet()) {
-            writeSwitch(map.getKey(), SwitchEnum.getByCode(map.getValue()));
+        for (CmdSendDto regis : allRegis) {
+            writeSwitch(regis.getRegisId(), SwitchEnum.getByCode(regis.getSwitchValue()));
         }
         return true;
     }

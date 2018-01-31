@@ -110,10 +110,6 @@ public class Timing {
      */
     private String monthList;
 
-    /**
-     * 创建的定时任务名称
-     */
-    private String taskName;
 
     public Long getId() {
         return id;
@@ -241,13 +237,5 @@ public class Timing {
 
     public void setMonthList(String monthList) {
         this.monthList = monthList;
-    }
-
-    public String getTaskName() {
-        return taskName;
-    }
-
-    public void setTaskName(String taskName) {
-        this.taskName = taskName;
     }
 }

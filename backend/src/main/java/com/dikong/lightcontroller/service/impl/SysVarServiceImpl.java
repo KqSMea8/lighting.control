@@ -1,8 +1,7 @@
 package com.dikong.lightcontroller.service.impl;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +13,7 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.SysVarDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
+import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.CmdService;
@@ -21,6 +21,7 @@ import com.dikong.lightcontroller.service.HistoryService;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TaskService;
+import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.DateToCronUtils;
 import com.dikong.lightcontroller.utils.TimeWeekUtils;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
@@ -95,7 +96,7 @@ public class SysVarServiceImpl implements SysVarService {
     @Override
     @Transactional
     public ReturnInfo updateSysVar(SysVar sysVar) {
-        int projId = 0;
+        int projId = AuthCurrentUser.getCurrentProjectId();
         if (SysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
             sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getId());
             processSequence(projId, sysVar.getVarValue());
@@ -121,11 +122,10 @@ public class SysVarServiceImpl implements SysVarService {
     private void processSequence(int projId, String value) {
         // 指定节点
         Example example = new Example(Timing.class);
-        example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO);
-        example.createCriteria().andEqualTo("projId", projId);
+        example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO).andEqualTo("projId", projId);
         List<Timing> timings = timingDAO.selectByExample(example);
         if (SysVar.OPEN_SYS_VALUE.equals(value) && !CollectionUtils.isEmpty(timings)) {
-            timings.forEach(item -> {
+            for (Timing item : timings) {
                 if (Timing.ORDINARY_NODE.equals(item.getNodeType())) {
                     String weekList = item.getWeekList();
                     String nodeContentRunTime = item.getNodeContentRunTime();
@@ -134,7 +134,7 @@ public class SysVarServiceImpl implements SysVarService {
                     commandSend.setTimingId(item.getId());
                     commandSend.setVarIdS(seachAllRegisId(item, value));
                     commandSend.setProjId(projId);
-                    taskService.addTask(commandSend, cron);
+                    taskService.addTimingTask(commandSend, cron);
                 } else if (Timing.SPECIFIED_NODE.equals(item.getNodeType())) {
                     String monthList = item.getMonthList();
                     if (null != monthList && !monthList.isEmpty()) {
@@ -146,25 +146,25 @@ public class SysVarServiceImpl implements SysVarService {
                             commandSend.setTimingId(item.getId());
                             commandSend.setVarIdS(seachAllRegisId(item, value));
                             commandSend.setProjId(projId);
-                            taskService.addTask(commandSend, cron);
+                            taskService.addTimingTask(commandSend, cron);
                         }
                     }
                 }
-            });
+            }
 
             // 马上执行最近的时间点,
             String weekNowDate = TimeWeekUtils.getWeekNowDate();
             String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
             Timing timing = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
             if (null != timing) {
-                Map<Long, Integer> thenRunRegis = seachAllRegisId(timing, value);
+                List<CmdSendDto> thenRunRegis = seachAllRegisId(timing, value);
                 cmdService.writeSwitch(thenRunRegis);
             }
         } else if (SysVar.CLOSE_SYS_VALUE.equals(value) && !CollectionUtils.isEmpty(timings)) {
-            Map<Long, Integer> allRegis = new HashMap<>();
+            List<CmdSendDto> allRegis = new ArrayList<>();
             timings.forEach(item -> {
-                Map<Long, Integer> regisId = seachAllRegisId(item, value);
-                allRegis.putAll(regisId);
+                List<CmdSendDto> regisId = seachAllRegisId(item, value);
+                allRegis.addAll(regisId);
             });
             cmdService.writeSwitch(allRegis);
         }
@@ -179,13 +179,14 @@ public class SysVarServiceImpl implements SysVarService {
      * @param timing
      * @return
      */
-    private Map<Long, Integer> seachAllRegisId(Timing timing, String value) {
-        Map<Long, Integer> idAndSwitchValue = new HashMap<>();
+    private List<CmdSendDto> seachAllRegisId(Timing timing, String value) {
+        List<CmdSendDto> cmdSendDtoList = new ArrayList<>();
         if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
             if (SysVar.CLOSE_SYS_VALUE.equals(value)) {
-                idAndSwitchValue.put(timing.getRunVar(), SwitchEnum.CLOSE.getCode());
+                cmdSendDtoList.add(new CmdSendDto(timing.getRunVar(), SwitchEnum.CLOSE.getCode()));
             } else {
-                idAndSwitchValue.put(timing.getRunVar(), Integer.valueOf(timing.getRunVarlue()));
+                cmdSendDtoList.add(
+                        new CmdSendDto(timing.getRunVar(), Integer.valueOf(timing.getRunVarlue())));
             }
         } else if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
             Long groupId = timing.getRunId();
@@ -193,14 +194,15 @@ public class SysVarServiceImpl implements SysVarService {
             if (!CollectionUtils.isEmpty(regisIds)) {
                 regisIds.forEach(item -> {
                     if (SysVar.CLOSE_SYS_VALUE.equals(value)) {
-                        idAndSwitchValue.put(item, SwitchEnum.CLOSE.getCode());
+                        cmdSendDtoList.add(new CmdSendDto(item, SwitchEnum.CLOSE.getCode()));
                     } else {
-                        idAndSwitchValue.put(item, Integer.valueOf(timing.getRunVarlue()));
+                        cmdSendDtoList
+                                .add(new CmdSendDto(item, Integer.valueOf(timing.getRunVarlue())));
                     }
                 });
             }
         }
-        return idAndSwitchValue;
+        return cmdSendDtoList;
     }
 
     /**
@@ -209,18 +211,18 @@ public class SysVarServiceImpl implements SysVarService {
      * @param value 变量值
      */
     private void processGroup(long groupId, String value) {
-        Map<Long, Integer> idAndSwitchValue = new HashMap<>();
+        List<CmdSendDto> cmdSendDtoList = new ArrayList<>();
         List<Long> regisIds = groupDeviceMiddleDAO.selectAllRegisId(groupId);
         if (!CollectionUtils.isEmpty(regisIds)) {
             regisIds.forEach(item -> {
                 if (SysVar.CLOSE_SYS_VALUE.equals(value)) {
-                    idAndSwitchValue.put(item, SwitchEnum.CLOSE.getCode());
+                    cmdSendDtoList.add(new CmdSendDto(item, SwitchEnum.CLOSE.getCode()));
                 } else {
-                    idAndSwitchValue.put(item, SwitchEnum.OPEN.getCode());
+                    cmdSendDtoList.add(new CmdSendDto(item, SwitchEnum.OPEN.getCode()));
                 }
             });
         }
-        cmdService.writeSwitch(idAndSwitchValue);
+        cmdService.writeSwitch(cmdSendDtoList);
     }
 
     private void processRegis(long regisId, String value) {

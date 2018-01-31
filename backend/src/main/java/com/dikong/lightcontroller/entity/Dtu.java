@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.entity;
 
+import javax.persistence.Id;
+
 /**
  * 更新时间
  * 
@@ -13,6 +15,12 @@ public class Dtu {
     // 未删除
     public static final Byte DEL_NO = 1;
 
+    //离线
+    public static final Byte OFFLINE = 0;
+    //在线
+    public static final Byte ONLINE = 1;
+
+    @Id
     private Long id;
     /**
      * DTU设备
@@ -44,6 +52,12 @@ public class Dtu {
     private Byte isDelete;
 
     /**
+     * 连线状态
+     */
+
+    private Byte onlineStatus;
+
+    /**
      * 项目id
      */
     private Integer projId;
@@ -73,6 +87,9 @@ public class Dtu {
     }
 
     public String getDeviceCode() {
+        if (null != deviceCode){
+            return deviceCode.trim();
+        }
         return deviceCode;
     }
 
@@ -81,6 +98,9 @@ public class Dtu {
     }
 
     public String getBeatContent() {
+        if (null != beatContent){
+            return beatContent.trim();
+        }
         return beatContent;
     }
 
@@ -118,5 +138,13 @@ public class Dtu {
 
     public void setProjId(Integer projId) {
         this.projId = projId;
+    }
+
+    public Byte getOnlineStatus() {
+        return onlineStatus;
+    }
+
+    public void setOnlineStatus(Byte onlineStatus) {
+        this.onlineStatus = onlineStatus;
     }
 }
