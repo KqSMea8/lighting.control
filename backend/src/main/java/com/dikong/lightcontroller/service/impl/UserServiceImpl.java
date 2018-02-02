@@ -28,6 +28,7 @@ import com.dikong.lightcontroller.dao.UserProjectDao;
 import com.dikong.lightcontroller.dao.UserRoleDao;
 import com.dikong.lightcontroller.dto.LoginReqDto;
 import com.dikong.lightcontroller.dto.LoginRes;
+import com.dikong.lightcontroller.dto.UserListReq;
 import com.dikong.lightcontroller.entity.Menu;
 import com.dikong.lightcontroller.entity.Resource;
 import com.dikong.lightcontroller.entity.Role;
@@ -37,6 +38,7 @@ import com.dikong.lightcontroller.entity.UserRole;
 import com.dikong.lightcontroller.service.UserService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.MD5Util;
+import com.github.pagehelper.PageHelper;
 
 import redis.clients.jedis.Jedis;
 import tk.mybatis.mapper.entity.Example;
@@ -140,7 +142,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ReturnInfo userList() {
+    public ReturnInfo userList(UserListReq userListReq) {
+        PageHelper.startPage(userListReq.getPageNo(), userListReq.getPageSize());
         Example example = new Example(User.class);
         example.selectProperties("userId", "userName", "userStatus", "isDelete");
         example.createCriteria().andEqualTo("isDelete", "1");
@@ -148,7 +151,7 @@ public class UserServiceImpl implements UserService {
         if (CollectionUtils.isEmpty(users)) {
             return ReturnInfo.create(CodeEnum.NOT_CONTENT);
         }
-        return ReturnInfo.createReturnSuccessOne(users);
+        return ReturnInfo.createReturnSucces(users);
     }
 
     @Override

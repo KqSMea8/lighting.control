@@ -15,6 +15,7 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.LoginReqDto;
+import com.dikong.lightcontroller.dto.UserListReq;
 import com.dikong.lightcontroller.entity.User;
 import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.UserService;
@@ -45,8 +46,8 @@ public class UserController {
     }
 
     @RequestMapping("/list")
-    public ReturnInfo list() {
-        return userService.userList();
+    public ReturnInfo list(@RequestBody UserListReq userListReq) {
+        return userService.userList(userListReq);
     }
 
     @PostMapping("/add")

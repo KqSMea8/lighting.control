@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.ProjectListReq;
 import com.dikong.lightcontroller.entity.Project;
 import com.dikong.lightcontroller.service.ProjectService;
 
@@ -20,8 +21,8 @@ public class ProjectController {
     private ProjectService projectService;
 
     @RequestMapping("/list")
-    public ReturnInfo list() {
-        return projectService.projectList();
+    public ReturnInfo list(@RequestBody ProjectListReq projectListReq) {
+        return projectService.projectList(projectListReq);
     }
 
     @PostMapping("/add")
