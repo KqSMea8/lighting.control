@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.LoginReqDto;
+import com.dikong.lightcontroller.dto.UserListReq;
 import com.dikong.lightcontroller.entity.User;
 import com.dikong.lightcontroller.entity.UserProject;
 
@@ -15,7 +16,7 @@ public interface UserService {
 
     public ReturnInfo loginOut(String token);
 
-    public ReturnInfo userList();
+    public ReturnInfo userList(UserListReq userListReq);
 
     public ReturnInfo add(User user);
 

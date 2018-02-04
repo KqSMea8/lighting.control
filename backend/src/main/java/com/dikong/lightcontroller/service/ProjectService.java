@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.ProjectListReq;
 import com.dikong.lightcontroller.entity.Project;
 
 /**
@@ -8,7 +9,7 @@ import com.dikong.lightcontroller.entity.Project;
  * @version 2018年1月20日 下午9:23:43
  */
 public interface ProjectService {
-    public ReturnInfo projectList();
+    public ReturnInfo projectList(ProjectListReq projectListReq);
 
     public ReturnInfo projectAdd(Project project);
 

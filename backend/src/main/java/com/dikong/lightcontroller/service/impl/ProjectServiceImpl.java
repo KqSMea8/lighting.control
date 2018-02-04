@@ -11,10 +11,12 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.ProjectDao;
 import com.dikong.lightcontroller.dao.UserProjectDao;
+import com.dikong.lightcontroller.dto.ProjectListReq;
 import com.dikong.lightcontroller.entity.Project;
 import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.ProjectService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
+import com.github.pagehelper.PageHelper;
 
 import tk.mybatis.mapper.entity.Example;
 
@@ -32,7 +34,8 @@ public class ProjectServiceImpl implements ProjectService {
     private UserProjectDao userProjectDao;
 
     @Override
-    public ReturnInfo projectList() {
+    public ReturnInfo projectList(ProjectListReq projectListReq) {
+        PageHelper.startPage(projectListReq.getPageNo(), projectListReq.getPageSize());
         Example example = new Example(UserProject.class);
         example.selectProperties("projectId");
         example.createCriteria().andEqualTo("userId", AuthCurrentUser.getUserId());
