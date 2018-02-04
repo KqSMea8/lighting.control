@@ -20,6 +20,9 @@ import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.UserService;
 import com.github.pagehelper.util.StringUtil;
 
+import io.swagger.annotations.Api;
+
+@Api(value = "UserController", description = "用户管理")
 @RestController
 @RequestMapping("/light/user")
 public class UserController {

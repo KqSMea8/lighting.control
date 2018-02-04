@@ -3,6 +3,7 @@ package com.dikong.lightcontroller.controller;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.service.HistoryService;
 import com.sun.org.apache.regexp.internal.RE;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import com.dikong.lightcontroller.entity.History;
  * @see
  *      </P>
  */
+@Api(value = "HistoryController",description = "历史资料管理")
 @RestController
 public class HistoryController {
 

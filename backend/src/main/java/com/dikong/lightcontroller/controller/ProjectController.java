@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.controller;
 
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,7 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Project;
 import com.dikong.lightcontroller.service.ProjectService;
 
+@Api(value = "ProjectController",description = "项目管理")
 @RestController
 @RequestMapping("/light/project")
 public class ProjectController {

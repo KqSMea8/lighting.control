@@ -1,17 +1,18 @@
 package com.dikong.lightcontroller.controller;
 
-import com.dikong.lightcontroller.common.CodeEnum;
-import com.dikong.lightcontroller.service.DeviceService;
-import org.apache.ibatis.annotations.Param;
+import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.service.DeviceService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.vo.CommandSend;
 
@@ -26,6 +27,7 @@ import com.dikong.lightcontroller.vo.CommandSend;
  * @see
  *      </P>
  */
+@Api(value = "TaskCallbackController",description = "任务回调管理")
 @RestController
 public class TaskCallbackController {
 
@@ -43,8 +45,8 @@ public class TaskCallbackController {
     }
 
     @GetMapping(path = "/device/status/{deviceId}")
-    public ReturnInfo deviceStatus(@Param("deviceId")Long deviceId){
-        if (null == deviceId || deviceId == 0){
+    public ReturnInfo deviceStatus(@PathVariable("deviceId") Long deviceId) {
+        if (null == deviceId || deviceId == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return deviceService.conncationInfo(deviceId);

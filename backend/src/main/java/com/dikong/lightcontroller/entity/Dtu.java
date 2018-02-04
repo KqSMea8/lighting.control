@@ -39,7 +39,7 @@ public class Dtu {
      */
     private String beatContent;
     /**
-     * 心跳包内容，默认180秒
+     * 心跳包时间，默认180秒
      */
     private Integer beatTime;
     /**

@@ -12,7 +12,7 @@ package com.dikong.lightcontroller.vo;
  *      </P>
  */
 public class DeviceAdd {
-    //用于生成主键
+    //用于生成主键,不需要上传
     private Long id;
     // 对外id
     private String externalId;

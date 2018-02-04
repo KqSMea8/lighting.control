@@ -4,6 +4,7 @@ import java.text.ParseException;
 
 import javax.validation.Valid;
 
+import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import com.dikong.lightcontroller.vo.TimingListSearch;
  * @see
  *      </P>
  */
+@Api(value = "TimingController",description = "时序管理")
 @RestController
 public class TimingController {
 

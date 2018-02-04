@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.controller;
 
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import com.dikong.lightcontroller.service.EquipmentMonitorService;
  * @author huangwenjun
  * @Datetime 2018年1月25日
  */
+@Api(value = "MonitorController",description = "监控管理")
 @RestController
 @RequestMapping("/light/monitor")
 public class MonitorController {

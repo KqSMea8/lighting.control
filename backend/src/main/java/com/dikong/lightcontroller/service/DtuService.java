@@ -28,4 +28,6 @@ public interface DtuService {
     ReturnInfo updateDtu(Dtu dtu);
 
     ReturnInfo conncationInfo(String deviceCode,Integer line);
+
+    ReturnInfo allDtu();
 }

@@ -6,6 +6,7 @@ import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.service.GroupService;
 import com.dikong.lightcontroller.vo.GroupList;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,7 @@ import java.util.List;
  * @create 2018年01月22日下午3:24
  * @see </P>
  */
+@Api(value = "GroupController",description = "群组管理")
 @RestController
 public class GroupController {
 

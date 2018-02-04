@@ -33,8 +33,8 @@ public interface DtuDAO extends Mapper<Dtu>{
     @Delete({"update dtu set is_delete=#{isDelete} where id=#{id}"})
     int updateIsDelete(@Param("id") Long id, @Param("isDelete") Byte isDelete);
 
-    @Insert({"insert into dtu (device,device_name,device_code,beat_content,beat_time) "
-            + "values (#{dtu.device},#{dtu.deviceName},#{dtu.deviceCode},#{dtu.beatContent},#{dtu.beatTime})"})
+    @Insert({"insert into dtu (device,device_name,device_code,beat_content,beat_time,proj_id) "
+            + "values (#{dtu.device},#{dtu.deviceName},#{dtu.deviceCode},#{dtu.beatContent},#{dtu.beatTime},#{dtu.projId})"})
     int insertDtu(@Param("dtu") Dtu dtu);
 
     @Select({"select device from dtu where id=#{id}"})
@@ -49,4 +49,12 @@ public interface DtuDAO extends Mapper<Dtu>{
 
     @Update({"update dtu set online_status=#{onlineStatus} where device_code=#{deviceCode}"})
     int updateOnlineStatusByCode(@Param("deviceCode")String deviceCode,@Param("onlineStatus")Byte onlineStatus);
+
+
+    @Select({"select device_code,beat_content,beat_time from dtu"})
+    List<Dtu> selectAllDtu();
+
+
+    @Select({"select count(0) from dtu where device_code=#{deviceCode}"})
+    int selectExistDeviceCode(@Param("deviceCode")String deviceCode);
 }

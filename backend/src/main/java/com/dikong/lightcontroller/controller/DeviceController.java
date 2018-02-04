@@ -1,9 +1,9 @@
 package com.dikong.lightcontroller.controller;
 
+import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +29,7 @@ import com.dikong.lightcontroller.vo.DeviceAdd;
  * @see
  *      </P>
  */
+@Api(value = "DeviceController",description = "串口设备管理")
 @RestController
 public class DeviceController {
 

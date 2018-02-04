@@ -1,11 +1,12 @@
 package com.dikong.lightcontroller.service.api;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.dikong.lightcontroller.dto.DeviceApi;
+import com.dikong.lightcontroller.dto.SendCmdRes;
 
 import feign.Headers;
+import feign.Param;
 import feign.RequestLine;
 
 /**
@@ -23,12 +24,12 @@ import feign.RequestLine;
 public interface DtuCollectionApi {
 
     @RequestLine("POST /device/create")
-    int createDevice(@RequestBody DeviceApi deviceApi);
+    SendCmdRes createDevice(@RequestBody DeviceApi deviceApi);
 
     @RequestLine("POST /device/modify")
-    int modifyDevice(@RequestBody DeviceApi deviceApi);
+    SendCmdRes modifyDevice(@RequestBody DeviceApi deviceApi);
 
 
-    @RequestLine("POST /device/{registerMsg}")
-    int deleteDevice(@PathVariable("registerMsg") String registerMsg);
+    @RequestLine("DELETE /device/{registerMsg}")
+    SendCmdRes deleteDevice(@Param(value = "registerMsg") String registerMsg);
 }

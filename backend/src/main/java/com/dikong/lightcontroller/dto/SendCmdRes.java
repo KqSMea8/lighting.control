@@ -1,26 +1,38 @@
 package com.dikong.lightcontroller.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author huangwenjun
  * @Datetime 2018年1月31日
  */
 public class SendCmdRes {
-    private int Code;
-    private String Data;
 
-    public int getCode() {
-        return Code;
+
+    @JsonProperty(value = "Code")
+    private Integer code;
+
+    @JsonProperty("Data")
+    private String data;
+
+    public Integer getCode() {
+        return code;
     }
 
-    public void setCode(int code) {
-        Code = code;
+    public void setCode(Integer code) {
+        this.code = code;
     }
 
     public String getData() {
-        return Data;
+        return data;
     }
 
     public void setData(String data) {
-        Data = data;
+        this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "SendCmdRes{" + "Code=" + code + ", Data='" + data + '\'' + '}';
     }
 }

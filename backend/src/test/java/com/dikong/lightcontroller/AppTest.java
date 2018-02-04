@@ -4,6 +4,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import java.util.Optional;
+
 /**
  * Unit test for simple App.
  */
@@ -29,5 +31,9 @@ public class AppTest extends TestCase {
      */
     public void testApp() {
         assertTrue(true);
+        Optional<String> name =Optional.of("lrf");
+        System.out.println(name.isPresent());
+        System.out.println(Optional.ofNullable("lrf").isPresent());
+        System.out.println(Optional.ofNullable(null).isPresent());
     }
 }
