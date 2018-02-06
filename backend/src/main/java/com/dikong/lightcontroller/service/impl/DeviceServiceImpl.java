@@ -174,6 +174,7 @@ public class DeviceServiceImpl implements DeviceService {
             } else {
                 defaultRegister = Register.addDefault(String.valueOf(Device.ONLINE), id);
             }
+            defaultRegister.setProjId(projId);
             registers.add(defaultRegister);
         } catch (IOException e) {
             LOG.error(Arrays.toString(e.getStackTrace()));
