@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +32,7 @@ import com.dikong.lightcontroller.vo.DeviceAdd;
  */
 @Api(value = "DeviceController",description = "串口设备管理")
 @RestController
+@RequestMapping("/light")
 public class DeviceController {
 
     private static final Logger LOG = LoggerFactory.getLogger(DeviceController.class);

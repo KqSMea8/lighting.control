@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.CodeEnum;
@@ -29,6 +30,7 @@ import com.dikong.lightcontroller.vo.CommandSend;
  */
 @Api(value = "TaskCallbackController",description = "任务回调管理")
 @RestController
+@RequestMapping("/light")
 public class TaskCallbackController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TaskCallbackController.class);

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.CodeEnum;
@@ -38,6 +39,7 @@ import com.dikong.lightcontroller.vo.TimingListSearch;
  */
 @Api(value = "TimingController",description = "时序管理")
 @RestController
+@RequestMapping("/light")
 public class TimingController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TimingController.class);

@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
@@ -22,6 +23,7 @@ import com.dikong.lightcontroller.service.SysVarService;
  */
 @Api(value = "SysVarController",description = "系统变量管理")
 @RestController
+@RequestMapping("/light")
 public class SysVarController {
 
     @Autowired
