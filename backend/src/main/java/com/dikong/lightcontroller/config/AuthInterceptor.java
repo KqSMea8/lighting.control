@@ -14,7 +14,7 @@ public class AuthInterceptor extends WebMvcConfigurerAdapter {
     public void addInterceptors(InterceptorRegistry registry) {
         String[] swagger = new String[] {"/swagger**", "/v2/api-docs"};
         registry.addInterceptor(new LoginHandleInterceptor()).addPathPatterns("/**")
-                .excludePathPatterns("/light/user/login", "/light/beat")
+                .excludePathPatterns("/light/user/login", "/light/beat","/light/api/**")
                 .excludePathPatterns(swagger);
         super.addInterceptors(registry);
     }

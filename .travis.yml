@@ -1,7 +1,14 @@
 language: java
 jdk:
   - oraclejdk8
+before_install: echo "before_install"
+
+install: echo "install"
+
+before_script: echo "before_script"
+
 script: 
   - echo "hello world"
   - cd ./backend 
   - mvn compile -Dmaven.test.skip=true
+

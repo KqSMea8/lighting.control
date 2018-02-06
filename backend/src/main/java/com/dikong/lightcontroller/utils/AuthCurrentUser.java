@@ -20,9 +20,6 @@ public class AuthCurrentUser {
     }
 
     public static int getCurrentProjectId() {
-        if (true){
-            return 0;
-        }
         return get().getCurrentProjectId();
     }
 
