@@ -1,4 +1,7 @@
 language: java
 jdk:
   - oraclejdk8
-script: echo "hello world"
+script: 
+  - echo "hello world"
+  - cd ./backend 
+  - mvn compile -Dmaven.test.skip=true
