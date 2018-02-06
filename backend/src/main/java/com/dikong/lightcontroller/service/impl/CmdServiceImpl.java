@@ -68,7 +68,7 @@ public class CmdServiceImpl implements CmdService {
         if (results.size() > 0) {
             return new CmdRes<String>(true, results.get(0));
         }
-        return new CmdRes<String>(false, results.get(0));
+        return new CmdRes<String>(false, reqResult.getData());
     }
 
     @Override
@@ -166,7 +166,7 @@ public class CmdServiceImpl implements CmdService {
         if (results.size() > 0) {
             return new CmdRes<String>(false, results.get(0));
         }
-        return new CmdRes<String>(false, results.get(0));
+        return new CmdRes<String>(false, reqResult.getData());
     }
 
     @Override
