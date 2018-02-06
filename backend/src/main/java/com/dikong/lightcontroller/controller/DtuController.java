@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.CodeEnum;
@@ -28,7 +31,9 @@ import com.dikong.lightcontroller.service.DtuService;
  * @see
  *      </P>
  */
+@Api(value = "DtuController",description = "Dtu 管理")
 @RestController
+@RequestMapping("/light")
 public class DtuController {
 
     @Autowired
@@ -43,6 +48,7 @@ public class DtuController {
      * @param dtuList
      * @return
      */
+    @ApiOperation(value = "dtu 列表")
     @PostMapping("/dtu/list")
     public ReturnInfo dtuList(@RequestBody DtuList dtuList) {
         return dtuService.list(dtuList);
@@ -97,6 +103,11 @@ public class DtuController {
         return dtuService.idList();
     }
 
+    /**
+     * 修改dtu信息
+     * @param dtu
+     * @return
+     */
     @PutMapping("/dtu/update")
     public ReturnInfo updateDtu(@RequestBody Dtu dtu) {
         return dtuService.updateDtu(dtu);
@@ -104,9 +115,9 @@ public class DtuController {
 
 
     /**
-     *
+     * 上报dtu设备状态接口
      * @param deviceCode dtu 注册码
-     * @param line 在线(0)/离线(1)
+     * @param line 在线(2)/离线(0)
      * @return
      */
     @GetMapping(path = "/api/dtu/connection/{deviceCode}/{line}")
@@ -117,4 +128,16 @@ public class DtuController {
         }
         return dtuService.conncationInfo(deviceCode, line);
     }
+
+    /**
+     * 数据收集中心读取所有的未删除的设备注册信息
+     * @return
+     */
+    @GetMapping(path = "/api/dtu/all")
+    public ReturnInfo allDtu(){
+        return dtuService.allDtu();
+    }
+
+
+
 }

@@ -1,7 +1,10 @@
 package com.dikong.lightcontroller.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * <p>
@@ -14,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
  * @see
  *      </P>
  */
+@Api(value = "BeatController", description = "心跳接口")
 @RestController
 public class BeatController {
 
-    @RequestMapping(path = "/light/beat")
+    @ApiOperation(value = "心跳接口", notes = "心跳接口")
+    @GetMapping(path = "/light/beat")
     public String beat() {
         return "alive";
     }
