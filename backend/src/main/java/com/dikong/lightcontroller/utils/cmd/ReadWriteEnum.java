@@ -5,7 +5,7 @@ package com.dikong.lightcontroller.utils.cmd;
  * @Datetime 2018年1月26日
  */
 public enum ReadWriteEnum {
-    READ(1), WRITE(0);
+        READ(0), WRITE(1);
 
     private int code;
 
