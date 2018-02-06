@@ -44,7 +44,8 @@ public class MonitorPanelServiceImpl implements MonitorPanelService {
     @Override
     public ReturnInfo list() {
         Example example = new Example(MonitorPanel.class);
-        example.createCriteria().andEqualTo("isDelete", 1);
+        example.createCriteria().andEqualTo("isDelete", 1).andEqualTo("projectId",
+                AuthCurrentUser.getCurrentProjectId());
         List<MonitorPanel> panels = panelDao.selectByExample(example);
         return ReturnInfo.createReturnSuccessOne(panels);
     }
