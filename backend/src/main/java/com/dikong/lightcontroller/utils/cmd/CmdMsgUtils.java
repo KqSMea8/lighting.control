@@ -45,7 +45,8 @@ public class CmdMsgUtils {
         value = SimpleStringUtils.repair4Char(value);
         String cmdHalf = dtuAddr + functionCode + address + value;
         String crc = crcCheck(cmdHalf);
-        return cmdHalf + crc;
+
+        return cmdHalf + crc.substring(2, 4) + crc.substring(0, 2);
     }
 
     /**
