@@ -1,0 +1,109 @@
+group 'com.github'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url 'http://maven.springframework.org/release/'
+        }
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE")
+        classpath ('org.springframework:springloaded:1.2.6.RELEASE')
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+apply plugin: 'spring-boot'
+
+// hot swapping
+idea {
+    module {
+        inheritOutputDirs = false
+        outputDir = file("${buildDir}/classes/main/")
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+ext {
+    springVersion = '4.3.2.RELEASE'
+    springBootVersion = '1.4.0.RELEASE'
+    springfoxVersion = '2.5.0'
+}
+
+jar {
+    baseName = 'schedule-job'
+//    appendix = 'worker'
+    version =  '1.0.0'
+}
+
+// clean bootRepackage 打jar包
+springBoot {
+    mainClass = "com.github.schedulejob.AppMain"
+    layout = "JAR"
+}
+
+configurations {
+    compile.exclude group:'log4j.log4j'
+    compile.exclude group:'com.mchange'
+    compile.exclude group:'c3p0'
+    compile.exclude group:'commons-logging'
+    compile.exclude group:'org.apache.httpcomponents'
+    compile.exclude group:'org.apache.tomcat', module: 'tomcat-jdbc'
+}
+
+dependencies {
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+
+    // spring web
+    compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-aop:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-actuator:${springBootVersion}")
+
+    // redis
+    compile("org.springframework.boot:spring-boot-starter-data-redis:${springBootVersion}")
+
+    // swagger2
+    compile ("io.springfox:springfox-swagger2:${springfoxVersion}")
+    compile ("io.springfox:springfox-swagger-ui:${springfoxVersion}")
+
+    // guava
+    compile("com.google.guava:guava:19.0")
+
+    // jdbc
+    runtime("mysql:mysql-connector-java:5.1.39")
+    compile("com.zaxxer:HikariCP:2.4.7")
+    compile"com.alibaba:druid-spring-boot-starter:1.1.6"
+
+    // mybatis
+    compile("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.1.1"){
+        exclude group: ' org.springframework.boot'
+    }
+
+    // thrift
+    compile("org.apache.thrift:libthrift:0.9.3")
+
+    // quartz
+    compile("org.quartz-scheduler:quartz:2.2.3")
+    compile("org.springframework:spring-context-support:${springVersion}")
+
+    // okHttp3
+    compile ("com.squareup.okhttp3:okhttp:3.4.1")
+    compile("com.squareup.okio:okio:1.9.0")
+}
