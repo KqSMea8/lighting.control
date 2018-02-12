@@ -7,7 +7,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>street.lighting.control</name>
+	<name>street-lighting-control</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -126,7 +126,7 @@
 		<!--swagger2 end-->
 	</dependencies>
 	<build>
-		<finalName>street.lighting.control</finalName>
+		<finalName>street-lighting-control</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
