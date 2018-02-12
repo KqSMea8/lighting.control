@@ -199,7 +199,7 @@ public class TimingServiceImpl implements TimingService {
 
     @SuppressWarnings("all")
     @Override
-    public ReturnInfo listNodeType(TimingListSearch timingListSearch) {
+    public ReturnInfo<List<TimingList>> listNodeType(TimingListSearch timingListSearch) {
 
         Timing search = new Timing();
         search.setNodeType(timingListSearch.getNodeType());
@@ -272,7 +272,7 @@ public class TimingServiceImpl implements TimingService {
 
 
     @Override
-    public ReturnInfo timingView(String viewTime) throws ParseException {
+    public ReturnInfo<TimingView> timingView(String viewTime) throws ParseException {
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<String> weekTime = TimeWeekUtils.getWeekTime(viewTime);
         List<Holiday> holidays = holidayDAO.selectAllHoliday(weekTime);

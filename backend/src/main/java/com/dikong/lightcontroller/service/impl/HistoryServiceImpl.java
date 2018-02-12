@@ -30,7 +30,7 @@ public class HistoryServiceImpl implements HistoryService {
     private HistoryDAO historyDAO;
 
     @Override
-    public ReturnInfo searchVarHistory(Long varId, Integer varType) {
+    public ReturnInfo<List<History>> searchVarHistory(Long varId, Integer varType) {
         List<History> histories = historyDAO.selectAllByVarId(varId, varType);
         return ReturnInfo.createReturnSuccessOne(histories);
     }
@@ -43,6 +43,7 @@ public class HistoryServiceImpl implements HistoryService {
         if (null != history.getVarValue() && (null == lastHistory
                 || !history.getVarValue().equals(lastHistory.getVarValue()))) {
             history.setCreateBy(useId);
+            history.setVarValue(history.getVarValue());
             historyDAO.insertHistory(history);
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);

@@ -15,81 +15,92 @@ import com.github.pagehelper.Page;
  * @see
  *      </P>
  */
-public class ReturnInfo {
-    private Integer code;
+public class ReturnInfo<T> {
+    // code 码
+    private int code;
+    // 返回信息
     private String msg;
-    private Object data;
-    private PageNation pageNation;
+    // 返回数据
+    private T data;
 
-    public ReturnInfo() {
+    private PageNation paginNation;
 
-    }
-
-
-    public ReturnInfo(int code, String msg) {
-        this.code = code;
-        this.msg = msg;
-    }
-
-    public static ReturnInfo create(Object data,PageNation pageNation){
-        return create(CodeEnum.SUCCESS.getCode(),CodeEnum.SUCCESS.getMsg(),data,pageNation);
-    }
-
-    public static ReturnInfo create(int code, String msg, Object data, PageNation paginNation) {
-        ReturnInfo returnInfo = new ReturnInfo();
+    public static <T> ReturnInfo<T> create(int code, String msg, T data, PageNation paginNation) {
+        ReturnInfo<T> returnInfo = new ReturnInfo<T>();
         returnInfo.code = code;
         returnInfo.msg = msg;
         returnInfo.data = data;
-        returnInfo.pageNation = paginNation;
+        returnInfo.paginNation = paginNation;
         return returnInfo;
     }
 
-    public static ReturnInfo create(CodeEnum codeEnum, Object data) {
-        return create(codeEnum.getCode(), codeEnum.getMsg(), data, null);
-    }
-
-    public static ReturnInfo create(CodeEnum codeEnum) {
+    public static <T> ReturnInfo<T> create(CodeEnum codeEnum) {
         return create(codeEnum.getCode(), codeEnum.getMsg());
     }
 
-    public static ReturnInfo create(int code, String msg) {
-        return create(code, msg, "", new PageNation());
+    public static <T> ReturnInfo<T> create(T data) {
+        return create(CodeEnum.SUCCESS,data);
     }
 
-    public static ReturnInfo createReturnSucces(List<?> data) {
-        ReturnInfo returnInfo = new ReturnInfo();
+    public static <T> ReturnInfo<T> create(CodeEnum codeEnum, T data) {
+        return create(codeEnum.getCode(), codeEnum.getMsg(), data, new PageNation());
+    }
+
+    public static <T> ReturnInfo<T> create(int code, String msg) {
+        return create(code, msg, null, new PageNation());
+    }
+
+    public static <T> ReturnInfo<T> create(T data, PageNation pageNation) {
+        return create(CodeEnum.SUCCESS.getCode(), CodeEnum.SUCCESS.getMsg(), data, pageNation);
+    }
+
+    /**
+     * 组装返回前端的数据
+     * 
+     * @param data 源数据
+     * @return
+     */
+    public static <T extends List> ReturnInfo<T> createReturnSucces(T data) {
+        ReturnInfo<T> returnInfo = new ReturnInfo<T>();
         returnInfo.setCode(CodeEnum.SUCCESS.getCode());
         returnInfo.setMsg(CodeEnum.SUCCESS.getMsg());
         returnInfo.setData(data);
         PageNation paginnation = create(data);
-        returnInfo.setPageNation(paginnation);
+        returnInfo.setPaginNation(paginnation);
         return returnInfo;
     }
 
-    public static ReturnInfo createReturnSuccessOne(Object data) {
+    public static <T> ReturnInfo<T> createReturnSuccessOne(T data) {
         ReturnInfo returnInfo = create(CodeEnum.SUCCESS);
         returnInfo.setData(data);
         return returnInfo;
     }
 
     public static PageNation create(List<?> result) {
-        if (null == result){
-            return new PageNation();
-        }
         PageNation paginnation = new PageNation();
-        paginnation.setTotal(new Long(((Page<?>) result).getTotal()).intValue());
-        paginnation.setPageNo(((Page<?>) result).getPageNum());
-        paginnation.setPages(((Page<?>) result).getPages());
-        paginnation.setPageSize(((Page<?>) result).getPageSize());
+        if (result != null && !result.isEmpty()) {
+            paginnation.setTotal(new Long(((Page<?>) result).getTotal()).intValue());
+            paginnation.setPageNo(((Page<?>) result).getPageNum());
+            paginnation.setPageSize(((Page<?>) result).getPageSize());
+            paginnation.setPages(((Page<?>) result).getPages());
+        }
         return paginnation;
     }
 
+    public ReturnInfo() {
 
-    public Integer getCode() {
+    }
+
+    public ReturnInfo(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public int getCode() {
         return code;
     }
 
-    public void setCode(Integer code) {
+    public void setCode(int code) {
         this.code = code;
     }
 
@@ -101,19 +112,19 @@ public class ReturnInfo {
         this.msg = msg;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(T data) {
         this.data = data;
     }
 
-    public PageNation getPageNation() {
-        return pageNation;
+    public PageNation getPaginNation() {
+        return paginNation;
     }
 
-    public void setPageNation(PageNation pageNation) {
-        this.pageNation = pageNation;
+    public void setPaginNation(PageNation paginNation) {
+        this.paginNation = paginNation;
     }
 }

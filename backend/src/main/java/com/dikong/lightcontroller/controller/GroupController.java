@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.controller;
 
 import java.util.List;
 
+import com.dikong.lightcontroller.vo.GroupDeviceList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +45,7 @@ public class GroupController {
      * @return
      */
     @PostMapping(path = "/group/list")
-    public ReturnInfo list(@RequestBody GroupList groupList){
+    public ReturnInfo<List<Group>> list(@RequestBody GroupList groupList){
         return groupService.list(groupList);
     }
 
@@ -77,7 +78,7 @@ public class GroupController {
      * @return
      */
     @GetMapping(path = "/group/device/{id}")
-    public ReturnInfo deviceList(@PathVariable("id")Long id){
+    public ReturnInfo<List<GroupDeviceList>> deviceList(@PathVariable("id")Long id){
         if (null == id || id == 0){
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }

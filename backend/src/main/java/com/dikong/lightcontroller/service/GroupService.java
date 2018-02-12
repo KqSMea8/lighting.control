@@ -3,6 +3,7 @@ package com.dikong.lightcontroller.service;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
+import com.dikong.lightcontroller.vo.GroupDeviceList;
 import com.dikong.lightcontroller.vo.GroupList;
 
 import java.util.List;
@@ -19,13 +20,13 @@ import java.util.List;
  */
 public interface GroupService {
 
-    ReturnInfo list(GroupList groupList);
+    ReturnInfo<List<Group>> list(GroupList groupList);
 
     ReturnInfo add(Group group);
 
     ReturnInfo deleteGroup(Long id);
 
-    ReturnInfo deviceList(Long id);
+    ReturnInfo<List<GroupDeviceList>> deviceList(Long id);
 
     ReturnInfo deleteGroupDevice(List<Long> middId);
 

@@ -10,6 +10,7 @@ import java.util.Set;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.dikong.lightcontroller.common.CodeEnum;
@@ -60,7 +61,7 @@ public class GroupServiceImpl implements GroupService {
     private SysVarService sysVarService;
 
     @Override
-    public ReturnInfo list(GroupList groupList) {
+    public ReturnInfo<List<Group>> list(GroupList groupList) {
         int projId = AuthCurrentUser.getCurrentProjectId();
         groupList.setProjId(projId);
         groupList.setIsDelete(Group.DEL_NO);
@@ -70,6 +71,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    @Transactional
     public ReturnInfo add(Group group) {
         int projId = AuthCurrentUser.getCurrentProjectId();
         Integer lastGroupCode = groupDAO.selectLastCode(Group.DEL_NO, projId);
@@ -88,7 +90,7 @@ public class GroupServiceImpl implements GroupService {
         sysVar.setVarId(group.getId());
         sysVar.setProjId(projId);
         sysVarService.addSysVar(sysVar);
-        return ReturnInfo.create(CodeEnum.SUCCESS);
+        return ReturnInfo.create(group.getId());
     }
 
     @Override
@@ -102,7 +104,7 @@ public class GroupServiceImpl implements GroupService {
 
 
     @Override
-    public ReturnInfo deviceList(Long id) {
+    public ReturnInfo<List<GroupDeviceList>> deviceList(Long id) {
         List<GroupDeviceMiddle> groupDeviceMiddles = groupDeviceMiddleDAO.selectByGroupId(id);
         Set<Long> deviceIds = new HashSet<>();
         Set<Long> regisIds = new HashSet<>();

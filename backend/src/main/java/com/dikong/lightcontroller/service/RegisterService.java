@@ -4,6 +4,8 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.vo.RegisterList;
 
+import java.util.List;
+
 /**
  * <p>
  * Description
@@ -15,9 +17,11 @@ import com.dikong.lightcontroller.vo.RegisterList;
  * @see </P>
  */
 public interface RegisterService {
-    ReturnInfo searchRegister(RegisterList registerList);
+    ReturnInfo<List<Register>> searchRegister(RegisterList registerList);
 
     ReturnInfo updateRegister(Register register);
 
     ReturnInfo updateRegisterValue(Long id,String regisValue);
+
+    ReturnInfo deleteRegister(Long id);
 }

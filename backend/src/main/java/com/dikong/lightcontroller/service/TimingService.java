@@ -3,9 +3,12 @@ package com.dikong.lightcontroller.service;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.vo.TimeOrdinaryNodeAdd;
 import com.dikong.lightcontroller.vo.TimeSpecifiedNodeAdd;
+import com.dikong.lightcontroller.vo.TimingList;
 import com.dikong.lightcontroller.vo.TimingListSearch;
+import com.dikong.lightcontroller.vo.TimingView;
 
 import java.text.ParseException;
+import java.util.List;
 
 /**
  * <p>
@@ -25,9 +28,9 @@ public interface TimingService {
 
     ReturnInfo deleteNode(Long id);
 
-    ReturnInfo listNodeType(TimingListSearch timingListSearch);
+    ReturnInfo<List<TimingList>> listNodeType(TimingListSearch timingListSearch);
 
     ReturnInfo addHolidayNode(String[] holidayTimes);
 
-    ReturnInfo timingView(String viewTime) throws ParseException;
+    ReturnInfo<TimingView> timingView(String viewTime) throws ParseException;
 }

@@ -37,21 +37,28 @@ public class RegisterServiceImpl implements RegisterService {
      * @return
      */
     @Override
-    public ReturnInfo searchRegister(RegisterList registerList) {
+    public ReturnInfo<List<Register>> searchRegister(RegisterList registerList) {
         List<Register> registers = registerDAO.selectRegisterById(registerList);
         return ReturnInfo.createReturnSuccessOne(registers);
     }
 
     @Override
     public ReturnInfo updateRegister(Register register) {
-        registerDAO.updateByRegisAddrAndDeviceId(register,register.getRegisAddr(),register.getDeviceId());
+        registerDAO.updateByRegisAddrAndDeviceId(register, register.getRegisAddr(),
+                register.getDeviceId());
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
 
     @Override
     public ReturnInfo updateRegisterValue(Long id, String regisValue) {
-        registerDAO.updateRegisValueById(regisValue,id);
+        registerDAO.updateRegisValueById(regisValue, id);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo deleteRegister(Long id) {
+        registerDAO.deleteRegister(id);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 }

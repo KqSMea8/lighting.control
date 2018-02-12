@@ -13,6 +13,8 @@ import com.dikong.lightcontroller.service.HistoryService;
 
 import io.swagger.annotations.Api;
 
+import java.util.List;
+
 /**
  * <p>
  * Description
@@ -33,7 +35,7 @@ public class HistoryController {
     private HistoryService historyService;
 
     @GetMapping(path = "/history/list/{varId}/{varType}")
-    public ReturnInfo historyList(@PathVariable("varId") Long varId,
+    public ReturnInfo<List<History>> historyList(@PathVariable("varId") Long varId,
             @PathVariable("varType") Integer varType) {
         if (!History.REGISTER_TYPE.equals(varType) && !History.GROUP_TYPE.equals(varType)
                 && !History.SEQUENCE_TYPE.equals(varType)) {

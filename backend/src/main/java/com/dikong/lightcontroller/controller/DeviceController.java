@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
+import com.dikong.lightcontroller.entity.Device;
+import com.dikong.lightcontroller.vo.DeviceBoardList;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,8 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.service.DeviceService;
 import com.dikong.lightcontroller.vo.DeviceAdd;
+
+import java.util.List;
 
 /**
  * <p>
@@ -89,7 +93,7 @@ public class DeviceController {
      * @return
      */
     @GetMapping(path = "/device/list/{dtuId}")
-    public ReturnInfo dtuIdList(@PathVariable("dtuId") Long dtuId) {
+    public ReturnInfo<List<Device>> dtuIdList(@PathVariable("dtuId") Long dtuId) {
         if (null == dtuId || dtuId == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
@@ -102,7 +106,7 @@ public class DeviceController {
      * @return
      */
     @GetMapping(path = "/device/all")
-    public ReturnInfo selectAllDeviceNoSelect() {
+    public ReturnInfo<List<DeviceBoardList>> selectAllDeviceNoSelect() {
         return deviceService.selectAllSelectDevice();
     }
 

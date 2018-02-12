@@ -1,10 +1,15 @@
 package com.dikong.lightcontroller.service;
 
+import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.Dtu;
+import com.dikong.lightcontroller.vo.DeviceBoardList;
+import com.dikong.lightcontroller.vo.DeviceList;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.vo.DeviceAdd;
+
+import java.util.List;
 
 /**
  * <p>
@@ -20,7 +25,7 @@ import com.dikong.lightcontroller.vo.DeviceAdd;
 
 public interface DeviceService {
 
-    ReturnInfo list(Long dtuId);
+    ReturnInfo<List<DeviceList>> list(Long dtuId);
 
     ReturnInfo deleteDevice(Long id);
 
@@ -28,9 +33,9 @@ public interface DeviceService {
 
     ReturnInfo uploadPointTableFile(MultipartFile multipartFile, Long id);
 
-    ReturnInfo idList(Long dtuId);
+    ReturnInfo<List<Device>> idList(Long dtuId);
 
-    ReturnInfo selectAllSelectDevice();
+    ReturnInfo<List<DeviceBoardList>> selectAllSelectDevice();
 
     ReturnInfo conncationInfo(Long id);
 

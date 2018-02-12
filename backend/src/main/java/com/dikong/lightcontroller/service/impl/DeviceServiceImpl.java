@@ -86,7 +86,7 @@ public class DeviceServiceImpl implements DeviceService {
      * @return
      */
     @Override
-    public ReturnInfo list(Long dtuId) {
+    public ReturnInfo<List<DeviceList>> list(Long dtuId) {
         List<Device> deviceList = deviceDAO.selectAllByDtuId(dtuId, Device.DEL_NO);
         List<DeviceList> deviceLists = new ArrayList<>();
         if (!CollectionUtils.isEmpty(deviceList)) {
@@ -212,7 +212,7 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     @Override
-    public ReturnInfo idList(Long dtuId) {
+    public ReturnInfo<List<Device>> idList(Long dtuId) {
         List<Device> devices = deviceDAO.selectIdList(dtuId, Device.DEL_NO);
         if (!CollectionUtils.isEmpty(devices)) {
             devices.forEach(item -> {
@@ -225,7 +225,7 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     @Override
-    public ReturnInfo selectAllSelectDevice() {
+    public ReturnInfo<List<DeviceBoardList>> selectAllSelectDevice() {
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId);
         if (!CollectionUtils.isEmpty(deviceBoardLists)) {

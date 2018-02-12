@@ -4,6 +4,8 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.DtuList;
 import com.dikong.lightcontroller.entity.Dtu;
 
+import java.util.List;
+
 /**
  * <p>
  * Description
@@ -17,17 +19,17 @@ import com.dikong.lightcontroller.entity.Dtu;
  */
 public interface DtuService {
 
-    ReturnInfo list(DtuList dtuList);
+    ReturnInfo<List<Dtu>> list(DtuList dtuList);
 
     ReturnInfo deleteDtu(Long id);
 
     ReturnInfo addDtu(Dtu dtu);
 
-    ReturnInfo idList();
+    ReturnInfo<List<Dtu>> idList();
 
     ReturnInfo updateDtu(Dtu dtu);
 
     ReturnInfo conncationInfo(String deviceCode,Integer line);
 
-    ReturnInfo allDtu();
+    ReturnInfo<List<Dtu>> allDtu();
 }

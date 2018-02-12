@@ -15,6 +15,9 @@ import com.dikong.lightcontroller.dto.BasePage;
  */
 public class TimingListSearch extends BasePage {
 
+    /**
+     * １，２，３
+     */
     private Integer nodeType;
 
     public Integer getNodeType() {

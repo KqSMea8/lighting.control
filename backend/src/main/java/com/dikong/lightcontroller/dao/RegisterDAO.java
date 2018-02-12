@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -37,7 +38,7 @@ public interface RegisterDAO {
             + " from register " + "<where>" + "<if test = \" register.deviceId != null \">"
             + " device_id = #{register.deviceId}" + "</if>"
             + "<if test = \" register.regisType != null \">"
-            + " regis_type = #{register.regisType} " + "</if>" + "</where>" + "</script>"})
+            + " and regis_type = #{register.regisType} " + "</if>" + "</where>" + "</script>"})
     List<Register> selectRegisterById(@Param("register") RegisterList registerList);
 
     @Select({"<script>"
@@ -72,4 +73,8 @@ public interface RegisterDAO {
 
     @Select({"select id,regis_type from register where device_id=#{deviceId} limit 1"})
     Register selectIdAndTypeByDeviceId(@Param("deviceId")Long deviceId);
+
+
+    @Delete({"delete from register where id=#{id}"})
+    int deleteRegister(@Param("id")Long id);
 }

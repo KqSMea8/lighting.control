@@ -1,15 +1,21 @@
 package com.dikong.lightcontroller.controller;
 
+import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.vo.RegisterList;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * <p>
@@ -35,8 +41,16 @@ public class RegisterController {
      * @return
      */
     @PostMapping(path = "/register/list")
-    public ReturnInfo list(@RequestBody RegisterList registerList){
+    public ReturnInfo<List<Register>> list(@RequestBody RegisterList registerList){
         return registerService.searchRegister(registerList);
+    }
+
+    @DeleteMapping(path = "/register/{id}")
+    public ReturnInfo delete(@PathVariable("id")Long id){
+        if (null == id || id == 0){
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return registerService.deleteRegister(id);
     }
 
 }

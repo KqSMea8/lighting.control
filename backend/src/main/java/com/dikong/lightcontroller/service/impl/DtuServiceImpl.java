@@ -69,7 +69,7 @@ public class DtuServiceImpl implements DtuService {
     }
 
     @Override
-    public ReturnInfo list(DtuList dtuList) {
+    public ReturnInfo<List<Dtu>> list(DtuList dtuList) {
         PageHelper.startPage(dtuList.getPageNo(), dtuList.getPageSize());
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<Dtu> dtus = dtuDAO.selectAllByPage(Dtu.DEL_NO, projId);
@@ -106,13 +106,14 @@ public class DtuServiceImpl implements DtuService {
 
 
     @Override
-    public ReturnInfo idList() {
+    public ReturnInfo<List<Dtu>> idList() {
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<Dtu> dtus = dtuDAO.selectAllDtuId(projId, Dtu.DEL_NO);
         return ReturnInfo.createReturnSuccessOne(dtus);
     }
 
     @Override
+    @Transactional
     public ReturnInfo updateDtu(Dtu dtu) {
         dtuDAO.updateByPrimaryKeySelective(dtu);
         // 发送dtu信息
@@ -132,7 +133,7 @@ public class DtuServiceImpl implements DtuService {
     }
 
     @Override
-    public ReturnInfo allDtu() {
+    public ReturnInfo<List<Dtu>> allDtu() {
         List<Dtu> dtus = dtuDAO.selectAllDtu();
         return ReturnInfo.createReturnSuccessOne(dtus);
     }

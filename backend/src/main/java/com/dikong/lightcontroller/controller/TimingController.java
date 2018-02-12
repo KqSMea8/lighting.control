@@ -1,9 +1,12 @@
 package com.dikong.lightcontroller.controller;
 
 import java.text.ParseException;
+import java.util.List;
 
 import javax.validation.Valid;
 
+import com.dikong.lightcontroller.vo.TimingList;
+import com.dikong.lightcontroller.vo.TimingView;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +57,7 @@ public class TimingController {
      * @return
      */
     @PostMapping(path = "/timing/list/nodetype")
-    public ReturnInfo list(@RequestBody TimingListSearch timingListSearch) {
+    public ReturnInfo<List<TimingList>> list(@RequestBody TimingListSearch timingListSearch) {
         if (null == timingListSearch.getNodeType()
                 || (!Timing.ORDINARY_NODE.equals(timingListSearch.getNodeType())
                         && !Timing.SPECIFIED_NODE.equals(timingListSearch.getNodeType()))) {
@@ -115,7 +118,7 @@ public class TimingController {
      * @return
      */
     @GetMapping(path = "/timing/node/view/{viewTime}")
-    public ReturnInfo view(@PathVariable("viewTime") String viewTime) throws ParseException {
+    public ReturnInfo<TimingView> view(@PathVariable("viewTime") String viewTime) throws ParseException {
         if (null == viewTime){
             return  ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }

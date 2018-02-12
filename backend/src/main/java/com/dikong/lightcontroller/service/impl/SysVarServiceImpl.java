@@ -226,7 +226,13 @@ public class SysVarServiceImpl implements SysVarService {
     }
 
     private void processRegis(long regisId, String value) {
-
+        List<CmdSendDto> cmdSendDtoList = new ArrayList<>();
+        if (SysVar.CLOSE_SYS_VALUE.equals(value)) {
+            cmdSendDtoList.add(new CmdSendDto(regisId, SwitchEnum.CLOSE.getCode()));
+        } else {
+            cmdSendDtoList.add(new CmdSendDto(regisId, SwitchEnum.OPEN.getCode()));
+        }
+        cmdService.writeSwitch(cmdSendDtoList);
     }
 
 }

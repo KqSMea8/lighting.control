@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.controller;
 
+import com.dikong.lightcontroller.vo.DeviceList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import com.dikong.lightcontroller.dto.DtuList;
 import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.service.DeviceService;
 import com.dikong.lightcontroller.service.DtuService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -50,7 +53,7 @@ public class DtuController {
      */
     @ApiOperation(value = "dtu 列表")
     @PostMapping("/dtu/list")
-    public ReturnInfo dtuList(@RequestBody DtuList dtuList) {
+    public ReturnInfo<List<Dtu>> dtuList(@RequestBody DtuList dtuList) {
         return dtuService.list(dtuList);
     }
 
@@ -86,7 +89,7 @@ public class DtuController {
      * @return
      */
     @GetMapping("/dtu/{id}")
-    public ReturnInfo deviceList(@PathVariable("id") Long dtuId) {
+    public ReturnInfo<List<DeviceList>> deviceList(@PathVariable("id") Long dtuId) {
         if (null == dtuId || dtuId == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
@@ -99,7 +102,7 @@ public class DtuController {
      * @return
      */
     @GetMapping(path = "/dtu/id/list")
-    public ReturnInfo dtuIdList() {
+    public ReturnInfo<List<Dtu>> dtuIdList() {
         return dtuService.idList();
     }
 
@@ -134,7 +137,7 @@ public class DtuController {
      * @return
      */
     @GetMapping(path = "/api/dtu/all")
-    public ReturnInfo allDtu(){
+    public ReturnInfo<List<Dtu>> allDtu(){
         return dtuService.allDtu();
     }
 

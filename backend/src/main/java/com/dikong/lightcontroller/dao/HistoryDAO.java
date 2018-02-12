@@ -27,7 +27,7 @@ public interface HistoryDAO {
     List<History> selectAllByVarId(@Param("varId") Long varId, @Param("varType") Integer varType);
 
     @Select({
-            "select * from history where var_id=#{varId} AND var_type=#{varType} order by create_time"})
+            "select * from history where var_id=#{varId} AND var_type=#{varType} order by create_time desc limit 1"})
     History selectLastHistory(@Param("varId") Long varId, @Param("varType") Integer varType);
 
     @Insert({
