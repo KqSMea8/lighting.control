@@ -18,6 +18,7 @@ public class LoginRes {
     private List<Menu> menus;
     private List<Resource> resources;
     private Integer currentProjectId;
+    private boolean isManager = false;// 是否为管理员标识
 
     public LoginRes() {
         super();
@@ -77,6 +78,14 @@ public class LoginRes {
 
     public void setCurrentProjectId(Integer currentProjectId) {
         this.currentProjectId = currentProjectId;
+    }
+
+    public boolean isManager() {
+        return isManager;
+    }
+
+    public void setManager(boolean isManager) {
+        this.isManager = isManager;
     }
 
     @Override

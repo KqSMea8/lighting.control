@@ -24,11 +24,15 @@ public class AuthCurrentUser {
     }
 
     public static int getUserId() {
-        LoginRes userInfo = currentUser.get();
+        LoginRes userInfo = get();
         if (Objects.isNull(userInfo)) {
             throw new NullPointerException();
         }
         return userInfo.getUserInfo().getUserId();
+    }
+
+    public static boolean isManager() {
+        return get().isManager();
     }
 }
 

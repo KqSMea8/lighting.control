@@ -246,8 +246,12 @@ public class UserServiceImpl implements UserService {
             return ReturnInfo.create(CodeEnum.NO_LOGIN);
         }
         LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        if (AuthCurrentUser.isManager()) {
+            List<Menu> menus = menuDao.selectAll();
+            return ReturnInfo.createReturnSuccessOne(menus);
+        }
         currentUserInfo.setCurrentProjectId(projectId);
-        jedis.set(token, JSON.toJSONString(currentUserInfo));
+        jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
         List<Integer> manageTypeIds =
                 userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
         List<Integer> menuIds = manageTypeMenuDao.menuIds(manageTypeIds);

@@ -15,6 +15,7 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.LoginRes;
+import com.dikong.lightcontroller.entity.Role;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.SpringContextUtil;
 
@@ -37,6 +38,11 @@ public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
             return false;
         }
         LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        for (Role role : currentUserInfo.getRoles()) {
+            if (role.getRoleId() == Constant.ROLE.SUPER_MANAGER_ID) {
+                currentUserInfo.setManager(true);
+            }
+        }
         AuthCurrentUser.set(currentUserInfo);
         return true;
     }
