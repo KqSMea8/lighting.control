@@ -3,6 +3,8 @@ package com.dikong.lightcontroller.controller;
 import com.dikong.lightcontroller.entity.SysVar;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,4 +35,13 @@ public class SysVarController {
     public ReturnInfo updateSysVar(@RequestBody SysVar sysVar){
         return sysVarService.updateSysVar(sysVar);
     }
+
+
+    @GetMapping(path = "/sys/var/list/{id}")
+    public ReturnInfo varList(@PathVariable("id")Long id){
+        return null;
+    }
+
+
+
 }

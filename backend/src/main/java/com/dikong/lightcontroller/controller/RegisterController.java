@@ -6,6 +6,7 @@ import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.vo.RegisterList;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +41,7 @@ public class RegisterController {
      * @param registerList
      * @return
      */
+    @ApiOperation(value = "查询设备下的所有变量，变量类型可以不传")
     @PostMapping(path = "/register/list")
     public ReturnInfo<List<Register>> list(@RequestBody RegisterList registerList){
         return registerService.searchRegister(registerList);
@@ -52,5 +54,4 @@ public class RegisterController {
         }
         return registerService.deleteRegister(id);
     }
-
 }

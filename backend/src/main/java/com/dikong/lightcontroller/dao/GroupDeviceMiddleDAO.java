@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 
@@ -45,5 +46,14 @@ public interface GroupDeviceMiddleDAO {
     List<Long> selectDeviceId(@Param("groupIds") List<Long> groupIds);
 
     @Select({"select regis_id from group_device_middle where group_id=#{groupId}"})
-    List<Long> selectAllRegisId(@Param("groupId")Long groupId);
+    List<Long> selectAllRegisId(@Param("groupId") Long groupId);
+
+
+    @Update({"<script>" + "update group_device_middle "
+            + "<trim prefix=\"SET\" suffixOverrides=\",\">"
+            + "<if test=\" middle.deviceId != null\">" + "device_id=#{middle.deviceId}," + "</if>"
+            + "<if test=\" middle.regisId != null\">" + "regis_id=#{middle.regisId}," + "</if>"
+            + "</trim>" + "where group_id=#{middle.groupId}" + "</script>"})
+    int updateGroupDevice(@Param("middle") GroupDeviceMiddle groupDeviceMiddle);
+
 }

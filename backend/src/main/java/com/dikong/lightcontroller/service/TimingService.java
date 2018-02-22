@@ -1,6 +1,9 @@
 package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.entity.Holiday;
+import com.dikong.lightcontroller.entity.Timing;
+import com.dikong.lightcontroller.vo.BoardList;
 import com.dikong.lightcontroller.vo.TimeOrdinaryNodeAdd;
 import com.dikong.lightcontroller.vo.TimeSpecifiedNodeAdd;
 import com.dikong.lightcontroller.vo.TimingList;
@@ -33,4 +36,10 @@ public interface TimingService {
     ReturnInfo addHolidayNode(String[] holidayTimes);
 
     ReturnInfo<TimingView> timingView(String viewTime) throws ParseException;
+
+    ReturnInfo<List<BoardList>> boardList();
+
+    ReturnInfo<List<Holiday>> getHoliday(String time);
+
+    ReturnInfo<Timing> getOrdinary(Long id);
 }

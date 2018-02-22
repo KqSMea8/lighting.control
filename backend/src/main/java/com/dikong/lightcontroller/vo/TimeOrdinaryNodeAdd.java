@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
  */
 public class TimeOrdinaryNodeAdd {
 
-    // 节点名称
+    // 自动生成
     @NotNull
     private String nodeName;
     // 日期
@@ -55,13 +55,7 @@ public class TimeOrdinaryNodeAdd {
     @NotNull
     private Byte stopWorkOnHoliday;
 
-    public String getNodeName() {
-        return nodeName;
-    }
 
-    public void setNodeName(String nodeName) {
-        this.nodeName = nodeName;
-    }
 
     public Integer[] getWeekList() {
         return weekList;

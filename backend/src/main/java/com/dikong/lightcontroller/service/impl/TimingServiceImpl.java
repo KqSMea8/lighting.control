@@ -23,6 +23,7 @@ import com.dikong.lightcontroller.dao.TimingCronDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Cnarea2016;
+import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.Holiday;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
@@ -34,6 +35,8 @@ import com.dikong.lightcontroller.utils.ArraysUtils;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.TimeCalculate;
 import com.dikong.lightcontroller.utils.TimeWeekUtils;
+import com.dikong.lightcontroller.vo.BoardList;
+import com.dikong.lightcontroller.vo.DeviceBoardList;
 import com.dikong.lightcontroller.vo.TimeOrdinaryNodeAdd;
 import com.dikong.lightcontroller.vo.TimeSpecifiedNodeAdd;
 import com.dikong.lightcontroller.vo.TimingList;
@@ -89,6 +92,12 @@ public class TimingServiceImpl implements TimingService {
     @Override
     public ReturnInfo addOrdinaryNode(TimeOrdinaryNodeAdd ordinaryNodeAdd) {
         int projId = AuthCurrentUser.getCurrentProjectId();
+        Timing lastNodeName = timingDAO.selectByLastNodeName(projId, Timing.DEL_NO);
+        int lastNode = 0;
+        if (lastNodeName != null) {
+            lastNode = Integer.parseInt(lastNodeName.getNodeName());
+            lastNode += 1;
+        }
         addSysVar(projId);
 
         Timing timing = new Timing();
@@ -123,7 +132,7 @@ public class TimingServiceImpl implements TimingService {
         }
         timing.setNodeContentRunTimeType(ordinaryNodeAdd.getStartTimeType());
         timing.setWeekList(ArraysUtils.toString(ordinaryNodeAdd.getWeekList()));
-        timing.setNodeName(ordinaryNodeAdd.getNodeName());
+        timing.setNodeName(String.valueOf(lastNode));
         timing.setRunType(ordinaryNodeAdd.getRunType());
         timing.setRunId(ordinaryNodeAdd.getRunId());
         timing.setRunVar(ordinaryNodeAdd.getRunVar());
@@ -140,7 +149,12 @@ public class TimingServiceImpl implements TimingService {
     public ReturnInfo addSpecifiedNode(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd) {
         int projId = AuthCurrentUser.getCurrentProjectId();
         addSysVar(projId);
-
+        Timing lastNodeName = timingDAO.selectByLastNodeName(projId, Timing.DEL_NO);
+        int lastNode = 0;
+        if (lastNodeName != null) {
+            lastNode = Integer.parseInt(lastNodeName.getNodeName());
+            lastNode += 1;
+        }
         Timing timing = new Timing();
         timing.setNodeType(Timing.SPECIFIED_NODE);
         timing.setProjId(projId);
@@ -173,7 +187,7 @@ public class TimingServiceImpl implements TimingService {
         }
         timing.setNodeContentRunTimeType(timeSpecifiedNodeAdd.getStartTimeType());
         timing.setMonthList(ArraysUtils.toString(timeSpecifiedNodeAdd.getMonthList()));
-        timing.setNodeName(timeSpecifiedNodeAdd.getNodeName());
+        timing.setNodeName(String.valueOf(lastNode));
         timing.setRunType(timeSpecifiedNodeAdd.getRunType());
         timing.setRunId(timeSpecifiedNodeAdd.getRunId());
         timing.setRunVar(timeSpecifiedNodeAdd.getRunVar());
@@ -250,7 +264,7 @@ public class TimingServiceImpl implements TimingService {
             }
             builder.append(";");
             timingList.setNodeContet(builder.toString());
-            timingList.setNodeName(item.getNodeName());
+            timingList.setNodeName("节点" + item.getNodeName());
             timingList.setId(item.getId());
             timingLists.add(timingList);
         });
@@ -310,6 +324,57 @@ public class TimingServiceImpl implements TimingService {
             day += 1;
         }
         return ReturnInfo.createReturnSuccessOne(timingView);
+    }
+
+
+    @Override
+    public ReturnInfo<List<BoardList>> boardList() {
+        List<BoardList> boardLists = new ArrayList<>();
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId);
+        if (!CollectionUtils.isEmpty(deviceBoardLists)) {
+            for (DeviceBoardList deviceBoardList : deviceBoardLists) {
+                BoardList boardList = new BoardList();
+                boardList.setDeviceIdOrGroupId(deviceBoardList.getId());
+                boardList.setDtuOrSysName(deviceBoardList.getDtuName());
+                boardList.setDeviceOrGroupName(deviceBoardList.getDeviceName());
+                boardList.setDeviceCodeOrGroup(
+                        Integer.parseInt(deviceBoardList.getDeviceCode()) + "");
+                boardList.setDeviceLocation(
+                        boardList.getDtuOrSysName() + ":ID" + boardList.getDeviceCodeOrGroup());
+                boardList.setItemType(Timing.DEVICE_TYPE);
+                boardLists.add(boardList);
+            }
+        }
+        List<Group> groups = groupDAO.selectByProjId(projId);
+        if (!CollectionUtils.isEmpty(groups)) {
+            for (Group group : groups) {
+                BoardList boardList = new BoardList();
+                boardList.setDeviceIdOrGroupId(group.getId());
+                boardList.setDtuOrSysName("SYS");
+                boardList.setDeviceOrGroupName(group.getGroupName());
+                boardList.setDeviceCodeOrGroup("Group" + group.getGroupCode());
+                boardList.setDeviceLocation(
+                        boardList.getDtuOrSysName() + ":" + boardList.getDeviceCodeOrGroup());
+                boardList.setItemType(Timing.GROUP_TYPE);
+                boardLists.add(boardList);
+            }
+        }
+        return ReturnInfo.createReturnSuccessOne(boardLists);
+    }
+
+
+    @Override
+    public ReturnInfo<List<Holiday>> getHoliday(String time) {
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        List<Holiday> holidays = holidayDAO.selectHoliday(time,projId);
+        return ReturnInfo.createReturnSuccessOne(holidays);
+    }
+
+    @Override
+    public ReturnInfo<Timing> getOrdinary(Long id) {
+        timingDAO.selectById(id);
+        return null;
     }
 
 

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +25,7 @@ import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.service.GroupService;
 import com.dikong.lightcontroller.service.SysVarService;
+import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.vo.GroupDeviceList;
 import com.dikong.lightcontroller.vo.GroupList;
 import com.github.pagehelper.PageHelper;
@@ -66,7 +66,7 @@ public class GroupServiceImpl implements GroupService {
         groupList.setProjId(projId);
         groupList.setIsDelete(Group.DEL_NO);
         PageHelper.startPage(groupList.getPageNo(), groupList.getPageSize());
-        List<Group> groups = groupDAO.selectAll(groupList);
+        List<Group> groups = groupDAO.selectAllGroup(groupList);
         return ReturnInfo.createReturnSucces(groups);
     }
 
@@ -82,7 +82,6 @@ public class GroupServiceImpl implements GroupService {
         group.setGroupCode(String.valueOf(lastGroupCode));
         group.setProjId(projId);
         groupDAO.addGroup(group);
-
         SysVar sysVar = new SysVar();
         sysVar.setSysVarType(SysVar.GROUP);
         sysVar.setVarValue(SysVar.CLOSE_SYS_VALUE);
@@ -166,6 +165,18 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public ReturnInfo addGroupDevice(GroupDeviceMiddle groupDeviceMiddle) {
         groupDeviceMiddleDAO.insert(groupDeviceMiddle);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    /**
+     * 修改群组设备
+     * 
+     * @param groupDeviceMiddle
+     * @return
+     */
+    @Override
+    public ReturnInfo updateGroupDevice(GroupDeviceMiddle groupDeviceMiddle) {
+        groupDeviceMiddleDAO.updateGroupDevice(groupDeviceMiddle);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 }

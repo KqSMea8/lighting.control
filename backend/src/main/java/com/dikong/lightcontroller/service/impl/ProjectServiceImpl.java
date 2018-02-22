@@ -34,7 +34,7 @@ public class ProjectServiceImpl implements ProjectService {
     private UserProjectDao userProjectDao;
 
     @Override
-    public ReturnInfo projectList(ProjectListReq projectListReq) {
+    public ReturnInfo<List<Project>> projectList(ProjectListReq projectListReq) {
         PageHelper.startPage(projectListReq.getPageNo(), projectListReq.getPageSize());
         Example example = new Example(UserProject.class);
         example.selectProperties("projectId");

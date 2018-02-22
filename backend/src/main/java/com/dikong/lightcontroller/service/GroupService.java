@@ -31,4 +31,6 @@ public interface GroupService {
     ReturnInfo deleteGroupDevice(List<Long> middId);
 
     ReturnInfo addGroupDevice(GroupDeviceMiddle groupDeviceMiddle);
+
+    ReturnInfo updateGroupDevice(GroupDeviceMiddle groupDeviceMiddle);
 }

@@ -35,4 +35,7 @@ public interface HolidayDAO {
 
     @Select({"select count(0) from holiday where holiday_time=#{today} AND proj_id=#{projId}"})
     int selectTodayIsHoliday(@Param("today")String today,@Param("projId")int projId);
+
+    @Select({"select * from holiday where proj_id=#{projId} AND holiday_time like concat(#{time},'%')"})
+    List<Holiday> selectHoliday(@Param("time") String time,@Param("projId") Integer projId);
 }

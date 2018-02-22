@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,6 +60,8 @@ public class GroupController {
         return groupService.add(group);
     }
 
+
+
     /**
      * 删除群组和群组关联的设备
      * @param id　群组id
@@ -104,4 +107,17 @@ public class GroupController {
     public ReturnInfo addGroupDevice(@RequestBody GroupDeviceMiddle groupDeviceMiddle){
         return groupService.addGroupDevice(groupDeviceMiddle);
     }
+
+
+    /**
+     * 修改群组下绑定的设备
+     * @param groupDeviceMiddle
+     * @return
+     */
+    @PutMapping(path = "/group/update/device")
+    public ReturnInfo updateGroupDevice(@RequestBody GroupDeviceMiddle groupDeviceMiddle){
+
+        return groupService.updateGroupDevice(groupDeviceMiddle);
+    }
+
 }

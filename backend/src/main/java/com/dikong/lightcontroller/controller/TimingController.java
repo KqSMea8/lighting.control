@@ -5,9 +5,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import com.dikong.lightcontroller.vo.TimingList;
-import com.dikong.lightcontroller.vo.TimingView;
-import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +22,17 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.utils.ValidateLogUtil;
+import com.dikong.lightcontroller.vo.BoardList;
 import com.dikong.lightcontroller.vo.TimeOrdinaryNodeAdd;
 import com.dikong.lightcontroller.vo.TimeSpecifiedNodeAdd;
+import com.dikong.lightcontroller.vo.TimingList;
 import com.dikong.lightcontroller.vo.TimingListSearch;
+import com.dikong.lightcontroller.vo.TimingView;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * <p>
@@ -40,7 +45,7 @@ import com.dikong.lightcontroller.vo.TimingListSearch;
  * @see
  *      </P>
  */
-@Api(value = "TimingController",description = "时序管理")
+@Api(value = "TimingController", description = "时序管理")
 @RestController
 @RequestMapping("/light")
 public class TimingController {
@@ -68,10 +73,12 @@ public class TimingController {
 
     /**
      * 添加普通 节点
+     * 
      * @param ordinaryNodeAdd
      * @param bindingResult
      * @return
      */
+    @ApiOperation(value = "添加普通 节点")
     @PostMapping(path = "/timing/add/ordinary/node")
     public ReturnInfo addOrdinaryNode(@RequestBody @Valid TimeOrdinaryNodeAdd ordinaryNodeAdd,
             BindingResult bindingResult) {
@@ -81,8 +88,18 @@ public class TimingController {
         return timingService.addOrdinaryNode(ordinaryNodeAdd);
     }
 
+    @ApiOperation(value = "获取修改普通 节点")
+    @GetMapping(path = "/timing/ordinary/{id}")
+    public ReturnInfo getOrdinary(@PathVariable("id") Long id) {
+        if (id == 0){
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return null;
+    }
+
     /**
      * 添加指定节点
+     * 
      * @param timeSpecifiedNodeAdd
      * @param bindingResult
      * @return
@@ -101,26 +118,38 @@ public class TimingController {
 
     /**
      * 添加节假日节点
+     * 
      * @param holidayTimes
      * @return
      */
     @PostMapping(path = "/timing/add/holiday/node")
     public ReturnInfo addHolidayNode(@RequestBody String[] holidayTimes) {
-        if (null == holidayTimes || holidayTimes.length == 0){
+        if (null == holidayTimes || holidayTimes.length == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return timingService.addHolidayNode(holidayTimes);
     }
 
+    @ApiOperation(value = "获取指定年月的指定节假日")
+    @ApiImplicitParams({@ApiImplicitParam(name = "time", value = "日期", required = true,
+            dataType = "String", paramType = "path")})
+    @GetMapping(path = "/timing/holiday/{time}")
+    public ReturnInfo getHoliday(@PathVariable("time") String time) {
+
+        return timingService.getHoliday(time);
+    }
+
     /**
      * 时序功能查看
+     * 
      * @param viewTime
      * @return
      */
     @GetMapping(path = "/timing/node/view/{viewTime}")
-    public ReturnInfo<TimingView> view(@PathVariable("viewTime") String viewTime) throws ParseException {
-        if (null == viewTime){
-            return  ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+    public ReturnInfo<TimingView> view(@PathVariable("viewTime") String viewTime)
+            throws ParseException {
+        if (null == viewTime) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return timingService.timingView(viewTime);
     }
@@ -138,5 +167,12 @@ public class TimingController {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return timingService.deleteNode(id);
+    }
+
+
+    @ApiOperation(value = "设定设备位置或群组")
+    @GetMapping(path = "/timing/board/list")
+    public ReturnInfo<List<BoardList>> getBoardList() {
+        return timingService.boardList();
     }
 }
