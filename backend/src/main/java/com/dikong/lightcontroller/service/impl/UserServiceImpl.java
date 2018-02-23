@@ -108,17 +108,30 @@ public class UserServiceImpl implements UserService {
                 return ReturnInfo.create(CodeEnum.NOCOMPETENCE);
             }
             List<Role> roles = roleDao.roleList(roleIds);
-            // 菜单信息
-            List<Integer> menuIds = roleMenuDao.menuIds(roleIds);
+            boolean isManager = false;
+            for (Role role : roles) {
+                if (role.getRoleId() == Constant.ROLE.SUPER_MANAGER_ID) {
+                    isManager = true;
+                }
+            }
+            List<Integer> menuIds = null;
+            if (!CollectionUtils.isEmpty(roleIds)) {
+                // 菜单信息
+                menuIds = roleMenuDao.menuIds(roleIds);
+            }
             List<Menu> menus = null;
             if (!CollectionUtils.isEmpty(menuIds)) {
                 menus = menuDao.menuList(menuIds);
             } else {
                 menus = new ArrayList<Menu>();
             }
-            List<Resource> resources = resourceDao.resourceList(menuIds);
+            List<Resource> resources = new ArrayList<Resource>();
+            if (!CollectionUtils.isEmpty(menuIds)) {
+                resources = resourceDao.resourceList(menuIds);
+            }
             userInfo.setPassword("");
             loginRes = new LoginRes(token, userInfo, menus, resources);
+            loginRes.setManager(isManager);
             LoginRes loginUserInfo = new LoginRes(token, userInfo, menus, resources);
             loginUserInfo.setRoles(roles);
             loginUserInfo.setCurrentProjectId(0);
