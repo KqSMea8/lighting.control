@@ -24,13 +24,17 @@ public class KeyExpiredListener extends JedisPubSub {
     public void onPMessage(String pattern, String channel, String message) {
         JedisPool jedisPool = (JedisPool) SpringContextUtil.getBean(JedisPool.class);
         Jedis jedis = jedisPool.getResource();
-        Map<String, String> onlineUsers = jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
-        for (String userId : onlineUsers.keySet()) {
-            String token = onlineUsers.get(userId);
-            if (token.equals(message)) {
-                jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
-                return;
+        try {
+            Map<String, String> onlineUsers = jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
+            for (String userId : onlineUsers.keySet()) {
+                String token = onlineUsers.get(userId);
+                if (token.equals(message)) {
+                    jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
+                    return;
+                }
             }
+        }finally {
+            jedis.close();
         }
     }
 }

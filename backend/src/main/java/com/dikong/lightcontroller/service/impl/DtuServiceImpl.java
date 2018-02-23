@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import com.dikong.lightcontroller.common.BussinessCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import com.dikong.lightcontroller.common.BussinessCode;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DtuDAO;
@@ -30,6 +31,8 @@ import feign.Feign;
 import feign.Retryer;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
  * <p>
@@ -47,10 +50,16 @@ public class DtuServiceImpl implements DtuService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DtuServiceImpl.class);
 
+    private static final String DTU_ONLINE = "dtu.online.status";
+
     @Autowired
     private DtuDAO dtuDAO;
 
+    @Autowired
+    private JedisPool jedisPool;
+
     private DtuCollectionApi dtuCollectionApi;
+
 
     private DtuServiceImpl() throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/application.properties");
@@ -92,8 +101,9 @@ public class DtuServiceImpl implements DtuService {
     @Transactional
     public ReturnInfo addDtu(Dtu dtu) {
         int existDeviceCode = dtuDAO.selectExistDeviceCode(dtu.getDeviceCode());
-        if (existDeviceCode > 0){
-            return ReturnInfo.create(BussinessCode.DTU_CODE_EXIST.getCode(),BussinessCode.DTU_CODE_EXIST.getMsg());
+        if (existDeviceCode > 0) {
+            return ReturnInfo.create(BussinessCode.DTU_CODE_EXIST.getCode(),
+                    BussinessCode.DTU_CODE_EXIST.getMsg());
         }
         int projId = AuthCurrentUser.getCurrentProjectId();
         dtu.setProjId(projId);
@@ -124,10 +134,20 @@ public class DtuServiceImpl implements DtuService {
 
     @Override
     public ReturnInfo conncationInfo(String deviceCode, Integer line) {
-        if (new Integer(0).equals(line)) {
-            dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.OFFLINE);
-        } else if (new Integer(2).equals(line)) {
-            dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.ONLINE);
+        Jedis jedis = jedisPool.getResource();
+        try {
+            String online = jedis.hget(DTU_ONLINE, deviceCode);
+            if (!StringUtils.isEmpty(online) && line.equals(Integer.parseInt(online))) {
+                return ReturnInfo.create(CodeEnum.SUCCESS);
+            }
+            if (new Integer(0).equals(line)) {
+                dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.OFFLINE);
+            } else if (new Integer(2).equals(line)) {
+                dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.ONLINE);
+            }
+            jedis.hset(DTU_ONLINE, deviceCode,String.valueOf(line));
+        }finally {
+            jedis.close();
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }

@@ -40,6 +40,7 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import tk.mybatis.mapper.entity.Example;
 
@@ -80,50 +81,56 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ReturnInfo login(LoginReqDto loginReqDto) {
-        Example userExample = new Example(User.class);
-        userExample.createCriteria().andEqualTo("userName", loginReqDto.getUsername());
-        List<User> userEntities = userDao.selectByExample(userExample);
-        if (CollectionUtils.isEmpty(userEntities)) {
-            return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
-        }
-        User userInfo = userEntities.get(0);
-        String password = MD5Util.getMD5Str(loginReqDto.getPassword());
-        if (!userInfo.getPassword().equals(password)) {
-            return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
-        }
-        String oldToken = jedisPool.getResource().hget(Constant.LOGIN.ONLINE_USERS_KEY,
-                String.valueOf(userInfo.getUserId()));
-        if (!StringUtils.isEmpty(oldToken)) {
-            jedisPool.getResource().hdel(Constant.LOGIN.ONLINE_USERS_KEY,
+        Jedis jedis = jedisPool.getResource();
+        LoginRes loginRes = null;
+        try {
+            Example userExample = new Example(User.class);
+            userExample.createCriteria().andEqualTo("userName", loginReqDto.getUsername());
+            List<User> userEntities = userDao.selectByExample(userExample);
+            if (CollectionUtils.isEmpty(userEntities)) {
+                return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
+            }
+            User userInfo = userEntities.get(0);
+            String password = MD5Util.getMD5Str(loginReqDto.getPassword());
+            if (!userInfo.getPassword().equals(password)) {
+                return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
+            }
+            String oldToken = jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY,
                     String.valueOf(userInfo.getUserId()));
-            jedisPool.getResource().del(oldToken);
+            if (!StringUtils.isEmpty(oldToken)) {
+                jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY,
+                        String.valueOf(userInfo.getUserId()));
+                jedis.del(oldToken);
+            }
+            String token = UUID.randomUUID().toString();
+            // 角色信息
+            List<Integer> roleIds = userRoleDao.roleIds(userInfo.getUserId());
+            if (CollectionUtils.isEmpty(roleIds)) {
+                return ReturnInfo.create(CodeEnum.NOCOMPETENCE);
+            }
+            List<Role> roles = roleDao.roleList(roleIds);
+            // 菜单信息
+            List<Integer> menuIds = roleMenuDao.menuIds(roleIds);
+            List<Menu> menus = null;
+            if (!CollectionUtils.isEmpty(menuIds)) {
+                menus = menuDao.menuList(menuIds);
+            } else {
+                menus = new ArrayList<Menu>();
+            }
+            List<Resource> resources = resourceDao.resourceList(menuIds);
+            userInfo.setPassword("");
+            loginRes = new LoginRes(token, userInfo, menus, resources);
+            LoginRes loginUserInfo = new LoginRes(token, userInfo, menus, resources);
+            loginUserInfo.setRoles(roles);
+            loginUserInfo.setCurrentProjectId(0);
+            jedisPool.getResource().setex(token, Constant.TIME.HALF_HOUR,
+                    JSON.toJSONString(loginUserInfo));
+            jedisPool.getResource().hset(Constant.LOGIN.ONLINE_USERS_KEY,
+                    String.valueOf(userInfo.getUserId()), token);
+            LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
+        }finally {
+            jedis.close();
         }
-        String token = UUID.randomUUID().toString();
-        // 角色信息
-        List<Integer> roleIds = userRoleDao.roleIds(userInfo.getUserId());
-        if (CollectionUtils.isEmpty(roleIds)) {
-            return ReturnInfo.create(CodeEnum.NOCOMPETENCE);
-        }
-        List<Role> roles = roleDao.roleList(roleIds);
-        // 菜单信息
-        List<Integer> menuIds = roleMenuDao.menuIds(roleIds);
-        List<Menu> menus = null;
-        if (!CollectionUtils.isEmpty(menuIds)) {
-            menus = menuDao.menuList(menuIds);
-        } else {
-            menus = new ArrayList<Menu>();
-        }
-        List<Resource> resources = resourceDao.resourceList(menuIds);
-        userInfo.setPassword("");
-        LoginRes loginRes = new LoginRes(token, userInfo, menus, resources);
-        LoginRes loginUserInfo = new LoginRes(token, userInfo, menus, resources);
-        loginUserInfo.setRoles(roles);
-        loginUserInfo.setCurrentProjectId(0);
-        jedisPool.getResource().setex(token, Constant.TIME.HALF_HOUR,
-                JSON.toJSONString(loginUserInfo));
-        jedisPool.getResource().hset(Constant.LOGIN.ONLINE_USERS_KEY,
-                String.valueOf(userInfo.getUserId()), token);
-        LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
         return ReturnInfo.createReturnSuccessOne(loginRes);
     }
 
@@ -134,13 +141,18 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public ReturnInfo loginOut(String token) {
-        String userId = String.valueOf(AuthCurrentUser.getUserId());
-        String oldToken = jedisPool.getResource().hget(Constant.LOGIN.ONLINE_USERS_KEY, userId);
-        if (StringUtils.isEmpty(oldToken) || !oldToken.equals(token)) {
-            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        Jedis jedis = jedisPool.getResource();
+        try {
+            String userId = String.valueOf(AuthCurrentUser.getUserId());
+            String oldToken = jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, userId);
+            if (StringUtils.isEmpty(oldToken) || !oldToken.equals(token)) {
+                return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+            }
+            jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
+            jedis.del(token);
+        }finally {
+            jedis.close();
         }
-        jedisPool.getResource().hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
-        jedisPool.getResource().del(token);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -212,18 +224,23 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public ReturnInfo onlineUserList() {
-        Map<String, String> onlineUsers =
-                jedisPool.getResource().hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
-        if (onlineUsers == null || onlineUsers.size() == 0) {
-            return ReturnInfo.create(CodeEnum.NOT_CONTENT);
+        Jedis jedis = jedisPool.getResource();
+        try {
+            Map<String, String> onlineUsers =
+                    jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
+            if (onlineUsers == null || onlineUsers.size() == 0) {
+                return ReturnInfo.create(CodeEnum.NOT_CONTENT);
+            }
+            Set<String> userInfos = onlineUsers.keySet();
+            List<Integer> userIds = new ArrayList<Integer>();
+            for (String userId : userInfos) {
+                userIds.add(Integer.valueOf(userId));
+            }
+            List<User> users = userDao.userListByIds(userIds);
+            return ReturnInfo.createReturnSuccessOne(users);
+        }finally {
+            jedis.close();
         }
-        Set<String> userInfos = onlineUsers.keySet();
-        List<Integer> userIds = new ArrayList<Integer>();
-        for (String userId : userInfos) {
-            userIds.add(Integer.valueOf(userId));
-        }
-        List<User> users = userDao.userListByIds(userIds);
-        return ReturnInfo.createReturnSuccessOne(users);
     }
 
     @Override
@@ -245,26 +262,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ReturnInfo enterProject(String token, Integer projectId) {
-        String userInfo = jedisPool.getResource().get(token);
-        if (StringUtils.isEmpty(userInfo)) {
-            return ReturnInfo.create(CodeEnum.NO_LOGIN);
-        }
-        LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
-        if (AuthCurrentUser.isManager()) {
-            List<Menu> menus = menuDao.selectAll();
+        Jedis jedis = jedisPool.getResource();
+        try {
+            String userInfo = jedis.get(token);
+            if (StringUtils.isEmpty(userInfo)) {
+                return ReturnInfo.create(CodeEnum.NO_LOGIN);
+            }
+            LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+            if (AuthCurrentUser.isManager()) {
+                List<Menu> menus = menuDao.selectAll();
+                return ReturnInfo.createReturnSuccessOne(menus);
+            }
+            currentUserInfo.setCurrentProjectId(projectId);
+            jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
+            List<Integer> manageTypeIds =
+                    userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
+            List<Integer> menuIds = manageTypeMenuDao.menuIds(manageTypeIds);
+            List<Menu> menus = null;
+            if (!CollectionUtils.isEmpty(menuIds)) {
+                menus = menuDao.menuList(menuIds);
+            } else {
+                menus = new ArrayList<Menu>();
+            }
             return ReturnInfo.createReturnSuccessOne(menus);
+        }finally {
+            jedis.close();
         }
-        currentUserInfo.setCurrentProjectId(projectId);
-        jedisPool.getResource().set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
-        List<Integer> manageTypeIds =
-                userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
-        List<Integer> menuIds = manageTypeMenuDao.menuIds(manageTypeIds);
-        List<Menu> menus = null;
-        if (!CollectionUtils.isEmpty(menuIds)) {
-            menus = menuDao.menuList(menuIds);
-        } else {
-            menus = new ArrayList<Menu>();
-        }
-        return ReturnInfo.createReturnSuccessOne(menus);
     }
 }

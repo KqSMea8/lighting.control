@@ -34,18 +34,22 @@ public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
         }
         JedisPool jedisPool = (JedisPool) SpringContextUtil.getBean(JedisPool.class);
         Jedis jedis = jedisPool.getResource();
-        String userInfo = jedis.get(token);
-        if (StringUtils.isEmpty(userInfo)) {
-            response(response, CodeEnum.NO_LOGIN, "");
-            return false;
-        }
-        LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
-        for (Role role : currentUserInfo.getRoles()) {
-            if (role.getRoleId() == Constant.ROLE.SUPER_MANAGER_ID) {
-                currentUserInfo.setManager(true);
+        try {
+            String userInfo = jedis.get(token);
+            if (StringUtils.isEmpty(userInfo)) {
+                response(response, CodeEnum.NO_LOGIN, "");
+                return false;
             }
+            LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+            for (Role role : currentUserInfo.getRoles()) {
+                if (role.getRoleId() == Constant.ROLE.SUPER_MANAGER_ID) {
+                    currentUserInfo.setManager(true);
+                }
+            }
+            AuthCurrentUser.set(currentUserInfo);
+        }finally {
+            jedis.close();
         }
-        AuthCurrentUser.set(currentUserInfo);
         return true;
     }
 

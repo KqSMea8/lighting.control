@@ -34,11 +34,12 @@ public class Subscriber {
     @Async
     public void subscriber() {
         while (true) {
+            Jedis jedis = null;
             try {
-                LOG.info("开始用户登陆时间过期监听");
                 Thread.sleep(10000);
+                jedis = jedisPool.getResource();
+                LOG.info("开始用户登陆时间过期监听");
                 // TODO 获取所有在线用户信息，判断其token是否存在，如果不存在则移除
-                Jedis jedis = jedisPool.getResource();
                 LOG.info("更新在线用户状态");
                 Map<String, String> onlineUsers = jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
                 Set<String> userInfos = onlineUsers.keySet();
@@ -53,6 +54,10 @@ public class Subscriber {
             } catch (Exception e) {
                 LOG.error("redis key过期监听异常" + e.toString());
                 e.printStackTrace();
+            }finally {
+                if (null != jedis){
+                    jedis.close();
+                }
             }
         }
     }

@@ -123,7 +123,7 @@ public class DtuController {
      * @param line 在线(2)/离线(0)
      * @return
      */
-    @GetMapping(path = "/api/dtu/connection/{deviceCode}/{line}")
+    @PostMapping(path = "/api/dtu/connection/{deviceCode}/{line}")
     public ReturnInfo online(@PathVariable("deviceCode") String deviceCode,
             @PathVariable("line") Integer line) {
         if (StringUtils.isEmpty(deviceCode) || null == line) {
