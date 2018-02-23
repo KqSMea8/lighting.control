@@ -135,6 +135,7 @@ public class UserServiceImpl implements UserService {
             LoginRes loginUserInfo = new LoginRes(token, userInfo, menus, resources);
             loginUserInfo.setRoles(roles);
             loginUserInfo.setCurrentProjectId(0);
+            loginUserInfo.setManager(isManager);
             jedisPool.getResource().setex(token, Constant.TIME.HALF_HOUR,
                     JSON.toJSONString(loginUserInfo));
             jedisPool.getResource().hset(Constant.LOGIN.ONLINE_USERS_KEY,
