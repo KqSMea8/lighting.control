@@ -100,12 +100,12 @@ public class DtuServiceImpl implements DtuService {
     @Override
     @Transactional
     public ReturnInfo addDtu(Dtu dtu) {
-        int existDeviceCode = dtuDAO.selectExistDeviceCode(dtu.getDeviceCode());
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        int existDeviceCode = dtuDAO.selectExistDeviceCode(projId,dtu.getDeviceCode());
         if (existDeviceCode > 0) {
             return ReturnInfo.create(BussinessCode.DTU_CODE_EXIST.getCode(),
                     BussinessCode.DTU_CODE_EXIST.getMsg());
         }
-        int projId = AuthCurrentUser.getCurrentProjectId();
         dtu.setProjId(projId);
         dtuDAO.insertDtu(dtu);
         // 发送dtu信息

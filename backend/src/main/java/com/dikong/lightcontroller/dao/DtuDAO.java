@@ -55,6 +55,6 @@ public interface DtuDAO extends Mapper<Dtu>{
     List<Dtu> selectAllDtu();
 
 
-    @Select({"select count(0) from dtu where device_code=#{deviceCode}"})
-    int selectExistDeviceCode(@Param("deviceCode")String deviceCode);
+    @Select({"select count(0) from dtu where device_code=#{deviceCode} AND is_delete = 1 AND proj_id=#{projId}"})
+    int selectExistDeviceCode(@Param("projId") Integer projId,@Param("deviceCode")String deviceCode);
 }

@@ -22,7 +22,7 @@ public class DeviceAdd {
     private String name;
     // 设备编号,不能重复
     private String code;
-    // 通讯调表文件
+    // 通讯点表文件
     private String model;
 
     public Long getId() {

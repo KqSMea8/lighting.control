@@ -206,7 +206,7 @@ public class DeviceServiceImpl implements DeviceService {
             registerDAO.insertMultiItem(registers);
         }
         String modilFilePath = filePath + fileName;
-        deviceDAO.updateModeFilePathById(id, modilFilePath);
+        deviceDAO.updateModeFilePathById(id, fileName,modilFilePath);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

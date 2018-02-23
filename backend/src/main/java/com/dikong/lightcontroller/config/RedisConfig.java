@@ -28,8 +28,10 @@ public class RedisConfig {
 
     @Bean
     public JedisPool getJedisPool(){
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setTestOnBorrow(true);
         JedisPool pool =
-                new JedisPool(new JedisPoolConfig(), environment.getProperty("redis.hosts"),
+                new JedisPool(jedisPoolConfig, environment.getProperty("redis.hosts"),
                                      Integer.valueOf(environment.getProperty("redis.port")));
         return pool;
     }

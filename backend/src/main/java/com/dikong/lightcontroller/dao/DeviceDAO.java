@@ -44,8 +44,8 @@ public interface DeviceDAO extends Mapper<Device>{
     @Options(useGeneratedKeys = true, keyProperty = "add.id")
     Long insertDevice(@Param("add") DeviceAdd deviceAdd);
 
-    @Update({"update device set model_file=#{filePath} where id=#{id}"})
-    int updateModeFilePathById(@Param("id") Long id, @Param("filePath") String filePath);
+    @Update({"update device set model_file=#{filePath},model=#{model} where id=#{id}"})
+    int updateModeFilePathById(@Param("id") Long id, @Param("model")String model,@Param("filePath") String filePath);
 
 
     @Select({"select id,code from device where dtu_id=#{dtuId} AND is_delete=#{isDelete} "})

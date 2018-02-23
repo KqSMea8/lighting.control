@@ -132,7 +132,7 @@ public class SysVarServiceImpl implements SysVarService {
         PageNation pageNation = null;
         if (0 == varListSearch.getId()) {
             // 系统变量
-            int projId = 1;
+            int projId = AuthCurrentUser.getCurrentProjectId();
             List<SysVar> sysVarList = sysVarDAO.selectAllByProjId(projId);
             if (!CollectionUtils.isEmpty(sysVarList)) {
                 for (SysVar sysVar : sysVarList) {
