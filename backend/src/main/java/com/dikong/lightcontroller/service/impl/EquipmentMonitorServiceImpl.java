@@ -20,7 +20,7 @@ import com.dikong.lightcontroller.dto.CmdRes;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
-import com.dikong.lightcontroller.entity.SysVar;
+import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
@@ -194,7 +194,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                         long varId = timing.getRunId();// 变量id
                         sendCmd(monitorId, varId, Integer.valueOf(value), sendResult);
                     }
-                    SysVar sysVar = new SysVar();
+                    BaseSysVar sysVar = new BaseSysVar();
                     sysVar.setId((long) sourceId);
                     sysVar.setSysVarType(2);
                     sysVar.setVarValue(value);

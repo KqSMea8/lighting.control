@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -27,16 +29,19 @@ public interface TimingDAO extends Mapper<Timing> {
     int updateDeleteById(@Param("id") Long id, @Param("isDelete") Byte isDelete);
 
 
-    @Select({"<script>"
-            + "select * from timing where week_list like CONCAT(CONCAT('%',#{week}),'%') or month_list like CONCAT(CONCAT('%',#{dataNow}),'%') order by node_content_run_time desc limit 1"
+    @Select({"<script>" + "select * from timing where "
+            + "node_content_run_time &gt;='00:00:00' AND node_content_run_time &lt;=DATE_FORMAT(NOW(),'%T') "
+            + "AND week_list like CONCAT(CONCAT('%',#{week}),'%') "
+            + "or month_list like CONCAT(CONCAT('%',#{dataNow}),'%') order by node_content_run_time "
             + "</script>"})
-    Timing selectLastOne(@Param("week") String week, @Param("dataNow") String dataNow);
+    List<Timing> selectLastOne(@Param("week") String week, @Param("dataNow") String dataNow);
 
 
     @Select({"select * from timing where id=#{id}"})
-    Timing selectById(@Param("id")Long id);
+    Timing selectById(@Param("id") Long id);
 
 
-    @Select({"select node_name from timing where proj_id=#{projId} AND is_delete={isDelete} order by node_name desc limit 1"})
-    Timing selectByLastNodeName(@Param("projId")Integer projId,@Param("isDelete")Byte isDelete);
+    @Select({
+            "select node_name from timing where proj_id=#{projId} AND is_delete={isDelete} order by node_name desc limit 1"})
+    Timing selectByLastNodeName(@Param("projId") Integer projId, @Param("isDelete") Byte isDelete);
 }

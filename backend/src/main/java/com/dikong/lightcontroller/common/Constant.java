@@ -18,4 +18,7 @@ public interface Constant {
         int DAY = HOUR * 24;
         int oneDayMillisecond = 1000 * 3600 * 24;// 一天的毫秒数
     }
+    interface ROLE {
+        int SUPER_MANAGER_ID = 1;
+    }
 }

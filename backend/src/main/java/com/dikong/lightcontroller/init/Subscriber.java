@@ -16,7 +16,6 @@ import com.github.pagehelper.util.StringUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author huangwenjun
@@ -29,6 +28,9 @@ public class Subscriber {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private JedisPool jedisPool;
+
     @Async
     public void subscriber() {
         while (true) {
@@ -36,10 +38,7 @@ public class Subscriber {
                 LOG.info("开始用户登陆时间过期监听");
                 Thread.sleep(10000);
                 // TODO 获取所有在线用户信息，判断其token是否存在，如果不存在则移除
-                JedisPool pool =
-                        new JedisPool(new JedisPoolConfig(), environment.getProperty("redis.hosts"),
-                                Integer.valueOf(environment.getProperty("redis.port")));
-                Jedis jedis = pool.getResource();
+                Jedis jedis = jedisPool.getResource();
                 LOG.info("更新在线用户状态");
                 Map<String, String> onlineUsers = jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
                 Set<String> userInfos = onlineUsers.keySet();

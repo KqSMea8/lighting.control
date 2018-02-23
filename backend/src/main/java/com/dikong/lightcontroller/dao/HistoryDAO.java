@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import com.dikong.lightcontroller.entity.History;
+import com.dikong.lightcontroller.vo.HistoryList;
+import com.dikong.lightcontroller.vo.HistorySearch;
 
 /**
  * <p>
@@ -33,4 +35,19 @@ public interface HistoryDAO {
     @Insert({
             "insert into history (var_id,var_type,var_value,create_by) values (#{history.varId},#{history.varType},#{history.varValue},#{history.createBy})"})
     int insertHistory(@Param("history") History history);
+
+    @Select({"<script>"
+            + "SELECT dt.device_name as dtu_name,d.name as device_name,r.regis_name as regis_name,h.var_value,h.create_time "
+            + "from history h LEFT JOIN register r on h.var_id=r.id LEFT JOIN device d on r.device_id=d.id LEFT JOIN dtu dt on d.dtu_id=dt.id "
+            + "WHERE h.var_type=#{search.varType} " + "and h.var_id=#{search.varId} "
+            + "and h.create_time &gt;=#{search.startTime} "
+            + "and h.create_time &lt;=#{search.endTime}" + "</script>"})
+    List<HistoryList> selectAll(@Param("search") HistorySearch historySearch);
+
+    @Select({"<script>"
+            + "SELECT sv.var_name as regis_name,h.var_value,h.create_time from history h LEFT JOIN sys_var sv on h.var_id=sv.id "
+            + "where h.var_type=#{search.varType} " + "and h.var_id=#{search.varId} "
+            + "and h.create_time &gt;=#{search.startTime} "
+            + "and h.create_time &lt;=#{search.endTime}" + "</script>"})
+    List<HistoryList> selectSysVar(@Param("search") HistorySearch historySearch);
 }

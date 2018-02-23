@@ -40,7 +40,7 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
 
-import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 import tk.mybatis.mapper.entity.Example;
 
 /**
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
 
     @Autowired
-    private Jedis jedis;
+    private JedisPool jedisPool;
 
     @Autowired
     private UserRoleDao userRoleDao;
@@ -91,11 +91,12 @@ public class UserServiceImpl implements UserService {
         if (!userInfo.getPassword().equals(password)) {
             return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
         }
-        String oldToken =
-                jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
+        String oldToken = jedisPool.getResource().hget(Constant.LOGIN.ONLINE_USERS_KEY,
+                String.valueOf(userInfo.getUserId()));
         if (!StringUtils.isEmpty(oldToken)) {
-            jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
-            jedis.del(oldToken);
+            jedisPool.getResource().hdel(Constant.LOGIN.ONLINE_USERS_KEY,
+                    String.valueOf(userInfo.getUserId()));
+            jedisPool.getResource().del(oldToken);
         }
         String token = UUID.randomUUID().toString();
         // 角色信息
@@ -118,8 +119,10 @@ public class UserServiceImpl implements UserService {
         LoginRes loginUserInfo = new LoginRes(token, userInfo, menus, resources);
         loginUserInfo.setRoles(roles);
         loginUserInfo.setCurrentProjectId(0);
-        jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(loginUserInfo));
-        jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()), token);
+        jedisPool.getResource().setex(token, Constant.TIME.HALF_HOUR,
+                JSON.toJSONString(loginUserInfo));
+        jedisPool.getResource().hset(Constant.LOGIN.ONLINE_USERS_KEY,
+                String.valueOf(userInfo.getUserId()), token);
         LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
         return ReturnInfo.createReturnSuccessOne(loginRes);
     }
@@ -132,12 +135,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public ReturnInfo loginOut(String token) {
         String userId = String.valueOf(AuthCurrentUser.getUserId());
-        String oldToken = jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, userId);
+        String oldToken = jedisPool.getResource().hget(Constant.LOGIN.ONLINE_USERS_KEY, userId);
         if (StringUtils.isEmpty(oldToken) || !oldToken.equals(token)) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
-        jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
-        jedis.del(token);
+        jedisPool.getResource().hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
+        jedisPool.getResource().del(token);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -209,7 +212,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public ReturnInfo onlineUserList() {
-        Map<String, String> onlineUsers = jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
+        Map<String, String> onlineUsers =
+                jedisPool.getResource().hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
         if (onlineUsers == null || onlineUsers.size() == 0) {
             return ReturnInfo.create(CodeEnum.NOT_CONTENT);
         }
@@ -241,13 +245,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ReturnInfo enterProject(String token, Integer projectId) {
-        String userInfo = jedis.get(token);
+        String userInfo = jedisPool.getResource().get(token);
         if (StringUtils.isEmpty(userInfo)) {
             return ReturnInfo.create(CodeEnum.NO_LOGIN);
         }
         LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        if (AuthCurrentUser.isManager()) {
+            List<Menu> menus = menuDao.selectAll();
+            return ReturnInfo.createReturnSuccessOne(menus);
+        }
         currentUserInfo.setCurrentProjectId(projectId);
-        jedis.set(token, JSON.toJSONString(currentUserInfo));
+        jedisPool.getResource().set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
         List<Integer> manageTypeIds =
                 userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
         List<Integer> menuIds = manageTypeMenuDao.menuIds(manageTypeIds);

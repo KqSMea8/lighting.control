@@ -1,8 +1,12 @@
 package com.dikong.lightcontroller.controller;
 
+import com.dikong.lightcontroller.vo.HistoryList;
+import com.dikong.lightcontroller.vo.HistorySearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,13 +38,12 @@ public class HistoryController {
     @Autowired
     private HistoryService historyService;
 
-    @GetMapping(path = "/history/list/{varId}/{varType}")
-    public ReturnInfo<List<History>> historyList(@PathVariable("varId") Long varId,
-            @PathVariable("varType") Integer varType) {
-        if (!History.REGISTER_TYPE.equals(varType) && !History.GROUP_TYPE.equals(varType)
-                && !History.SEQUENCE_TYPE.equals(varType)) {
+    @PostMapping(path = "/history/list")
+    public ReturnInfo<List<HistoryList>> historyList(@RequestBody HistorySearch historySearch) {
+        if (!History.REGISTER_TYPE.equals(historySearch.getVarType()) && !History.GROUP_TYPE.equals(historySearch.getVarType())
+                && !History.SEQUENCE_TYPE.equals(historySearch.getVarType())) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
-        return historyService.searchVarHistory(varId,varType);
+        return historyService.searchVarHistory(historySearch);
     }
 }

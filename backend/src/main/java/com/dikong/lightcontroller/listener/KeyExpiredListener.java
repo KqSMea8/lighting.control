@@ -6,6 +6,7 @@ import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.utils.SpringContextUtil;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
 
 /**
@@ -21,7 +22,8 @@ public class KeyExpiredListener extends JedisPubSub {
 
     @Override
     public void onPMessage(String pattern, String channel, String message) {
-        Jedis jedis = (Jedis) SpringContextUtil.getBean(Jedis.class);
+        JedisPool jedisPool = (JedisPool) SpringContextUtil.getBean(JedisPool.class);
+        Jedis jedis = jedisPool.getResource();
         Map<String, String> onlineUsers = jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
         for (String userId : onlineUsers.keySet()) {
             String token = onlineUsers.get(userId);

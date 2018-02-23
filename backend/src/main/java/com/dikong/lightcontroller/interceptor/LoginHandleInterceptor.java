@@ -15,10 +15,12 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.LoginRes;
+import com.dikong.lightcontroller.entity.Role;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.SpringContextUtil;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
 
@@ -30,13 +32,19 @@ public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
             response(response, CodeEnum.NO_LOGIN, "");
             return false;
         }
-        Jedis jedis = (Jedis) SpringContextUtil.getBean(Jedis.class);
+        JedisPool jedisPool = (JedisPool) SpringContextUtil.getBean(JedisPool.class);
+        Jedis jedis = jedisPool.getResource();
         String userInfo = jedis.get(token);
         if (StringUtils.isEmpty(userInfo)) {
             response(response, CodeEnum.NO_LOGIN, "");
             return false;
         }
         LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        for (Role role : currentUserInfo.getRoles()) {
+            if (role.getRoleId() == Constant.ROLE.SUPER_MANAGER_ID) {
+                currentUserInfo.setManager(true);
+            }
+        }
         AuthCurrentUser.set(currentUserInfo);
         return true;
     }

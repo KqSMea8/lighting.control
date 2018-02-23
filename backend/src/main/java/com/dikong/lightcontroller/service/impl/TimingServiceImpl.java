@@ -25,7 +25,7 @@ import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Cnarea2016;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.Holiday;
-import com.dikong.lightcontroller.entity.SysVar;
+import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.SysVarService;
@@ -439,11 +439,11 @@ public class TimingServiceImpl implements TimingService {
 
 
     private void addSysVar(int projId) {
-        SysVar sysVar = new SysVar();
-        sysVar.setSysVarType(SysVar.SEQUENCE);
+        BaseSysVar sysVar = new BaseSysVar();
+        sysVar.setSysVarType(BaseSysVar.SEQUENCE);
         sysVar.setVarName("Sequence_EN");
-        sysVar.setVarId(SysVar.SEQUENCE_VAR_ID);
-        sysVar.setVarValue(SysVar.CLOSE_SYS_VALUE);
+        sysVar.setVarId(BaseSysVar.SEQUENCE_VAR_ID);
+        sysVar.setVarValue(BaseSysVar.CLOSE_SYS_VALUE);
         sysVar.setProjId(projId);
         sysVarService.addSysVarWherNotExist(sysVar);
     }

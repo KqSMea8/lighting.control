@@ -1,7 +1,11 @@
 package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
-import com.dikong.lightcontroller.entity.SysVar;
+import com.dikong.lightcontroller.entity.BaseSysVar;
+import com.dikong.lightcontroller.vo.SysVarList;
+import com.dikong.lightcontroller.vo.VarListSearch;
+
+import java.util.List;
 
 /**
  * <p>
@@ -15,13 +19,15 @@ import com.dikong.lightcontroller.entity.SysVar;
  */
 public interface SysVarService {
 
-    ReturnInfo addSysVarWherNotExist(SysVar sysVar);
+    ReturnInfo addSysVarWherNotExist(BaseSysVar sysVar);
 
-    ReturnInfo addSysVar(SysVar sysVar);
+    ReturnInfo addSysVar(BaseSysVar sysVar);
 
     ReturnInfo deleteSysVar(Long varId,Integer sysVarType);
 
     ReturnInfo searchAll();
 
-    ReturnInfo updateSysVar(SysVar sysVar);
+    ReturnInfo updateSysVar(BaseSysVar sysVar);
+
+    ReturnInfo<List<SysVarList>> selectAllVar(VarListSearch varListSearch);
 }

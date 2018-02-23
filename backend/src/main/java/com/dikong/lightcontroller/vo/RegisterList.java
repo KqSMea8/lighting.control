@@ -17,6 +17,13 @@ public class RegisterList {
     //变量类型
     private String regisType;
 
+    public RegisterList(){
+
+    }
+    public RegisterList(Long deviceId){
+        this.deviceId = deviceId;
+    }
+
     public Long getDeviceId() {
         return deviceId;
     }

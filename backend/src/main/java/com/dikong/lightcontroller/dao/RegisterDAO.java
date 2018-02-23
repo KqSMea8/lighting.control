@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.dao;
 
 import java.util.List;
 
+import com.dikong.lightcontroller.entity.RegisterTime;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -34,12 +35,12 @@ public interface RegisterDAO {
             + "</foreach>" + "</script>"})
     int insertMultiItem(@Param("registers") List<Register> registers);
 
-    @Select({"<script>" + "select id,device_id,var_name,regis_name,regis_addr,regis_type"
+    @Select({"<script>" + "select id,device_id,var_name,regis_name,regis_addr,regis_type,update_time"
             + " from register " + "<where>" + "<if test = \" register.deviceId != null \">"
             + " device_id = #{register.deviceId}" + "</if>"
             + "<if test = \" register.regisType != null \">"
             + " and regis_type = #{register.regisType} " + "</if>" + "</where>" + "</script>"})
-    List<Register> selectRegisterById(@Param("register") RegisterList registerList);
+    List<RegisterTime> selectRegisterById(@Param("register") RegisterList registerList);
 
     @Select({"<script>"
             + "select id,var_name,regis_name,regis_addr,regis_type from register where id in"

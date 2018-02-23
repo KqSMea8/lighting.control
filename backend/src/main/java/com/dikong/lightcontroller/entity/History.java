@@ -15,16 +15,16 @@ import java.util.Date;
  */
 public class History {
 
-    public static final Integer REGISTER_TYPE = 1;
+    public static final Integer REGISTER_TYPE = 3;
     public static final Integer GROUP_TYPE = 2;
-    public static final Integer SEQUENCE_TYPE = 3;
+    public static final Integer SEQUENCE_TYPE = 1;
 
     private Long id;
 
     private Long varId;
 
     /**
-     * 变量类型,1->设备变量,2->群组变量,3->时序变量
+     * 变量类型,3->设备变量,2->群组变量,1->时序变量
      */
     private Integer varType;
 

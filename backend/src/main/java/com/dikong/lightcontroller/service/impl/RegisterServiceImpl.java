@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.service.impl;
 
 import java.util.List;
 
+import com.dikong.lightcontroller.entity.RegisterTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +38,8 @@ public class RegisterServiceImpl implements RegisterService {
      * @return
      */
     @Override
-    public ReturnInfo<List<Register>> searchRegister(RegisterList registerList) {
-        List<Register> registers = registerDAO.selectRegisterById(registerList);
+    public ReturnInfo<List<RegisterTime>> searchRegister(RegisterList registerList) {
+        List<RegisterTime> registers = registerDAO.selectRegisterById(registerList);
         return ReturnInfo.createReturnSuccessOne(registers);
     }
 

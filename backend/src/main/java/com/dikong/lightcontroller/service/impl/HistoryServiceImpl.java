@@ -2,15 +2,19 @@ package com.dikong.lightcontroller.service.impl;
 
 import java.util.List;
 
+import com.dikong.lightcontroller.common.PageNation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.HistoryDAO;
+import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.History;
-import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.service.HistoryService;
+import com.dikong.lightcontroller.vo.HistoryList;
+import com.dikong.lightcontroller.vo.HistorySearch;
+import com.github.pagehelper.PageHelper;
 
 /**
  * <p>
@@ -30,9 +34,18 @@ public class HistoryServiceImpl implements HistoryService {
     private HistoryDAO historyDAO;
 
     @Override
-    public ReturnInfo<List<History>> searchVarHistory(Long varId, Integer varType) {
-        List<History> histories = historyDAO.selectAllByVarId(varId, varType);
-        return ReturnInfo.createReturnSuccessOne(histories);
+    public ReturnInfo<List<HistoryList>> searchVarHistory(HistorySearch historySearch) {
+        PageHelper.startPage(historySearch.getPageNo(), historySearch.getPageSize());
+        List<HistoryList> historyLists = null;
+        if (History.REGISTER_TYPE.equals(historySearch.getVarType())) {
+            // 设备变量
+            historyLists = historyDAO.selectAll(historySearch);
+        } else {
+            // 群组和时序
+            historyLists = historyDAO.selectSysVar(historySearch);
+        }
+        PageNation pageNation = ReturnInfo.create(historyLists);
+        return ReturnInfo.create(historyLists,pageNation);
     }
 
     @Override
@@ -50,15 +63,16 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
-    public ReturnInfo updateHistory(SysVar sysVar) {
+    public ReturnInfo updateHistory(BaseSysVar sysVar) {
         History history = new History();
-        if (SysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
-            history.setVarId(SysVar.SEQUENCE_VAR_ID);
+        if (BaseSysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
+            history.setVarId(sysVar.getId());
             history.setVarType(History.SEQUENCE_TYPE);
-        } else if (SysVar.GROUP.equals(sysVar.getSysVarType())) {
-            history.setVarId(sysVar.getVarId());
+        } else if (BaseSysVar.GROUP.equals(sysVar.getSysVarType())) {
+            history.setVarId(sysVar.getId());
             history.setVarType(History.GROUP_TYPE);
         } else {
+            // 变量id
             history.setVarId(sysVar.getVarId());
             history.setVarType(History.REGISTER_TYPE);
         }

@@ -36,6 +36,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ReturnInfo<List<Project>> projectList(ProjectListReq projectListReq) {
         PageHelper.startPage(projectListReq.getPageNo(), projectListReq.getPageSize());
+        if (AuthCurrentUser.isManager()) {
+            List<Project> projects = projectDao.selectAll();
+            return ReturnInfo.createReturnSuccessOne(projects);
+        }
         Example example = new Example(UserProject.class);
         example.selectProperties("projectId");
         example.createCriteria().andEqualTo("userId", AuthCurrentUser.getUserId());

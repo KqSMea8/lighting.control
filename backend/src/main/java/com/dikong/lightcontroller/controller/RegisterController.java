@@ -3,6 +3,7 @@ package com.dikong.lightcontroller.controller;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Register;
+import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.vo.RegisterList;
 import io.swagger.annotations.Api;
@@ -43,7 +44,7 @@ public class RegisterController {
      */
     @ApiOperation(value = "查询设备下的所有变量，变量类型可以不传")
     @PostMapping(path = "/register/list")
-    public ReturnInfo<List<Register>> list(@RequestBody RegisterList registerList){
+    public ReturnInfo<List<RegisterTime>> list(@RequestBody RegisterList registerList){
         return registerService.searchRegister(registerList);
     }
 

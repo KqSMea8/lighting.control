@@ -2,7 +2,9 @@ package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.History;
-import com.dikong.lightcontroller.entity.SysVar;
+import com.dikong.lightcontroller.entity.BaseSysVar;
+import com.dikong.lightcontroller.vo.HistoryList;
+import com.dikong.lightcontroller.vo.HistorySearch;
 
 import java.util.List;
 
@@ -18,9 +20,9 @@ import java.util.List;
  */
 public interface HistoryService {
 
-    ReturnInfo<List<History>> searchVarHistory(Long varId,Integer varType);
+    ReturnInfo<List<HistoryList>> searchVarHistory(HistorySearch historySearch);
 
     ReturnInfo updateHistory(History history);
 
-    ReturnInfo updateHistory(SysVar sysVar);
+    ReturnInfo updateHistory(BaseSysVar sysVar);
 }
