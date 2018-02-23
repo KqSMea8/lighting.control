@@ -98,8 +98,7 @@ public class UserServiceImpl implements UserService {
             String oldToken = jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY,
                     String.valueOf(userInfo.getUserId()));
             if (!StringUtils.isEmpty(oldToken)) {
-                jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY,
-                        String.valueOf(userInfo.getUserId()));
+                jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
                 jedis.del(oldToken);
             }
             String token = UUID.randomUUID().toString();
@@ -128,7 +127,7 @@ public class UserServiceImpl implements UserService {
             jedisPool.getResource().hset(Constant.LOGIN.ONLINE_USERS_KEY,
                     String.valueOf(userInfo.getUserId()), token);
             LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
-        }finally {
+        } finally {
             jedis.close();
         }
         return ReturnInfo.createReturnSuccessOne(loginRes);
@@ -150,7 +149,7 @@ public class UserServiceImpl implements UserService {
             }
             jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
             jedis.del(token);
-        }finally {
+        } finally {
             jedis.close();
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -226,8 +225,7 @@ public class UserServiceImpl implements UserService {
     public ReturnInfo onlineUserList() {
         Jedis jedis = jedisPool.getResource();
         try {
-            Map<String, String> onlineUsers =
-                    jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
+            Map<String, String> onlineUsers = jedis.hgetAll(Constant.LOGIN.ONLINE_USERS_KEY);
             if (onlineUsers == null || onlineUsers.size() == 0) {
                 return ReturnInfo.create(CodeEnum.NOT_CONTENT);
             }
@@ -238,7 +236,7 @@ public class UserServiceImpl implements UserService {
             }
             List<User> users = userDao.userListByIds(userIds);
             return ReturnInfo.createReturnSuccessOne(users);
-        }finally {
+        } finally {
             jedis.close();
         }
     }
@@ -269,12 +267,12 @@ public class UserServiceImpl implements UserService {
                 return ReturnInfo.create(CodeEnum.NO_LOGIN);
             }
             LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+            currentUserInfo.setCurrentProjectId(projectId);
+            jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
             if (AuthCurrentUser.isManager()) {
                 List<Menu> menus = menuDao.selectAll();
                 return ReturnInfo.createReturnSuccessOne(menus);
             }
-            currentUserInfo.setCurrentProjectId(projectId);
-            jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
             List<Integer> manageTypeIds =
                     userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
             List<Integer> menuIds = manageTypeMenuDao.menuIds(manageTypeIds);
@@ -285,7 +283,7 @@ public class UserServiceImpl implements UserService {
                 menus = new ArrayList<Menu>();
             }
             return ReturnInfo.createReturnSuccessOne(menus);
-        }finally {
+        } finally {
             jedis.close();
         }
     }
