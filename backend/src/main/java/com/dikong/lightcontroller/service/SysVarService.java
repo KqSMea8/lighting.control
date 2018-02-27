@@ -1,7 +1,10 @@
 package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.entity.BaseSysVar;
+import com.dikong.lightcontroller.entity.Dtu;
+import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.vo.SysVarList;
 import com.dikong.lightcontroller.vo.VarListSearch;
 
@@ -30,4 +33,8 @@ public interface SysVarService {
     ReturnInfo updateSysVar(BaseSysVar sysVar);
 
     ReturnInfo<List<SysVarList>> selectAllVar(VarListSearch varListSearch);
+
+    List<CmdSendDto> seachAllRegisId(Timing timing, String value);
+
+    ReturnInfo<List<Dtu>> dtuVarList();
 }

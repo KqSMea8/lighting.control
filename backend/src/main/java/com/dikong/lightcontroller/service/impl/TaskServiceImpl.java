@@ -28,6 +28,7 @@ import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.api.TaskServiceApi;
+import com.dikong.lightcontroller.utils.DateToCronUtils;
 import com.dikong.lightcontroller.utils.TimeWeekUtils;
 import com.dikong.lightcontroller.vo.CommandSend;
 
@@ -58,12 +59,19 @@ public class TaskServiceImpl implements TaskService {
     private static final String DEFAULT_DEVICE_CRON = "0 */5 * * * ? *";
     private static final String DEFAULT_DEVICE_JOB_GROUP = "LIGHT_DEVICE_STATUS_JOB";
     private static final String DEFAULT_DEVICE_TRIGGER_GROUP = "LIGHT_DEVICE_STATUS_TRIGGER";
+
+    // 节假日job group
+    private static final String DEFAULT_HOLIDAY_JOB_GROUO = "LIGHT_HOLIDAY_JOB";
+
+
     private TaskServiceApi taskServiceApi;
 
     // 时序任务调度回调地址
     private String callBackUrl;
     // 设备回调url
     private String deviceCallBackUrl;
+    // 节假日回调url
+    private String holidayCallbackUrl;
 
 
     @Autowired
@@ -98,12 +106,16 @@ public class TaskServiceImpl implements TaskService {
         if (StringUtils.isEmpty(deviceCallBackUrl)) {
             throw new NullPointerException("schedule.controller.deviceCallBackUrl is not null");
         }
+        holidayCallbackUrl = properties.getProperty("schedule.controller.holidayCallbackUrl");
+        if (StringUtils.isEmpty(holidayCallbackUrl)) {
+            throw new NullPointerException("schedule.controller.holidayCallbackUrl is not null");
+        }
         this.taskServiceApi = Feign.builder().decoder(new JacksonDecoder())
                 .encoder(new JacksonEncoder()).target(TaskServiceApi.class, host);
 
     }
 
-    private QuartzJobDto createTask(String method,String taskName, String jsonParams, String cron,
+    private QuartzJobDto createTask(String method, String taskName, String jsonParams, String cron,
             String groupName, String triggerGroup, String description, String callback) {
         QuartzJobDto quartzJobDto = new QuartzJobDto();
         QuartzJobDto.JobDo jobDo = new QuartzJobDto.JobDo();
@@ -129,6 +141,12 @@ public class TaskServiceImpl implements TaskService {
         return null;
     }
 
+    /**
+     * 添加设备任务
+     * 
+     * @param id
+     * @return
+     */
     @Override
     public ReturnInfo addDeviceTask(Long id) {
         String taskName = UUID.randomUUID().toString();
@@ -169,7 +187,12 @@ public class TaskServiceImpl implements TaskService {
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
-
+    /**
+     * 回调执行任务
+     * 
+     * @param commandSend
+     * @return
+     */
     @Override
     public ReturnInfo callBack(CommandSend commandSend) {
         int projId = commandSend.getProjId();
@@ -204,6 +227,38 @@ public class TaskServiceImpl implements TaskService {
     public ReturnInfo removeTimingTask(String taskName) {
         boolean delTask = removeTask(taskName, DEFAULT_JOB_GROUP);
         return ReturnInfo.createReturnSuccessOne(delTask);
+    }
+
+    /**
+     * 添加节假日任务
+     * 
+     * @param holidayTime
+     * @return 返回任务id
+     */
+    @Override
+    public ReturnInfo<String> addHolidayTask(String holidayTime) {
+        String taskName = UUID.randomUUID().toString();
+        holidayTime = holidayTime + " 00:00:00";
+        String cronFormt = DateToCronUtils.cronFormt(holidayTime);
+        holidayCallbackUrl = holidayCallbackUrl + "/" + taskName;
+        QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", cronFormt,
+                DEFAULT_HOLIDAY_JOB_GROUO, DEFAULT_TRIGGER_GROUP, "节假日定时任务", holidayCallbackUrl);
+        if (null == task) {
+            throw new NullPointerException("添加节假日定时任务失败");
+        }
+        return ReturnInfo.create(taskName);
+    }
+
+    /**
+     * 删除节假日任务
+     * 
+     * @param taskName
+     * @return
+     */
+    @Override
+    public ReturnInfo removeHolidayTask(String taskName) {
+        boolean removeTask = removeTask(taskName, DEFAULT_HOLIDAY_JOB_GROUO);
+        return ReturnInfo.createReturnSuccessOne(removeTask);
     }
 
     private boolean removeTask(String taskName, String jobGroup) {

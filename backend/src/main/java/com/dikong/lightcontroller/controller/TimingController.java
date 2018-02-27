@@ -104,6 +104,7 @@ public class TimingController {
      * @param bindingResult
      * @return
      */
+    @ApiOperation(value = "添加指定节点")
     @PostMapping(path = "/timing/add/specified/node")
     public ReturnInfo addSpecifiedNode(
             @RequestBody @Valid TimeSpecifiedNodeAdd timeSpecifiedNodeAdd,
@@ -122,6 +123,7 @@ public class TimingController {
      * @param holidayTimes
      * @return
      */
+    @ApiOperation(value = "添加节假日节点")
     @PostMapping(path = "/timing/add/holiday/node")
     public ReturnInfo addHolidayNode(@RequestBody String[] holidayTimes) {
         if (null == holidayTimes || holidayTimes.length == 0) {
@@ -145,6 +147,7 @@ public class TimingController {
      * @param viewTime
      * @return
      */
+    @ApiOperation(value = "时序功能查看")
     @GetMapping(path = "/timing/node/view/{viewTime}")
     public ReturnInfo<TimingView> view(@PathVariable("viewTime") String viewTime)
             throws ParseException {
@@ -161,6 +164,7 @@ public class TimingController {
      * @param id
      * @return
      */
+    @ApiOperation(value = "删除指定节点和普通节点节点")
     @DeleteMapping(path = "/timing/del/{id}")
     public ReturnInfo delNode(@PathVariable("id") Long id) {
         if (null == id || id == 0) {

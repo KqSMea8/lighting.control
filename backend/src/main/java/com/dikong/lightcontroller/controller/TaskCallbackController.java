@@ -1,6 +1,8 @@
 package com.dikong.lightcontroller.controller;
 
+import com.dikong.lightcontroller.service.TimingService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import com.dikong.lightcontroller.service.DeviceService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.vo.CommandSend;
 
+import java.util.Date;
+
 /**
  * <p>
  * Description
@@ -30,7 +34,7 @@ import com.dikong.lightcontroller.vo.CommandSend;
  */
 @Api(value = "TaskCallbackController",description = "任务回调管理")
 @RestController
-@RequestMapping("/light")
+@RequestMapping("/light/callback")
 public class TaskCallbackController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TaskCallbackController.class);
@@ -41,10 +45,14 @@ public class TaskCallbackController {
     @Autowired
     private DeviceService deviceService;
 
+    @Autowired
+    private TimingService timingService;
+
     @PostMapping(path = "/command/send")
     public ReturnInfo commandSend(@RequestBody CommandSend commandSend) {
         return taskService.callBack(commandSend);
     }
+
 
     @GetMapping(path = "/device/status/{deviceId}")
     public ReturnInfo deviceStatus(@PathVariable("deviceId") Long deviceId) {
@@ -54,4 +62,10 @@ public class TaskCallbackController {
         return deviceService.conncationInfo(deviceId);
     }
 
+    @ApiOperation(value = "节假日回调任务")
+    @GetMapping(path = "/holiday/task/{taskName}")
+    public ReturnInfo holidayTask(@PathVariable("taskName")String taskName){
+        LOG.info("节假日回调任务,任务id:{},当前时间是{}",taskName,new Date());
+        return timingService.holidayTask();
+    }
 }

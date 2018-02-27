@@ -1,10 +1,12 @@
 package com.dikong.lightcontroller.service.impl;
 
+import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dikong.lightcontroller.entity.History;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,12 +15,15 @@ import org.springframework.util.CollectionUtils;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.PageNation;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dao.DtuDAO;
 import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
+import com.dikong.lightcontroller.dao.HolidayDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dao.SysVarDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.entity.BaseSysVar;
+import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
@@ -79,6 +84,12 @@ public class SysVarServiceImpl implements SysVarService {
     @Autowired
     private RegisterDAO registerDAO;
 
+    @Autowired
+    private HolidayDAO holidayDAO;
+
+    @Autowired
+    private DtuDAO dtuDAO;
+
     @Override
     public ReturnInfo addSysVarWherNotExist(BaseSysVar sysVar) {
         Integer exisSysVar = sysVarDAO.selectExisSysVar(sysVar.getProjId(), sysVar.getSysVarType());
@@ -138,6 +149,7 @@ public class SysVarServiceImpl implements SysVarService {
                 for (SysVar sysVar : sysVarList) {
                     SysVarList varList = new SysVarList();
                     varList.setId(sysVar.getId());
+                    varList.setVarNameView(sysVar.getVarName());
                     varList.setVarName(sysVar.getVarName());
                     varList.setVarType(sysVar.getVarType());
                     varList.setVarAddr(String.valueOf(sysVar.getId()));
@@ -151,22 +163,22 @@ public class SysVarServiceImpl implements SysVarService {
         } else {
             RegisterList register = new RegisterList(varListSearch.getId());
             List<RegisterTime> registers = registerDAO.selectRegisterById(register);
+            registers.sort(RegisterTime::compareRegisAddr);
             if (!CollectionUtils.isEmpty(registers)) {
                 for (RegisterTime reg : registers) {
                     SysVarList varList = new SysVarList();
                     varList.setId(reg.getId());
+                    varList.setVarNameView(reg.getVarName());
                     varList.setVarName(reg.getRegisName());
                     varList.setVarType(reg.getRegisType());
                     varList.setVarAddr(reg.getRegisAddr());
                     varList.setVarValue(reg.getRegisValue());
                     varList.setVarTime(reg.getUpdateTime());
+                    varList.setItemType(History.REGISTER_TYPE);
                     sysVarLists.add(varList);
                 }
                 pageNation = ReturnInfo.create(registers);
             }
-        }
-        if (null == pageNation) {
-            pageNation = new PageNation();
         }
         return ReturnInfo.create(sysVarLists, pageNation);
     }
@@ -209,33 +221,43 @@ public class SysVarServiceImpl implements SysVarService {
                     }
                 }
             }
-
-            // 马上执行最近的时间点,
-            String weekNowDate = TimeWeekUtils.getWeekNowDate();
-            String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-            List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
-            if (!CollectionUtils.isEmpty(timingList)) {
-                Map<Long, Timing> groupTime = new HashMap<>();
-                Map<Long, Timing> deviceTime = new HashMap<>();
-                for (Timing timing : timingList) {
-                    if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
-                        groupTime.put(timing.getRunId(), timing);
-                    } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
-                        deviceTime.put(timing.getRunId(), timing);
+            // 如果是指定节假日,就把所有变量都设为0
+            String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
+            int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
+            if (todayIsHoliday > 0) {
+                List<CmdSendDto> allRegis = new ArrayList<>();
+                timings.forEach(item -> {
+                    List<CmdSendDto> regisId = seachAllRegisId(item, BaseSysVar.CLOSE_SYS_VALUE);
+                    allRegis.addAll(regisId);
+                });
+                cmdService.writeSwitch(allRegis);
+            } else {
+                // 马上执行最近的时间点,
+                String weekNowDate = TimeWeekUtils.getWeekNowDate();
+                String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
+                List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
+                if (!CollectionUtils.isEmpty(timingList)) {
+                    Map<Long, Timing> groupTime = new HashMap<>();
+                    Map<Long, Timing> deviceTime = new HashMap<>();
+                    for (Timing timing : timingList) {
+                        if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
+                            groupTime.put(timing.getRunId(), timing);
+                        } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
+                            deviceTime.put(timing.getRunId(), timing);
+                        }
+                    }
+                    // 群组
+                    for (Map.Entry<Long, Timing> map : groupTime.entrySet()) {
+                        List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
+                        cmdService.writeSwitch(thenRunRegis);
+                    }
+                    // 设备
+                    for (Map.Entry<Long, Timing> map : deviceTime.entrySet()) {
+                        List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
+                        cmdService.writeSwitch(thenRunRegis);
                     }
                 }
-                // 群组
-                for (Map.Entry<Long, Timing> map : groupTime.entrySet()) {
-                    List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
-                    cmdService.writeSwitch(thenRunRegis);
-                }
-                // 设备
-                for (Map.Entry<Long, Timing> map : deviceTime.entrySet()) {
-                    List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
-                    cmdService.writeSwitch(thenRunRegis);
-                }
             }
-
         } else if (BaseSysVar.CLOSE_SYS_VALUE.equals(value) && !CollectionUtils.isEmpty(timings)) {
             List<CmdSendDto> allRegis = new ArrayList<>();
             timings.forEach(item -> {
@@ -255,7 +277,8 @@ public class SysVarServiceImpl implements SysVarService {
      * @param timing
      * @return
      */
-    private List<CmdSendDto> seachAllRegisId(Timing timing, String value) {
+    @Override
+    public List<CmdSendDto> seachAllRegisId(Timing timing, String value) {
         List<CmdSendDto> cmdSendDtoList = new ArrayList<>();
         if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
             if (BaseSysVar.CLOSE_SYS_VALUE.equals(value)) {
@@ -279,6 +302,17 @@ public class SysVarServiceImpl implements SysVarService {
             }
         }
         return cmdSendDtoList;
+    }
+
+    @Override
+    public ReturnInfo<List<Dtu>> dtuVarList() {
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        List<Dtu> dtus = dtuDAO.selectAllDtuId(projId, Dtu.DEL_NO);
+        Dtu dtu = new Dtu();
+        dtu.setId(new Long(0));
+        dtu.setDevice("SYS");
+        dtus.add(dtu);
+        return ReturnInfo.createReturnSuccessOne(dtus);
     }
 
     /**

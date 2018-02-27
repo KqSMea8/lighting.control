@@ -13,7 +13,9 @@ package com.dikong.lightcontroller.common;
  */
 public enum BussinessCode {
     DEVICE_EXIST(-100, "设备Id已存在"),
-    DTU_CODE_EXIST(-101,"DTU注册码已重复");
+    DTU_CODE_EXIST(-101,"DTU注册码已重复"),
+    GROUP_EXIST(-102,"群组名称已存在"),
+    SYSTEM_TYPE_EXIST(-200,"系统设置类型已存在");
     private int code;
 
     private String msg;

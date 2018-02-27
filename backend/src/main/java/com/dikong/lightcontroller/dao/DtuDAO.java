@@ -51,10 +51,10 @@ public interface DtuDAO extends Mapper<Dtu>{
     int updateOnlineStatusByCode(@Param("deviceCode")String deviceCode,@Param("onlineStatus")Byte onlineStatus);
 
 
-    @Select({"select device_code,beat_content,beat_time from dtu"})
-    List<Dtu> selectAllDtu();
+    @Select({"select device_code,beat_content,beat_time from dtu where is_delete=#{isDelete}"})
+    List<Dtu> selectAllDtu(@Param("isDelete") Byte isDelete);
 
 
-    @Select({"select count(0) from dtu where device_code=#{deviceCode} AND is_delete = 1 AND proj_id=#{projId}"})
-    int selectExistDeviceCode(@Param("projId") Integer projId,@Param("deviceCode")String deviceCode);
+    @Select({"select count(0) from dtu where device_code=#{deviceCode} AND is_delete = 1"})
+    int selectExistDeviceCode(@Param("deviceCode")String deviceCode);
 }

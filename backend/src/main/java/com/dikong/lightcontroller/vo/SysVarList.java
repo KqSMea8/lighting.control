@@ -16,6 +16,8 @@ public class SysVarList {
     //变量id
     private Long id;
     //变量名称
+    private String varNameView;
+    //变量名称
     private String varName;
     //变量类型
     private String varType;
@@ -34,6 +36,14 @@ public class SysVarList {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getVarNameView() {
+        return varNameView;
+    }
+
+    public void setVarNameView(String varNameView) {
+        this.varNameView = varNameView;
     }
 
     public String getVarName() {

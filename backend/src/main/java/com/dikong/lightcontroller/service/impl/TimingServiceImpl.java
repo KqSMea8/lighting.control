@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dikong.lightcontroller.dto.CmdSendDto;
+import com.dikong.lightcontroller.service.CmdService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +25,10 @@ import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dao.TimingCronDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.DeviceDtu;
+import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Cnarea2016;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.Holiday;
-import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.SysVarService;
@@ -87,6 +90,9 @@ public class TimingServiceImpl implements TimingService {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private CmdService cmdService;
 
     @SuppressWarnings("all")
     @Override
@@ -221,64 +227,68 @@ public class TimingServiceImpl implements TimingService {
         PageHelper.startPage(timingListSearch.getPageNo(), timingListSearch.getPageSize());
         List<Timing> timings = timingDAO.select(search);
         List<TimingList> timingLists = new ArrayList<>();
-        timings.forEach(item -> {
-            TimingList timingList = new TimingList();
-            StringBuilder builder = new StringBuilder();
-            Integer runTimeType = item.getNodeContentRunTimeType();
-            if (Timing.ORDINDRY_TIME.equals(runTimeType)) {
-                builder.append(item.getNodeContentRunTime());
+        if (!CollectionUtils.isEmpty(timings)) {
+            timings.forEach(item -> {
+                TimingList timingList = new TimingList();
+                StringBuilder builder = new StringBuilder();
+                Integer runTimeType = item.getNodeContentRunTimeType();
+                if (Timing.ORDINDRY_TIME.equals(runTimeType)) {
+                    builder.append(item.getNodeContentRunTime());
+                    builder.append(";");
+                } else if (Timing.DAWN_TIME.equals(runTimeType)) {
+                    builder.append("天亮");
+                    builder.append(";");
+                    Cnarea2016 cnarea =
+                            cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
+                    builder.append(cnarea.getName());
+                } else if (Timing.DARK_TIME.equals(runTimeType)) {
+                    builder.append("天黑");
+                    builder.append(";");
+                    Cnarea2016 cnarea =
+                            cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
+                    builder.append(cnarea.getName());
+                }
                 builder.append(";");
-            } else if (Timing.DAWN_TIME.equals(runTimeType)) {
-                builder.append("天亮");
+                builder.append("[ ");
+                if (Timing.GROUP_TYPE.equals(item.getRunType())) {
+                    String groupCode = groupDAO.selectCodeById(item.getRunId());
+                    builder.append("SYS:Group" + groupCode);
+                } else if (Timing.DEVICE_TYPE.equals(item.getRunType())) {
+                    DeviceDtu deviceDtu = deviceDAO.selectById(item.getRunId());
+                    String registerAddr = registerDAO.selectById(item.getRunVar());
+                    String s = deviceDtu.getDtuName() + ":ID"
+                            + Integer.parseInt(deviceDtu.getDeviceCode()) + ":" + registerAddr;
+                    builder.append(s);
+                }
+                builder.append(" ]");
+                builder.append("=");
+                builder.append(item.getRunVarlue());
                 builder.append(";");
-                Cnarea2016 cnarea =
-                        cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
-                builder.append(cnarea.getName());
-            } else if (Timing.DARK_TIME.equals(runTimeType)) {
-                builder.append("天黑");
+                if (Timing.ORDINARY_NODE.equals(timingListSearch.getNodeType())) {
+                    builder.append(item.getWeekList());
+                } else if (Timing.SPECIFIED_NODE.equals(timingListSearch.getNodeType())) {
+                    builder.append(item.getMonthList());
+                }
                 builder.append(";");
-                Cnarea2016 cnarea =
-                        cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
-                builder.append(cnarea.getName());
-            }
-            builder.append(";");
-            builder.append("[ ");
-            if (Timing.GROUP_TYPE.equals(item.getRunType())) {
-                String groupCode = groupDAO.selectCodeById(item.getRunId());
-                builder.append("SYS:Group" + groupCode);
-            } else if (Timing.DEVICE_TYPE.equals(item.getRunType())) {
-                DeviceDtu deviceDtu = deviceDAO.selectById(item.getRunId());
-                String registerAddr = registerDAO.selectById(item.getRunVar());
-                String s = deviceDtu.getDtuName() + ":ID"
-                        + Integer.parseInt(deviceDtu.getDeviceCode()) + ":" + registerAddr;
-                builder.append(s);
-            }
-            builder.append(" ]");
-            builder.append("=");
-            builder.append(item.getRunVarlue());
-            builder.append(";");
-            if (Timing.ORDINARY_NODE.equals(timingListSearch.getNodeType())) {
-                builder.append(item.getWeekList());
-            } else if (Timing.SPECIFIED_NODE.equals(timingListSearch.getNodeType())) {
-                builder.append(item.getMonthList());
-            }
-            builder.append(";");
-            timingList.setNodeContet(builder.toString());
-            timingList.setNodeName("节点" + item.getNodeName());
-            timingList.setId(item.getId());
-            timingLists.add(timingList);
-        });
+                timingList.setNodeContet(builder.toString());
+                timingList.setNodeName("节点" + item.getNodeName());
+                timingList.setId(item.getId());
+                timingLists.add(timingList);
+            });
+        }
         PageNation pageNation = ReturnInfo.create(timings);
         return ReturnInfo.create(timingLists, pageNation);
     }
 
 
     @Override
+    @Transactional
     public ReturnInfo addHolidayNode(String[] holidayTimes) {
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<Holiday> holidays = new ArrayList<>();
         for (String holidayTime : holidayTimes) {
-            holidays.add(new Holiday(holidayTime, projId));
+            ReturnInfo<String> stringReturnInfo = taskService.addHolidayTask(holidayTime);
+            holidays.add(new Holiday(holidayTime, projId, stringReturnInfo.getData()));
         }
         holidayDAO.insertList(holidays);
         return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -367,7 +377,7 @@ public class TimingServiceImpl implements TimingService {
     @Override
     public ReturnInfo<List<Holiday>> getHoliday(String time) {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        List<Holiday> holidays = holidayDAO.selectHoliday(time,projId);
+        List<Holiday> holidays = holidayDAO.selectHoliday(time, projId);
         return ReturnInfo.createReturnSuccessOne(holidays);
     }
 
@@ -375,6 +385,24 @@ public class TimingServiceImpl implements TimingService {
     public ReturnInfo<Timing> getOrdinary(Long id) {
         timingDAO.selectById(id);
         return null;
+    }
+
+    /**
+     * 节假日当天关闭所有的变量
+     * @return
+     */
+    @Override
+    public ReturnInfo holidayTask() {
+        String weekNowDate = TimeWeekUtils.getWeekNowDate();
+        String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
+        List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
+        List<CmdSendDto> allRegis = new ArrayList<>();
+        timingList.forEach(item -> {
+            List<CmdSendDto> regisId = sysVarService.seachAllRegisId(item, BaseSysVar.CLOSE_SYS_VALUE);
+            allRegis.addAll(regisId);
+        });
+        cmdService.writeSwitch(allRegis);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
 

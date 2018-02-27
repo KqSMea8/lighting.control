@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.vo;
 
+import com.dikong.lightcontroller.dto.BasePage;
+
 /**
  * <p>
  * Description
@@ -11,7 +13,7 @@ package com.dikong.lightcontroller.vo;
  * @see
  *      </P>
  */
-public class RegisterList {
+public class RegisterList extends BasePage{
     //设备id
     private Long deviceId;
     //变量类型

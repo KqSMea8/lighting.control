@@ -42,4 +42,6 @@ public interface TimingService {
     ReturnInfo<List<Holiday>> getHoliday(String time);
 
     ReturnInfo<Timing> getOrdinary(Long id);
+
+    ReturnInfo holidayTask();
 }

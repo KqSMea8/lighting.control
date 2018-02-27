@@ -24,6 +24,7 @@ import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.service.DtuService;
 import com.dikong.lightcontroller.service.api.DtuCollectionApi;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
+import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.Slf4jLogCollection;
 import com.github.pagehelper.PageHelper;
 
@@ -101,11 +102,14 @@ public class DtuServiceImpl implements DtuService {
     @Transactional
     public ReturnInfo addDtu(Dtu dtu) {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        int existDeviceCode = dtuDAO.selectExistDeviceCode(projId,dtu.getDeviceCode());
+        int existDeviceCode = dtuDAO.selectExistDeviceCode(dtu.getDeviceCode());
         if (existDeviceCode > 0) {
             return ReturnInfo.create(BussinessCode.DTU_CODE_EXIST.getCode(),
                     BussinessCode.DTU_CODE_EXIST.getMsg());
         }
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        Long dtuDevice = jedis.incr(String.valueOf(projId));
+        dtu.setDevice("DTU" + dtuDevice);
         dtu.setProjId(projId);
         dtuDAO.insertDtu(dtu);
         // 发送dtu信息
@@ -134,27 +138,24 @@ public class DtuServiceImpl implements DtuService {
 
     @Override
     public ReturnInfo conncationInfo(String deviceCode, Integer line) {
-        Jedis jedis = jedisPool.getResource();
-        try {
-            String online = jedis.hget(DTU_ONLINE, deviceCode);
-            if (!StringUtils.isEmpty(online) && line.equals(Integer.parseInt(online))) {
-                return ReturnInfo.create(CodeEnum.SUCCESS);
-            }
-            if (new Integer(0).equals(line)) {
-                dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.OFFLINE);
-            } else if (new Integer(2).equals(line)) {
-                dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.ONLINE);
-            }
-            jedis.hset(DTU_ONLINE, deviceCode,String.valueOf(line));
-        }finally {
-            jedis.close();
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        String online = jedis.hget(DTU_ONLINE, deviceCode);
+        if (!StringUtils.isEmpty(online) && line.equals(Integer.parseInt(online))) {
+            return ReturnInfo.create(CodeEnum.SUCCESS);
+        }
+        if (new Integer(0).equals(line)) {
+            dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.OFFLINE);
+            jedis.hset(DTU_ONLINE, deviceCode, String.valueOf(line));
+        } else if (new Integer(2).equals(line)) {
+            dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.ONLINE);
+            jedis.hset(DTU_ONLINE, deviceCode, String.valueOf(line));
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
     @Override
     public ReturnInfo<List<Dtu>> allDtu() {
-        List<Dtu> dtus = dtuDAO.selectAllDtu();
+        List<Dtu> dtus = dtuDAO.selectAllDtu(Dtu.DEL_NO);
         return ReturnInfo.createReturnSuccessOne(dtus);
     }
 }

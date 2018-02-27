@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dikong.lightcontroller.utils.JedisProxy;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -32,18 +34,15 @@ public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
             return false;
         }
         JedisPool jedisPool = (JedisPool) SpringContextUtil.getBean(JedisPool.class);
-        Jedis jedis = jedisPool.getResource();
-        try {
-            String userInfo = jedis.get(token);
-            if (StringUtils.isEmpty(userInfo)) {
-                response(response, CodeEnum.NO_LOGIN, "");
-                return false;
-            }
-            LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
-            AuthCurrentUser.set(currentUserInfo);
-        } finally {
-            jedis.close();
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        String userInfo = jedis.get(token);
+        if (StringUtils.isEmpty(userInfo)) {
+            response(response, CodeEnum.NO_LOGIN, "");
+            return false;
         }
+        LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        AuthCurrentUser.set(currentUserInfo);
+
         return true;
     }
 

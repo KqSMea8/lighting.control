@@ -22,6 +22,8 @@ public class GroupDeviceList {
     private String regisName;
     //对外id
     private String externalId;
+    //变量id
+    private Long regisId;
     //寄存器值
     private String regisAddr;
     //接口类型，模拟还是数字，BV,AI,AV,BI
@@ -89,5 +91,13 @@ public class GroupDeviceList {
 
     public void setRegisType(String regisType) {
         this.regisType = regisType;
+    }
+
+    public Long getRegisId() {
+        return regisId;
+    }
+
+    public void setRegisId(Long regisId) {
+        this.regisId = regisId;
     }
 }

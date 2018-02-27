@@ -133,7 +133,7 @@ public class DeviceServiceImpl implements DeviceService {
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
-//l_1#wqweq$ht
+    // l_1#wqweq$ht
     @Override
     public ReturnInfo uploadPointTableFile(MultipartFile multipartFile, Long id) {
         String filePath = environment.getProperty("file.path");
@@ -143,6 +143,7 @@ public class DeviceServiceImpl implements DeviceService {
         }
 
         String fileName = multipartFile.getOriginalFilename();
+        String model = fileName;
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<Register> registers = new LinkedList<>();
         try {
@@ -206,13 +207,21 @@ public class DeviceServiceImpl implements DeviceService {
             registerDAO.insertMultiItem(registers);
         }
         String modilFilePath = filePath + fileName;
-        deviceDAO.updateModeFilePathById(id, fileName,modilFilePath);
+        deviceDAO.updateModeFilePathById(id, model, modilFilePath);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
 
     @Override
     public ReturnInfo<List<Device>> idList(Long dtuId) {
+        if (null == dtuId || dtuId == 0) {
+            List<Device> deviceList = new ArrayList<>();
+            Device device = new Device();
+            device.setId(new Long(0));
+            device.setCode("0");
+            deviceList.add(device);
+            return ReturnInfo.createReturnSuccessOne(deviceList);
+        }
         List<Device> devices = deviceDAO.selectIdList(dtuId, Device.DEL_NO);
         if (!CollectionUtils.isEmpty(devices)) {
             devices.forEach(item -> {

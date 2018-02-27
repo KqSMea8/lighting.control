@@ -23,9 +23,9 @@ import com.dikong.lightcontroller.entity.Holiday;
 @Mapper
 public interface HolidayDAO {
 
-    @Insert({"<script>" + "insert into holiday (holiday_time,proj_id) values "
+    @Insert({"<script>" + "insert into holiday (holiday_time,proj_id,start_task) values "
             + "<foreach collection=\"list\" index=\"index\" item=\"item\" separator=\",\"> "
-            + " (#{item.holidayTime},#{item.projId}) " + "</foreach>" + "</script>"})
+            + " (#{item.holidayTime},#{item.projId},#{item.startTask}) " + "</foreach>" + "</script>"})
     int insertList(@Param("list") List<Holiday> holidays);
 
     @Select({"<script>" + "select * from holiday where holiday_time in "

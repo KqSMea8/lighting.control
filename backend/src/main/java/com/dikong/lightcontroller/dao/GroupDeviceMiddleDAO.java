@@ -53,7 +53,8 @@ public interface GroupDeviceMiddleDAO {
             + "<trim prefix=\"SET\" suffixOverrides=\",\">"
             + "<if test=\" middle.deviceId != null\">" + "device_id=#{middle.deviceId}," + "</if>"
             + "<if test=\" middle.regisId != null\">" + "regis_id=#{middle.regisId}," + "</if>"
-            + "</trim>" + "where group_id=#{middle.groupId}" + "</script>"})
+            + "<if test=\" middle.groupId != null \">" + "group_id=#{middle.groupId}," + "</if>"
+            + "</trim>" + "where id=#{middle.id}" + "</script>"})
     int updateGroupDevice(@Param("middle") GroupDeviceMiddle groupDeviceMiddle);
 
 }

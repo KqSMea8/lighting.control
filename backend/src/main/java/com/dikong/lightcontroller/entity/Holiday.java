@@ -13,16 +13,21 @@ package com.dikong.lightcontroller.entity;
 public class Holiday {
 
     private Long id;
+
     private String holidayTime;
+
     private Integer projId;
+    //开始任务,节假日的当天00:00
+    private String startTask;
 
     public Holiday(){
 
     }
 
-    public Holiday(String holidayTime, Integer projId) {
+    public Holiday(String holidayTime, Integer projId,String startTask) {
         this.holidayTime = holidayTime;
         this.projId = projId;
+        this.startTask = startTask;
     }
 
     public Long getId() {
@@ -47,5 +52,13 @@ public class Holiday {
 
     public void setProjId(Integer projId) {
         this.projId = projId;
+    }
+
+    public String getStartTask() {
+        return startTask;
+    }
+
+    public void setStartTask(String startTask) {
+        this.startTask = startTask;
     }
 }

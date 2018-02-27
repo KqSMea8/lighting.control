@@ -1,8 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
-import com.dikong.lightcontroller.entity.Device;
-import com.dikong.lightcontroller.vo.DeviceBoardList;
-import io.swagger.annotations.Api;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +17,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.service.DeviceService;
 import com.dikong.lightcontroller.vo.DeviceAdd;
+import com.dikong.lightcontroller.vo.DeviceBoardList;
 
-import java.util.List;
+import io.swagger.annotations.Api;
 
 /**
  * <p>
@@ -34,7 +35,7 @@ import java.util.List;
  * @see
  *      </P>
  */
-@Api(value = "DeviceController",description = "串口设备管理")
+@Api(value = "DeviceController", description = "串口设备管理")
 @RestController
 @RequestMapping("/light")
 public class DeviceController {
@@ -70,9 +71,8 @@ public class DeviceController {
     }
 
     /**
-     * 上传点表文件
-     * 重复上传的时候就先去判断数据库是否存在，如果存在就看之前的是否变化，如果有就更新，
-     * 不存在就插入
+     * 上传点表文件 重复上传的时候就先去判断数据库是否存在，如果存在就看之前的是否变化，如果有就更新， 不存在就插入
+     * 
      * @param uploadfile
      * @param id 设备id
      * @return
@@ -94,15 +94,15 @@ public class DeviceController {
      */
     @GetMapping(path = "/device/list/{dtuId}")
     public ReturnInfo<List<Device>> dtuIdList(@PathVariable("dtuId") Long dtuId) {
-        if (null == dtuId || dtuId == 0) {
+        if (null == dtuId) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return deviceService.idList(dtuId);
     }
 
     /**
-     * 选择所有的设备
-     * 一个设备可以被多个组选中
+     * 选择所有的设备 一个设备可以被多个组选中
+     * 
      * @return
      */
     @GetMapping(path = "/device/all")

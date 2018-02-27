@@ -35,11 +35,12 @@ public interface RegisterDAO {
             + "</foreach>" + "</script>"})
     int insertMultiItem(@Param("registers") List<Register> registers);
 
-    @Select({"<script>" + "select id,device_id,var_name,regis_name,regis_addr,regis_type,update_time"
+    @Select({"<script>" + "select id,device_id,var_name,regis_name,regis_addr,regis_type,regis_value,update_time"
             + " from register " + "<where>" + "<if test = \" register.deviceId != null \">"
             + " device_id = #{register.deviceId}" + "</if>"
             + "<if test = \" register.regisType != null \">"
-            + " and regis_type = #{register.regisType} " + "</if>" + "</where>" + "</script>"})
+            + " and regis_type = #{register.regisType} " + "</if>" + "</where>"
+                     + " order by regis_addr " + "</script>"})
     List<RegisterTime> selectRegisterById(@Param("register") RegisterList registerList);
 
     @Select({"<script>"

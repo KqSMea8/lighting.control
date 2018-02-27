@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
 import com.dikong.lightcontroller.entity.BaseSysVar;
+import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.vo.SysVarList;
 import com.dikong.lightcontroller.vo.VarListSearch;
 import io.swagger.annotations.Api;
@@ -47,6 +48,12 @@ public class SysVarController {
     @PostMapping(path = "/sys/var/list")
     public ReturnInfo<List<SysVarList>> varList(@RequestBody VarListSearch varListSearch){
         return sysVarService.selectAllVar(varListSearch);
+    }
+
+
+    @GetMapping(path = "/dtu/var/list")
+    public ReturnInfo<List<Dtu>> varDtuList(){
+        return sysVarService.dtuVarList();
     }
 
 

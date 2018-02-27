@@ -24,4 +24,8 @@ public interface TaskService {
     ReturnInfo callBack(CommandSend commandSend);
 
     ReturnInfo removeTimingTask(String taskName);
+
+    ReturnInfo<String> addHolidayTask(String holidayTime);
+
+    ReturnInfo removeHolidayTask(String taskName);
 }

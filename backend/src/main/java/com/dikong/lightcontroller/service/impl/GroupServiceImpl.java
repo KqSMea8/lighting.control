@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import com.dikong.lightcontroller.common.BussinessCode;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
@@ -19,10 +20,10 @@ import com.dikong.lightcontroller.dao.GroupDAO;
 import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dto.DeviceDtu;
+import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
-import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.service.GroupService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
@@ -74,6 +75,12 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public ReturnInfo add(Group group) {
         int projId = AuthCurrentUser.getCurrentProjectId();
+        int existGroupName =
+                groupDAO.selectByNameAndProj(projId, group.getGroupName(), Group.DEL_NO);
+        if (existGroupName > 0) {
+            return ReturnInfo.create(BussinessCode.GROUP_EXIST.getCode(),
+                    BussinessCode.GROUP_EXIST.getMsg());
+        }
         Integer lastGroupCode = groupDAO.selectLastCode(Group.DEL_NO, projId);
         if (null == lastGroupCode) {
             lastGroupCode = 0;
@@ -147,6 +154,7 @@ public class GroupServiceImpl implements GroupService {
                     groupDeviceList.setVarName(register.getVarName());
                 }
                 groupDeviceList.setDeviceId(item.getDeviceId());
+                groupDeviceList.setRegisId(item.getRegisId());
                 groupDeviceLists.add(groupDeviceList);
             });
         }
