@@ -35,10 +35,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ReturnInfo<List<Project>> projectList(ProjectListReq projectListReq) {
-        PageHelper.startPage(projectListReq.getPageNo(), projectListReq.getPageSize());
+
         if (AuthCurrentUser.isManager()) {
-            List<Project> projects = projectDao.selectAll();
-            return ReturnInfo.createReturnSuccessOne(projects);
+            Example example = new Example(Project.class);
+            example.createCriteria().andEqualTo("isDelete", 1);
+            PageHelper.startPage(projectListReq.getPageNo(), projectListReq.getPageSize());
+            List<Project> projects = projectDao.selectByExample(example);
+            return ReturnInfo.createReturnSucces(projects);
         }
         Example example = new Example(UserProject.class);
         example.selectProperties("projectId");
@@ -51,8 +54,9 @@ public class ProjectServiceImpl implements ProjectService {
         if (projectIds.size() == 0) {
             return ReturnInfo.create(CodeEnum.NOT_CONTENT);
         }
+        PageHelper.startPage(projectListReq.getPageNo(), projectListReq.getPageSize());
         List<Project> projects = projectDao.projectList(projectIds);
-        return ReturnInfo.createReturnSuccessOne(projects);
+        return ReturnInfo.createReturnSucces(projects);
     }
 
     @Override
