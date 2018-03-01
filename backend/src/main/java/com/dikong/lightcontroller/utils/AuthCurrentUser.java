@@ -25,6 +25,9 @@ public class AuthCurrentUser {
 
     public static int getUserId() {
         LoginRes userInfo = get();
+        if (userInfo == null) {
+            return 0;
+        }
         if (Objects.isNull(userInfo)) {
             throw new NullPointerException();
         }
@@ -35,4 +38,3 @@ public class AuthCurrentUser {
         return get().isManager();
     }
 }
-

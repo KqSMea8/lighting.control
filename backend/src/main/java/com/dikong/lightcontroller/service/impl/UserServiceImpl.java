@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
+
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
@@ -39,10 +43,6 @@ import com.dikong.lightcontroller.service.UserService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -95,8 +95,9 @@ public class UserServiceImpl implements UserService {
             if (!userInfo.getPassword().equals(password)) {
                 return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
             }
-            String oldToken = jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY,
-                    String.valueOf(userInfo.getUserId()));
+            String oldToken =
+                    jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY,
+                            String.valueOf(userInfo.getUserId()));
             if (!StringUtils.isEmpty(oldToken)) {
                 jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
                 jedis.del(oldToken);
@@ -300,5 +301,13 @@ public class UserServiceImpl implements UserService {
         } finally {
             jedis.close();
         }
+    }
+
+    @Override
+    public ReturnInfo userProjectList(Integer userId) {
+        Example example = new Example(UserProject.class);
+        example.createCriteria().andEqualTo("userId", userId);
+        List<UserProject> userProjects = userProjectDao.selectByExample(example);
+        return ReturnInfo.createReturnSuccessOne(userProjects);
     }
 }
