@@ -20,7 +20,7 @@ public class CmdMsgUtils {
 
     public static String assembleSendCmd(String dtuAddr, ReadWriteEnum operationType,
             String varType, int addressInfo, int value) {
-        if (value > MAXVALUE) {
+        if (value > MAXVALUE || dtuAddr.length() > 2) {
             return null;
         }
         return assembleSendCmd(dtuAddr, operationType, varType, addressInfo,
@@ -41,8 +41,10 @@ public class CmdMsgUtils {
         if (addressInfo > MAXVALUE) {
             return null;
         }
+
         String address = SimpleStringUtils.repair4Char(Integer.toHexString(addressInfo - 1));
         value = SimpleStringUtils.repair4Char(value);
+        dtuAddr = SimpleStringUtils.repairChar(2, dtuAddr);
         String cmdHalf = dtuAddr + functionCode + address + value;
         String crc = crcCheck(cmdHalf);
 
@@ -62,10 +64,10 @@ public class CmdMsgUtils {
         int byteNum = Integer.parseInt(recieveCmd.substring(4, 6), 16);
         int[] currentIndex = new int[1];
         for (int i = 0; i < byteNum * 2; i += 2) {
-            String binHighStr = Integer
-                    .toBinaryString(Integer.parseInt(recieveCmd.substring(i + 6, i + 7), 16));
-            String binLowStr = Integer
-                    .toBinaryString(Integer.parseInt(recieveCmd.substring(i + 7, i + 8), 16));
+            String binHighStr =
+                    Integer.toBinaryString(Integer.parseInt(recieveCmd.substring(i + 6, i + 7), 16));
+            String binLowStr =
+                    Integer.toBinaryString(Integer.parseInt(recieveCmd.substring(i + 7, i + 8), 16));
             String bin4CharLow = SimpleStringUtils.repair4Char(binLowStr);
             String bin4CharHigh = SimpleStringUtils.repair4Char(binHighStr);
             switchChange(bin4CharLow, currentIndex, length, switchInfo);
