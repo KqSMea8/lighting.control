@@ -201,17 +201,17 @@ public class CmdServiceImpl implements CmdService {
         // 查询DTU信息
         Dtu dtu = dtuDao.selectDtuById(device.getDtuId());
         // 查询一个变量当前值，默认为1
-        return reqUtil(dtu.getDeviceCode(), device.getCode(), readWriteEnum,
+        return reqUtil(dtu, device.getCode(), readWriteEnum,
                 register.getRegisType(), register.getRegisAddr(), varNum);
     }
 
-    private CmdRes<String> reqUtil(String deviceCode, String devAddr, ReadWriteEnum readWriteEnum,
+    private CmdRes<String> reqUtil(Dtu dtu, String devAddr, ReadWriteEnum readWriteEnum,
             String varType, String varAddr, int varNum) {
         String sendMsg = CmdMsgUtils.assembleSendCmd(devAddr, readWriteEnum, varType,
                 Integer.valueOf(varAddr), varNum);
         // TODO 命令执行记录
         CmdRecord cmdRecord = new CmdRecord();
-        cmdRecord.setDeviceCode(deviceCode);
+        cmdRecord.setDeviceCode(dtu.getDeviceCode());
         cmdRecord.setDevCode(devAddr);
         cmdRecord.setRegisAddr(varAddr);
         cmdRecord.setCmdInfo(sendMsg);
@@ -219,7 +219,7 @@ public class CmdServiceImpl implements CmdService {
         String response = "";
         Map<String, String> req = new HashMap<String, String>();
         req.put("cmdType", String.valueOf(readWriteEnum.getCode()));
-        req.put("registerMsg", deviceCode);
+        req.put("registerMsg", dtu.getDeviceCode());
         req.put("cmd", sendMsg);
         LOG.info("发送信息：" + JSON.toJSONString(req));
         try {
@@ -243,6 +243,8 @@ public class CmdServiceImpl implements CmdService {
         SendCmdRes sendCmdRes = JSON.parseObject(response, SendCmdRes.class);
         cmdRecord.setResult(sendCmdRes.getData());
         cmdRecordDao.insert(cmdRecord);
+        String data = sendCmdRes.getData();
+        dtu.getBeatContent();
         if (sendCmdRes.getCode() == -1) {
             return new CmdRes<String>(false, sendCmdRes.getData());
         }
