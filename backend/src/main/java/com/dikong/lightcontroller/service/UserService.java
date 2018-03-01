@@ -30,5 +30,7 @@ public interface UserService {
 
     public ReturnInfo userDelProject(UserProject userProjectReq);
 
+    public ReturnInfo userProjectList(Integer userId);
+
     public ReturnInfo enterProject(String token, Integer projectId);
 }

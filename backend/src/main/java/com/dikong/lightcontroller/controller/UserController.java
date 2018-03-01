@@ -1,10 +1,13 @@
 package com.dikong.lightcontroller.controller;
 
+import io.swagger.annotations.Api;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +23,6 @@ import com.dikong.lightcontroller.entity.User;
 import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.UserService;
 import com.github.pagehelper.util.StringUtil;
-
-import io.swagger.annotations.Api;
 
 @Api(value = "UserController", description = "用户管理")
 @RestController
@@ -92,5 +93,13 @@ public class UserController {
         }
         String token = request.getHeader(Constant.LOGIN.TOKEN);
         return userService.enterProject(token, projectId);
+    }
+
+    @GetMapping("/project/list/{user-id}")
+    public ReturnInfo userProjectList(@PathVariable("user-id") Integer userId) {
+        if (userId == null) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return userService.userProjectList(userId);
     }
 }

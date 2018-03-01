@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
+
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
@@ -40,10 +44,6 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -286,5 +286,13 @@ public class UserServiceImpl implements UserService {
         }
         return ReturnInfo.createReturnSuccessOne(menus);
 
+    }
+
+    @Override
+    public ReturnInfo userProjectList(Integer userId) {
+        Example example = new Example(UserProject.class);
+        example.createCriteria().andEqualTo("userId", userId);
+        List<UserProject> userProjects = userProjectDao.selectByExample(example);
+        return ReturnInfo.createReturnSuccessOne(userProjects);
     }
 }
