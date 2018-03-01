@@ -41,7 +41,8 @@ public interface TimingDAO extends Mapper<Timing> {
     Timing selectById(@Param("id") Long id);
 
 
-    @Select({
-            "select node_name from timing where proj_id=#{projId} AND is_delete={isDelete} order by node_name desc limit 1"})
+    @Select({"<script>"
+            + "select node_name from timing where proj_id=#{projId} AND is_delete=#{isDelete} order by node_name desc limit 1"
+            + "</script>"})
     Timing selectByLastNodeName(@Param("projId") Integer projId, @Param("isDelete") Byte isDelete);
 }

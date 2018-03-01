@@ -22,7 +22,6 @@ import javax.validation.constraints.NotNull;
 public class TimeOrdinaryNodeAdd {
 
     // 自动生成
-    @NotNull
     private String nodeName;
     // 日期
     @NotNull

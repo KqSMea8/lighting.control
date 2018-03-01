@@ -28,9 +28,11 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
+import com.dikong.lightcontroller.dto.BasePage;
 import com.dikong.lightcontroller.dto.CmdRes;
 import com.dikong.lightcontroller.dto.QuartzJobDto;
 import com.dikong.lightcontroller.entity.Device;
+import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.DeviceService;
@@ -41,6 +43,8 @@ import com.dikong.lightcontroller.utils.FileUtils;
 import com.dikong.lightcontroller.vo.DeviceAdd;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
 import com.dikong.lightcontroller.vo.DeviceList;
+import com.dikong.lightcontroller.vo.DeviceOnlineList;
+import com.github.pagehelper.PageHelper;
 
 /**
  * <p>
@@ -271,23 +275,33 @@ public class DeviceServiceImpl implements DeviceService {
                 update.setUseTimes(device.getUseTimes() == null ? 0
                         : device.getUseTimes()
                                 + calLastedTime(device.getLastOfflineTime(), new Date()));
-            }
-            update.setLastOfflineTime(new Date());
-            update.setStatus(Device.OFFLINE);
-        } else {
-            if (Device.OFFLINE.equals(device.getStatus())) {
+                update.setStatus(Device.OFFLINE);
+                update.setLastOfflineTime(new Date());
+            } else if (Device.OFFLINE.equals(device.getStatus())) {
                 update.setConnectCount(
                         device.getConnectCount() == null ? 0 : device.getConnectCount() + 1);
                 update.setUseTimes(device.getUseTimes() == null ? 0
                         : device.getUseTimes()
                                 + calLastedTime(device.getLastOnlineTime(), new Date()));
+                update.setStatus(Device.ONLINE);
+                update.setLastOnlineTime(new Date());
             }
-            update.setStatus(Device.ONLINE);
-            update.setLastOnlineTime(new Date());
         }
         update.setId(deviceId);
-        deviceDAO.updateByPrimaryKeySelective(device);
+        deviceDAO.updateByPrimaryKeySelective(update);
         return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo<List<DeviceOnlineList>> online(BasePage basePage) {
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        PageHelper.startPage(basePage.getPageNo(), basePage.getPageSize());
+        List<DeviceOnlineList> deviceOnlineLists =
+                deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
+        for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
+            deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
+        }
+        return ReturnInfo.createReturnSucces(deviceOnlineLists);
     }
 
 

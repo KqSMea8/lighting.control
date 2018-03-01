@@ -207,9 +207,9 @@ public class TimingServiceImpl implements TimingService {
     @Override
     @Transactional
     public ReturnInfo deleteNode(Long id) {
+        timingDAO.updateDeleteById(id, Timing.DEL_YES);
         List<TimingCron> timingCrons = timingCronDAO.selectAllByTimingId(id);
         if (!CollectionUtils.isEmpty(timingCrons)) {
-            timingDAO.updateDeleteById(id, Timing.DEL_YES);
             for (TimingCron timingCron : timingCrons) {
                 taskService.removeTimingTask(timingCron.getTaskName());
             }

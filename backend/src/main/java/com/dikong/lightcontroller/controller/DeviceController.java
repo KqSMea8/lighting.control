@@ -2,6 +2,9 @@ package com.dikong.lightcontroller.controller;
 
 import java.util.List;
 
+import com.dikong.lightcontroller.dto.BasePage;
+import com.dikong.lightcontroller.vo.DeviceOnlineList;
+import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,5 +114,8 @@ public class DeviceController {
     }
 
 
-
+    @PostMapping(path = "/device/online")
+    public ReturnInfo<List<DeviceOnlineList>> onlineList(@RequestBody BasePage basePage){
+        return deviceService.online(basePage);
+    }
 }

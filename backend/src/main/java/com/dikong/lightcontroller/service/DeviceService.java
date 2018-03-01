@@ -1,9 +1,11 @@
 package com.dikong.lightcontroller.service;
 
+import com.dikong.lightcontroller.dto.BasePage;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
 import com.dikong.lightcontroller.vo.DeviceList;
+import com.dikong.lightcontroller.vo.DeviceOnlineList;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
@@ -39,4 +41,5 @@ public interface DeviceService {
 
     ReturnInfo conncationInfo(Long id);
 
+    ReturnInfo<List<DeviceOnlineList>> online(BasePage basePage);
 }

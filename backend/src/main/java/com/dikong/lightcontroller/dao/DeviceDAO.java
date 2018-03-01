@@ -13,6 +13,8 @@ import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.vo.DeviceAdd;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
+import com.dikong.lightcontroller.vo.DeviceOnlineList;
+
 import tk.mybatis.mapper.common.Mapper;
 
 /**
@@ -27,7 +29,7 @@ import tk.mybatis.mapper.common.Mapper;
  *      </P>
  */
 @Repository
-public interface DeviceDAO extends Mapper<Device>{
+public interface DeviceDAO extends Mapper<Device> {
 
     @Select({
             "select id,external_id,name,code,model from device where dtu_id=#{dtuId} AND is_delete=#{isDelete}"})
@@ -45,7 +47,8 @@ public interface DeviceDAO extends Mapper<Device>{
     Long insertDevice(@Param("add") DeviceAdd deviceAdd);
 
     @Update({"update device set model_file=#{filePath},model=#{model} where id=#{id}"})
-    int updateModeFilePathById(@Param("id") Long id, @Param("model")String model,@Param("filePath") String filePath);
+    int updateModeFilePathById(@Param("id") Long id, @Param("model") String model,
+            @Param("filePath") String filePath);
 
 
     @Select({"select id,code from device where dtu_id=#{dtuId} AND is_delete=#{isDelete} "})
@@ -76,4 +79,12 @@ public interface DeviceDAO extends Mapper<Device>{
 
     @Select({"select model_file from device where id=#{id}"})
     String selectModeFile(@Param("id") Long id);
+
+    @Select({"<script>"
+            + "SELECT d.id as `device_id`,d.external_id,dt.device as `dtu_name`,d.name as `device_name`,d.code as `device_code`,d.status as `online_status`,d.last_call,d.use_times,d.connect_count,d.disconnect_count "
+            + "from device d LEFT JOIN dtu dt on d.dtu_id=dt.id "
+            + "WHERE dt.proj_id=#{projId} and d.is_delete=#{deviceIsDelet} and dt.is_delete=#{dtuIsDelet} ORDER BY d.create_time DESC"
+            + "</script>"})
+    List<DeviceOnlineList> selectOnlineStatus(@Param("projId") Integer projId,
+            @Param("deviceIsDelet") Byte deviceIsDelet, @Param("dtuIsDelet") Byte dtuIsDelet);
 }

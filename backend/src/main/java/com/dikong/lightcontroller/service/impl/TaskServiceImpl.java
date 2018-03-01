@@ -150,10 +150,10 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public ReturnInfo addDeviceTask(Long id) {
         String taskName = UUID.randomUUID().toString();
-        deviceCallBackUrl = deviceCallBackUrl + "/" + id;
+        String callBack = deviceCallBackUrl + "/" + id;
         QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,
                 DEFAULT_DEVICE_JOB_GROUP, DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION,
-                deviceCallBackUrl);
+                callBack);
         return ReturnInfo.createReturnSuccessOne(task);
     }
 

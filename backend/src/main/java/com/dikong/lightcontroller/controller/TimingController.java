@@ -83,7 +83,7 @@ public class TimingController {
     public ReturnInfo addOrdinaryNode(@RequestBody @Valid TimeOrdinaryNodeAdd ordinaryNodeAdd,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+            return ValidateLogUtil.paramError(bindingResult,LOG);
         }
         return timingService.addOrdinaryNode(ordinaryNodeAdd);
     }
