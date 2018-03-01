@@ -2,7 +2,6 @@ package com.dikong.lightcontroller.dao;
 
 import java.util.List;
 
-import com.dikong.lightcontroller.entity.RegisterTime;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -11,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import com.dikong.lightcontroller.entity.Register;
+import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.vo.RegisterList;
 
 /**
@@ -35,13 +35,23 @@ public interface RegisterDAO {
             + "</foreach>" + "</script>"})
     int insertMultiItem(@Param("registers") List<Register> registers);
 
-    @Select({"<script>" + "select id,device_id,var_name,regis_name,regis_addr,regis_type,regis_value,update_time"
+    @Select({"<script>"
+            + "select id,device_id,var_name,regis_name,regis_addr,regis_type,regis_value,update_time"
             + " from register " + "<where>" + "<if test = \" register.deviceId != null \">"
             + " device_id = #{register.deviceId}" + "</if>"
             + "<if test = \" register.regisType != null \">"
             + " and regis_type = #{register.regisType} " + "</if>" + "</where>"
-                     + " order by regis_addr " + "</script>"})
+            + " order by regis_addr " + "</script>"})
     List<RegisterTime> selectRegisterById(@Param("register") RegisterList registerList);
+
+
+
+    @Select({"<script>"
+            + "select id,device_id,var_name,regis_name,regis_addr,regis_type,regis_value,update_time"
+            + " from register " + " where id in "
+            + "<foreach collection=\"ids\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
+            + " #{item} " + "</foreach>" + "</script>"})
+    List<RegisterTime> selectRegisterInIds(@Param("ids") List<Long> ids);
 
     @Select({"<script>"
             + "select id,var_name,regis_name,regis_addr,regis_type from register where id in"
@@ -67,16 +77,16 @@ public interface RegisterDAO {
 
 
     @Update({"update register set regis_value=#{regisValue} where id=#{id}"})
-    int updateRegisValueById(@Param("regisValue")String regisValue,@Param("id")Long id);
-    
+    int updateRegisValueById(@Param("regisValue") String regisValue, @Param("id") Long id);
+
     @Select({"select * from register where id=#{id}"})
     Register selectRegisById(@Param("id") Long id);
 
 
     @Select({"select id,regis_type from register where device_id=#{deviceId} limit 1"})
-    Register selectIdAndTypeByDeviceId(@Param("deviceId")Long deviceId);
+    Register selectIdAndTypeByDeviceId(@Param("deviceId") Long deviceId);
 
 
     @Delete({"delete from register where id=#{id}"})
-    int deleteRegister(@Param("id")Long id);
+    int deleteRegister(@Param("id") Long id);
 }

@@ -4,6 +4,7 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.vo.RegisterList;
+import com.dikong.lightcontroller.vo.SysVarList;
 
 import java.util.List;
 
@@ -25,4 +26,6 @@ public interface RegisterService {
     ReturnInfo updateRegisterValue(Long id,String regisValue);
 
     ReturnInfo deleteRegister(Long id);
+
+    ReturnInfo<List<SysVarList>> regisValue(List<Register> registers);
 }

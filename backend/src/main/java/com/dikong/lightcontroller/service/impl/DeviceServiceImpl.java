@@ -277,18 +277,19 @@ public class DeviceServiceImpl implements DeviceService {
                                 + calLastedTime(device.getLastOfflineTime(), new Date()));
                 update.setStatus(Device.OFFLINE);
                 update.setLastOfflineTime(new Date());
-            } else if (Device.OFFLINE.equals(device.getStatus())) {
-                update.setConnectCount(
-                        device.getConnectCount() == null ? 0 : device.getConnectCount() + 1);
-                update.setUseTimes(device.getUseTimes() == null ? 0
-                        : device.getUseTimes()
-                                + calLastedTime(device.getLastOnlineTime(), new Date()));
-                update.setStatus(Device.ONLINE);
-                update.setLastOnlineTime(new Date());
             }
+        } else if (Device.OFFLINE.equals(device.getStatus())) {
+            update.setConnectCount(
+                    device.getConnectCount() == null ? 0 : device.getConnectCount() + 1);
+            update.setUseTimes(device.getUseTimes() == null ? 0
+                    : device.getUseTimes() + calLastedTime(device.getLastOnlineTime(), new Date()));
+            update.setStatus(Device.ONLINE);
+            update.setLastOnlineTime(new Date());
         }
-        update.setId(deviceId);
-        deviceDAO.updateByPrimaryKeySelective(update);
+        if (null != update.getStatus()) {
+            update.setId(deviceId);
+            deviceDAO.updateByPrimaryKeySelective(update);
+        }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
