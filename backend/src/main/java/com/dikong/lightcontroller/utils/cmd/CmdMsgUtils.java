@@ -152,4 +152,17 @@ public class CmdMsgUtils {
         }
         return SimpleStringUtils.repair4Char(Integer.toHexString(crc));
     }
+
+    public static String strTo16(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        String str = "";
+        for (int i = 0; i < s.length(); i++) {
+            int ch = (int) s.charAt(i);
+            String s4 = Integer.toHexString(ch);
+            str = str + s4;
+        }
+        return str;
+    }
 }
