@@ -234,21 +234,21 @@ public class TimingServiceImpl implements TimingService {
                 Integer runTimeType = item.getNodeContentRunTimeType();
                 if (Timing.ORDINDRY_TIME.equals(runTimeType)) {
                     builder.append(item.getNodeContentRunTime());
-                    builder.append(";");
+                    builder.append("; ");
                 } else if (Timing.DAWN_TIME.equals(runTimeType)) {
                     builder.append("天亮");
-                    builder.append(";");
+                    builder.append("; ");
                     Cnarea2016 cnarea =
                             cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
                     builder.append(cnarea.getName());
                 } else if (Timing.DARK_TIME.equals(runTimeType)) {
                     builder.append("天黑");
-                    builder.append(";");
+                    builder.append("; ");
                     Cnarea2016 cnarea =
                             cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
                     builder.append(cnarea.getName());
                 }
-                builder.append(";");
+                builder.append("; ");
                 builder.append("[ ");
                 if (Timing.GROUP_TYPE.equals(item.getRunType())) {
                     String groupCode = groupDAO.selectCodeById(item.getRunId());
@@ -263,13 +263,13 @@ public class TimingServiceImpl implements TimingService {
                 builder.append(" ]");
                 builder.append("=");
                 builder.append(item.getRunVarlue());
-                builder.append(";");
+                builder.append("; ");
                 if (Timing.ORDINARY_NODE.equals(timingListSearch.getNodeType())) {
                     builder.append(item.getWeekList());
                 } else if (Timing.SPECIFIED_NODE.equals(timingListSearch.getNodeType())) {
                     builder.append(item.getMonthList());
                 }
-                builder.append(";");
+                builder.append("; ");
                 timingList.setNodeContet(builder.toString());
                 timingList.setNodeName("节点" + item.getNodeName());
                 timingList.setId(item.getId());

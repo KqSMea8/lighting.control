@@ -106,6 +106,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
+    @Transactional
     public ReturnInfo deleteDevice(Long id) {
         Device device = deviceDAO.selectDeviceById(id);
         if (null != device && !StringUtils.isEmpty(device.getTaskName())) {
@@ -119,7 +120,7 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     @Transactional
     public ReturnInfo addDevice(DeviceAdd deviceAdd) {
-        int existNum = deviceDAO.selectByDtuIdAndCode(deviceAdd.getDtuId(), deviceAdd.getCode());
+        int existNum = deviceDAO.selectByDtuIdAndCode(deviceAdd.getDtuId(), deviceAdd.getCode(),Device.DEL_NO);
         if (existNum > 0) {
             return ReturnInfo.create(BussinessCode.DEVICE_EXIST.getCode(),
                     BussinessCode.DEVICE_EXIST.getMsg());

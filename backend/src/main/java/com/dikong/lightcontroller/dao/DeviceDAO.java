@@ -38,8 +38,8 @@ public interface DeviceDAO extends Mapper<Device> {
     @Update({"update device set is_delete=#{isDelete} where id=#{id}"})
     int updateDeleteById(@Param("id") Long id, @Param("isDelete") Byte isDelete);
 
-    @Select({"select count(0) from device where dtu_id=#{dtuId} AND code=#{code}"})
-    int selectByDtuIdAndCode(@Param("dtuId") Long dtuId, @Param("code") String code);
+    @Select({"select count(0) from device where dtu_id=#{dtuId} AND code=#{code} AND is_delete=#{isDelete}"})
+    int selectByDtuIdAndCode(@Param("dtuId") Long dtuId, @Param("code") String code,@Param("isDelete")Byte isDelete);
 
     @Insert({"insert into device (dtu_id,external_id,name,code,model) "
             + "values (#{add.dtuId},#{add.externalId},#{add.name},#{add.code},#{add.model})"})

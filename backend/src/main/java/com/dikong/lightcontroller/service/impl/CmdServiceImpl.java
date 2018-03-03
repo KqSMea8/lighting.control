@@ -83,6 +83,46 @@ public class CmdServiceImpl implements CmdService {
         return new CmdRes<List<String>>(false, results);
     }
 
+    @Override
+    public CmdRes<List<String>> readMuchSwitch(List<Register> varIds) {
+        if (null == varIds) {
+            return new CmdRes<List<String>>(false, null);
+        }
+
+        if (varIds.size() < 2) {
+            return readMuchSwitch(varIds.get(0).getId(), 1);
+        }
+
+        List<String> results = new ArrayList<>();
+        Long startVarId = null;
+        int varNum = 0;
+        int size = varIds.size();
+        for (int i = 1; i < size; i++) {
+            Integer firstAddr = Integer.valueOf(varIds.get(i - 1).getRegisAddr());
+            Integer secondAddr = Integer.valueOf(varIds.get(i).getRegisAddr());
+            if ((firstAddr + 1) == secondAddr) {
+                // 连续
+                if (null == startVarId) {
+                    startVarId = varIds.get(i - 1).getId();
+                }
+                varNum += 1;
+            } else {
+                varNum = varNum + 1;
+                CmdRes<List<String>> listCmdRes = readMuchSwitch(startVarId, varNum);
+                if (listCmdRes.isSuccess()) {
+                    results.addAll(listCmdRes.getData());
+                } else {
+                    for (int j = 0; j < varNum; j++) {
+                        results.add("0");
+                    }
+                }
+                varNum = 0;
+                startVarId = null;
+            }
+        }
+        return new CmdRes<List<String>>(true, results);
+    }
+
     /**
      *
      * @param varId 变量id
@@ -201,8 +241,8 @@ public class CmdServiceImpl implements CmdService {
         // 查询DTU信息
         Dtu dtu = dtuDao.selectDtuById(device.getDtuId());
         // 查询一个变量当前值，默认为1
-        return reqUtil(dtu, device.getCode(), readWriteEnum,
-                register.getRegisType(), register.getRegisAddr(), varNum);
+        return reqUtil(dtu, device.getCode(), readWriteEnum, register.getRegisType(),
+                register.getRegisAddr(), varNum);
     }
 
     private CmdRes<String> reqUtil(Dtu dtu, String devAddr, ReadWriteEnum readWriteEnum,

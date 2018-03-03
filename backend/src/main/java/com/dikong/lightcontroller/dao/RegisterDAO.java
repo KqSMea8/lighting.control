@@ -83,7 +83,7 @@ public interface RegisterDAO {
     Register selectRegisById(@Param("id") Long id);
 
 
-    @Select({"select id,regis_type from register where device_id=#{deviceId} limit 1"})
+    @Select({"select id,regis_type from register where device_id=#{deviceId} order by regis_addr limit 1"})
     Register selectIdAndTypeByDeviceId(@Param("deviceId") Long deviceId);
 
 
