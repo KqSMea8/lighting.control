@@ -17,7 +17,7 @@ public interface CmdService {
 
     public CmdRes<List<String>> readMuchSwitch(long varId, int varNum);
 
-    public CmdRes<List<String>> readMuchSwitch(List<Register> varIds);
+    public CmdRes<List<String>> readMuchVar(List<Register> varIds);
 
     public CmdRes<String> writeSwitch(long varId, SwitchEnum switchEnum);
 

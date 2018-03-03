@@ -3,6 +3,7 @@ package com.dikong.lightcontroller.service.impl;
 import java.util.List;
 
 import com.dikong.lightcontroller.common.PageNation;
+import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +51,7 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Override
     public ReturnInfo updateHistory(History history) {
-        int useId = 0;
+        int useId = AuthCurrentUser.getUserId();
         History lastHistory =
                 historyDAO.selectLastHistory(history.getVarId(), history.getVarType());
         if (null != history.getVarValue() && (null == lastHistory

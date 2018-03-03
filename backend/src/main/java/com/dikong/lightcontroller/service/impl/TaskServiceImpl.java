@@ -11,6 +11,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -50,6 +52,8 @@ import tk.mybatis.mapper.entity.Example;
  */
 @Service
 public class TaskServiceImpl implements TaskService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TaskServiceImpl.class);
 
     private static final String DEFAULT_DESCRIPTION = "定时任务";
     private static final String DEFAULT_JOB_GROUP = "LIGHT_CONTROLLER_JOB";
@@ -200,6 +204,7 @@ public class TaskServiceImpl implements TaskService {
         String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
         int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
         if (todayIsHoliday > 0) {
+            LOG.info("有指定节假日,{}",nowDateYearMonthDay);
             return ReturnInfo.create(CodeEnum.SUCCESS);
         }
         // 判断是否有指定日运行
@@ -210,9 +215,10 @@ public class TaskServiceImpl implements TaskService {
         List<Timing> timings = timingDAO.selectByExample(example);
         if (!CollectionUtils.isEmpty(timings)) {
             // 有指定日节点
+            LOG.info("有指定日节点,{}",timings.size());
             Timing timing = timingDAO.selectById(commandSend.getTimingId());
             if (Timing.SPECIFIED_NODE.equals(timing.getNodeType())) {
-                // 判断当前命令是否是指定
+                // 判断当前命令是否是指定日
                 cmdService.writeSwitch(commandSend.getVarIdS());
             }
             return ReturnInfo.create(CodeEnum.SUCCESS);

@@ -1,9 +1,9 @@
 package com.dikong.lightcontroller.vo;
 
-import com.dikong.lightcontroller.dto.CmdSendDto;
-
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+
+import com.dikong.lightcontroller.dto.CmdSendDto;
 
 /**
  * <p>
@@ -62,5 +62,12 @@ public class CommandSend {
 
     public void setProjId(Integer projId) {
         this.projId = projId;
+    }
+
+    @Override
+    public String toString() {
+        return "CommandSend{" + "timingId=" + timingId + ", varIdS="
+                + (varIdS != null ? Arrays.asList(varIdS) : varIdS) + ", taskName='" + taskName
+                + '\'' + ", projId=" + projId + '}';
     }
 }

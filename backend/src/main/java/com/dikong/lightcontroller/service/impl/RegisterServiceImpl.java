@@ -3,9 +3,9 @@ package com.dikong.lightcontroller.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dikong.lightcontroller.dao.SysVarDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -14,6 +14,7 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.PageNation;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.RegisterDAO;
+import com.dikong.lightcontroller.dao.SysVarDAO;
 import com.dikong.lightcontroller.dto.CmdRes;
 import com.dikong.lightcontroller.entity.History;
 import com.dikong.lightcontroller.entity.Register;
@@ -112,10 +113,22 @@ public class RegisterServiceImpl implements RegisterService {
                 pageNation = ReturnInfo.create(sysVarList);
             }
         } else {
+
             RegisterList register = new RegisterList(varListSearch.getId());
             List<RegisterTime> registers = registerDAO.selectRegisterById(register);
-            registers.sort(RegisterTime::compareRegisAddr);
+            // registers.sort(RegisterTime::compareRegisAddr);
+            List<Register> registerList = new ArrayList<>();
+            registers.forEach(item -> {
+                Register r = new Register();
+                BeanUtils.copyProperties(item, r);
+                registerList.add(r);
+            });
+
+            CmdRes<List<String>> listCmdRes = cmdService.readMuchVar(registerList);
+            LOG.info("发送读取变量但前值命令返回值为:{}", listCmdRes);
+
             if (!CollectionUtils.isEmpty(registers)) {
+                int i = 0;
                 for (RegisterTime reg : registers) {
                     SysVarList varList = new SysVarList();
                     varList.setId(reg.getId());
@@ -123,17 +136,9 @@ public class RegisterServiceImpl implements RegisterService {
                     varList.setVarName(reg.getRegisName());
                     varList.setVarType(reg.getRegisType());
                     varList.setVarAddr(reg.getRegisAddr());
-
-                    CmdRes<String> readResult = null;
-                    if (Register.BI.equals(reg.getRegisType())
-                            || Register.BV.equals(reg.getRegisType())) {
-                        readResult = cmdService.readOneSwitch(reg.getId());
-                    } else {
-                        readResult = cmdService.readOneAnalog(reg.getId());
-                    }
-                    LOG.info("发送读取变量但前值命令返回值为:{}", readResult);
-                    if (readResult.isSuccess()) {
-                        String data = readResult.getData();
+                    String data = listCmdRes.getData().get(i);
+                    i = i + 1;
+                    if (null != data) {
                         reg.setRegisValue(data);
                         registerDAO.updateRegisValueById(data, reg.getId());
                     }

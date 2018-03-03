@@ -8,7 +8,8 @@ package com.dikong.lightcontroller.dto;
  *
  * @author lengrongfu
  * @create 2018年01月30日下午3:58
- * @see </P>
+ * @see
+ *      </P>
  */
 public class CmdSendDto {
     /**
@@ -20,7 +21,7 @@ public class CmdSendDto {
      */
     private Integer switchValue;
 
-    public CmdSendDto(){
+    public CmdSendDto() {
 
     }
 
@@ -43,5 +44,10 @@ public class CmdSendDto {
 
     public void setSwitchValue(Integer switchValue) {
         this.switchValue = switchValue;
+    }
+
+    @Override
+    public String toString() {
+        return "CmdSendDto{" + "regisId=" + regisId + ", switchValue=" + switchValue + '}';
     }
 }
