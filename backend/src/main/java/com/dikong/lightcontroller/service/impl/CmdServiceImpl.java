@@ -239,6 +239,7 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<String>(false, "发送命令异常");
         }
         LOG.info("命令发送响应：" + response);
+        response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()), "");
         if (StringUtils.isEmpty(response)) {
             String info = "返回值为空";
             cmdRecord.setResult(info);
@@ -248,8 +249,6 @@ public class CmdServiceImpl implements CmdService {
         SendCmdRes sendCmdRes = JSON.parseObject(response, SendCmdRes.class);
         cmdRecord.setResult(sendCmdRes.getData());
         cmdRecordDao.insert(cmdRecord);
-        String data = sendCmdRes.getData();
-        response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()), "");
         if (sendCmdRes.getCode() == -1) {
             return new CmdRes<String>(false, sendCmdRes.getData());
         }
