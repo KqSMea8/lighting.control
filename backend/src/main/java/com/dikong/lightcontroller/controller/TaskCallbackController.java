@@ -50,6 +50,7 @@ public class TaskCallbackController {
 
     @PostMapping(path = "/command/send")
     public ReturnInfo commandSend(@RequestBody CommandSend commandSend) {
+        LOG.info("时序控制任务回调,回调参数为{}",commandSend);
         return taskService.callBack(commandSend);
     }
 
@@ -59,6 +60,7 @@ public class TaskCallbackController {
         if (null == deviceId || deviceId == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
+        LOG.info("设置状态查找回调,设备id为{}",deviceId);
         return deviceService.conncationInfo(deviceId);
     }
 

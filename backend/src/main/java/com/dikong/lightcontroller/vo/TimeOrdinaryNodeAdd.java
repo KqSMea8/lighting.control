@@ -24,7 +24,7 @@ public class TimeOrdinaryNodeAdd {
     // 自动生成
     private String nodeName;
     // 日期
-    @NotNull
+
     private Integer[] weekList;
     // 开始时间
     @JsonFormat(timezone = "GMT+8", pattern = "HH:mm:ss")

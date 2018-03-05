@@ -119,7 +119,13 @@ public class Register {
         this.regisValue = regisValue;
     }
 
-    public static Register addDefault(String regisValue,Long deviceId){
+    @Override
+    public String toString() {
+        return "Register{" + "id=" + id + ", regisName='" + regisName + '\'' + ", regisAddr='"
+                + regisAddr + '\'' + '}';
+    }
+
+    public static Register addDefault(String regisValue, Long deviceId) {
         Register register = new Register();
         register.setVarName("CONNECT");
         register.setRegisName("CONNECT");

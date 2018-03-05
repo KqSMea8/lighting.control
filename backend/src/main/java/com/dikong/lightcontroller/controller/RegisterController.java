@@ -2,9 +2,7 @@ package com.dikong.lightcontroller.controller;
 
 import java.util.List;
 
-import com.dikong.lightcontroller.vo.SysVarList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,10 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
-import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.vo.RegisterList;
+import com.dikong.lightcontroller.vo.SysVarList;
+import com.dikong.lightcontroller.vo.VarListSearch;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -67,10 +66,7 @@ public class RegisterController {
     @ApiImplicitParams({@ApiImplicitParam(name = "id", required = true),
             @ApiImplicitParam(name = "regisType", required = true)})
     @PostMapping(path = "/register/value")
-    public ReturnInfo<List<SysVarList>> regisValue(@RequestBody List<Register> registers) {
-        if (CollectionUtils.isEmpty(registers)) {
-            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
-        }
-        return registerService.regisValue(registers);
+    public ReturnInfo<List<SysVarList>> regisValue(@RequestBody VarListSearch varListSearch) {
+        return registerService.regisValue(varListSearch);
     }
 }

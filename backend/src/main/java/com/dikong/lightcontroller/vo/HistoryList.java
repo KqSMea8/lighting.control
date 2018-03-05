@@ -17,6 +17,7 @@ public class HistoryList {
     private String regisName;
     private String varValue;
     private String createTime;
+    private String createBy;
 
     public String getDtuName() {
         return dtuName;
@@ -56,5 +57,13 @@ public class HistoryList {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
     }
 }

@@ -80,7 +80,110 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<List<String>>(false, results);
         }
         results = CmdMsgUtils.analysisSwitchCmd(reqResult.getData(), varNum);
+        if (results.size() > 0) {
+            return new CmdRes<List<String>>(true, results);
+        }
         return new CmdRes<List<String>>(false, results);
+    }
+
+    @Override
+    public CmdRes<List<String>> readMuchVar(List<Register> varIds) {
+        if (null == varIds) {
+            return new CmdRes<List<String>>(false, null);
+        }
+
+        if (varIds.size() < 2) {
+            Register register = varIds.get(0);
+            if (Register.BV.equals(register.getRegisType())
+                    || Register.BI.equals(register.getRegisType())) {
+                return readMuchSwitch(register.getId(), 1);
+            } else {
+                return readMuchAnalog(register.getId(), 1);
+            }
+        }
+
+        List<String> results = new ArrayList<>();
+
+        List<Register> tempB = new ArrayList<>();
+        List<Register> tempA = new ArrayList<>();
+        int size = varIds.size();
+        for (int i = 1; i < size; i++) {
+            Integer firstAddr = Integer.valueOf(varIds.get(i - 1).getRegisAddr());
+            Integer secondAddr = Integer.valueOf(varIds.get(i).getRegisAddr());
+            if ((firstAddr + 1) == secondAddr
+                    && (Register.BV.equals(varIds.get(i - 1).getRegisType())
+                            || Register.BI.equals(varIds.get(i - 1).getRegisType()))
+                    && (Register.BV.equals(varIds.get(i).getRegisType())
+                            || Register.BI.equals(varIds.get(i).getRegisType()))) {
+                // 开关连续
+                tempB.add(varIds.get(i - 1));
+                if (size != (i + 1)) {
+                    continue;
+                } else {
+                    i += 1;
+                }
+            } else if ((firstAddr + 1) == secondAddr
+                    && (Register.AV.equals(varIds.get(i - 1).getRegisType())
+                            || Register.AI.equals(varIds.get(i - 1).getRegisType()))
+                    && (Register.AV.equals(varIds.get(i).getRegisType())
+                            || Register.AI.equals(varIds.get(i).getRegisType()))) {
+                // 模拟连续
+                tempA.add(varIds.get(i - 1));
+                if (size != (i + 1)) {
+                    continue;
+                } else {
+                    i += 1;
+                }
+            }
+
+            if (Register.BV.equals(varIds.get(i - 1).getRegisType())
+                    || Register.BI.equals(varIds.get(i - 1).getRegisType())) {
+                tempB.add(varIds.get(i - 1));
+
+            } else if (Register.AV.equals(varIds.get(i - 1).getRegisType())
+                    || Register.AI.equals(varIds.get(i - 1).getRegisType())) {
+                tempA.add(varIds.get(i - 1));
+            }
+            // 发送命令
+            CmdRes<List<String>> listCmdRes = null;
+            int tempSize = 0;
+            if (tempA.size() == 0) {
+                listCmdRes = readMuchSwitch(tempB.get(0).getId(), tempB.size());
+                tempSize = tempB.size();
+                LOG.info("查询多个开关量为{},返回值为{}", tempB, listCmdRes);
+            } else if (tempB.size() == 0) {
+                listCmdRes = readMuchAnalog(tempA.get(0).getId(), tempA.size());
+                tempSize = tempA.size();
+                LOG.info("查询多个模拟量为{},返回值为{}", tempA, listCmdRes);
+            }
+            if (listCmdRes.isSuccess()) {
+                results.addAll(listCmdRes.getData());
+            } else {
+                for (int j = 0; j < tempSize; j++) {
+                    results.add(null);
+                }
+            }
+            tempB.removeAll(tempB);
+            tempA.removeAll(tempA);
+        }
+        // 最后一个不能被执行到
+        if ((size - 1) == results.size()) {
+            Register register = varIds.get(size - 1);
+            CmdRes<List<String>> listCmdRes = null;
+            if (Register.BV.equals(register.getRegisType())
+                    || Register.BI.equals(register.getRegisType())) {
+                listCmdRes = readMuchSwitch(register.getId(), 1);
+            } else {
+                listCmdRes = readMuchAnalog(register.getId(), 1);
+            }
+
+            if (listCmdRes.isSuccess()) {
+                results.addAll(listCmdRes.getData());
+            } else {
+                results.add(null);
+            }
+        }
+        return new CmdRes<List<String>>(true, results);
     }
 
     /**
@@ -167,7 +270,7 @@ public class CmdServiceImpl implements CmdService {
         }
         List<String> results = CmdMsgUtils.analysisAnalogCmd(reqResult.getData());
         if (results.size() > 0) {
-            return new CmdRes<String>(false, results.get(0));
+            return new CmdRes<String>(true, results.get(0));
         }
         return new CmdRes<String>(false, reqResult.getData());
     }
@@ -181,6 +284,9 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<List<String>>(false, results);
         }
         results = CmdMsgUtils.analysisAnalogCmd(reqResult.getData());
+        if (results.size() > 0){
+            return new CmdRes<List<String>>(true, results);
+        }
         return new CmdRes<List<String>>(false, results);
     }
 
@@ -262,4 +368,5 @@ public class CmdServiceImpl implements CmdService {
         }
         return new CmdRes<String>(true, sendCmdRes.getData());
     }
+
 }
