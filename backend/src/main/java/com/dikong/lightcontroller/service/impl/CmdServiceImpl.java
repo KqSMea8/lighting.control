@@ -201,8 +201,10 @@ public class CmdServiceImpl implements CmdService {
         // 查询DTU信息
         Dtu dtu = dtuDao.selectDtuById(device.getDtuId());
         // 查询一个变量当前值，默认为1
-        String sendMsg = CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
-                register.getRegisType(), Integer.valueOf(register.getRegisAddr()), switchEnum);
+        String sendMsg =
+                CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
+                        register.getRegisType(), Integer.valueOf(register.getRegisAddr()),
+                        switchEnum);
         CmdRecord cmdRecord = new CmdRecord();
         cmdRecord.setDeviceCode(dtu.getDeviceCode());
         cmdRecord.setDevCode(device.getCode());
@@ -217,8 +219,9 @@ public class CmdServiceImpl implements CmdService {
         LOG.info("发送信息：" + JSON.toJSONString(req));
         String response = "";
         try {
-            response = OkhttpUtils
-                    .postFrom(envioroment.getProperty(serviceIpKey) + "/device/command", req, null);
+            response =
+                    OkhttpUtils.postFrom(envioroment.getProperty(serviceIpKey) + "/device/command",
+                            req, null);
         } catch (IOException e) {
             String info = "发送命令异常" + e.toString();
             LOG.error(info);
@@ -313,8 +316,9 @@ public class CmdServiceImpl implements CmdService {
 
     private CmdRes<String> reqUtil(Dtu dtu, String devAddr, ReadWriteEnum readWriteEnum,
             String varType, String varAddr, int varNum) {
-        String sendMsg = CmdMsgUtils.assembleSendCmd(devAddr, readWriteEnum, varType,
-                Integer.valueOf(varAddr), varNum);
+        String sendMsg =
+                CmdMsgUtils.assembleSendCmd(devAddr, readWriteEnum, varType,
+                        Integer.valueOf(varAddr), varNum);
         // TODO 命令执行记录
         CmdRecord cmdRecord = new CmdRecord();
         cmdRecord.setDeviceCode(dtu.getDeviceCode());
@@ -329,8 +333,9 @@ public class CmdServiceImpl implements CmdService {
         req.put("cmd", sendMsg);
         LOG.info("发送信息：" + JSON.toJSONString(req));
         try {
-            response = OkhttpUtils
-                    .postFrom(envioroment.getProperty(serviceIpKey) + "/device/command", req, null);
+            response =
+                    OkhttpUtils.postFrom(envioroment.getProperty(serviceIpKey) + "/device/command",
+                            req, null);
         } catch (IOException e) {
             String info = "发送命令异常" + e.toString();
             LOG.error(info);
@@ -340,6 +345,7 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<String>(false, "发送命令异常");
         }
         LOG.info("命令发送响应：" + response);
+        response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()), "");
         if (StringUtils.isEmpty(response)) {
             String info = "返回值为空";
             cmdRecord.setResult(info);
@@ -349,8 +355,6 @@ public class CmdServiceImpl implements CmdService {
         SendCmdRes sendCmdRes = JSON.parseObject(response, SendCmdRes.class);
         cmdRecord.setResult(sendCmdRes.getData());
         cmdRecordDao.insert(cmdRecord);
-        String data = sendCmdRes.getData();
-        dtu.getBeatContent();
         if (sendCmdRes.getCode() == -1) {
             return new CmdRes<String>(false, sendCmdRes.getData());
         }
