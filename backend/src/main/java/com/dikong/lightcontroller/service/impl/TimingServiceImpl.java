@@ -6,14 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dikong.lightcontroller.dto.CmdSendDto;
-import com.dikong.lightcontroller.service.CmdService;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import com.dikong.lightcontroller.common.BussinessCode;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.PageNation;
 import com.dikong.lightcontroller.common.ReturnInfo;
@@ -24,13 +22,16 @@ import com.dikong.lightcontroller.dao.HolidayDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dao.TimingCronDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
+import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Cnarea2016;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.Holiday;
+import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.entity.TimingCron;
+import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.TimingService;
@@ -97,6 +98,15 @@ public class TimingServiceImpl implements TimingService {
     @SuppressWarnings("all")
     @Override
     public ReturnInfo addOrdinaryNode(TimeOrdinaryNodeAdd ordinaryNodeAdd) {
+        Long runId = ordinaryNodeAdd.getRunId();
+        if (runId != null) {
+            Register register = registerDAO.selectRegisById(runId);
+            if (Register.AI.equals(register.getRegisType())
+                    || Register.AV.equals(register.getRegisType())) {
+                return ReturnInfo.create(BussinessCode.NOADD_SIMULATION.getCode(),
+                        BussinessCode.NOADD_SIMULATION.getMsg());
+            }
+        }
         int projId = AuthCurrentUser.getCurrentProjectId();
         Timing lastNodeName = timingDAO.selectByLastNodeName(projId, Timing.DEL_NO);
         int lastNode = 0;
@@ -153,6 +163,15 @@ public class TimingServiceImpl implements TimingService {
     @SuppressWarnings("all")
     @Override
     public ReturnInfo addSpecifiedNode(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd) {
+        Long runId = timeSpecifiedNodeAdd.getRunId();
+        if (runId != null) {
+            Register register = registerDAO.selectRegisById(runId);
+            if (Register.AI.equals(register.getRegisType())
+                    || Register.AV.equals(register.getRegisType())) {
+                return ReturnInfo.create(BussinessCode.NOADD_SIMULATION.getCode(),
+                        BussinessCode.NOADD_SIMULATION.getMsg());
+            }
+        }
         int projId = AuthCurrentUser.getCurrentProjectId();
         addSysVar(projId);
         Timing lastNodeName = timingDAO.selectByLastNodeName(projId, Timing.DEL_NO);
@@ -220,10 +239,11 @@ public class TimingServiceImpl implements TimingService {
     @SuppressWarnings("all")
     @Override
     public ReturnInfo<List<TimingList>> listNodeType(TimingListSearch timingListSearch) {
-
+        int projId = AuthCurrentUser.getCurrentProjectId();
         Timing search = new Timing();
         search.setNodeType(timingListSearch.getNodeType());
         search.setIsDelete(Timing.DEL_NO);
+        search.setProjId(projId);
         PageHelper.startPage(timingListSearch.getPageNo(), timingListSearch.getPageSize());
         List<Timing> timings = timingDAO.select(search);
         List<TimingList> timingLists = new ArrayList<>();
@@ -299,7 +319,7 @@ public class TimingServiceImpl implements TimingService {
     public ReturnInfo<TimingView> timingView(String viewTime) throws ParseException {
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<String> weekTime = TimeWeekUtils.getWeekTime(viewTime);
-        List<Holiday> holidays = holidayDAO.selectAllHoliday(weekTime);
+        List<Holiday> holidays = holidayDAO.selectAllHoliday(weekTime, projId);
         Map<String, String> holidaMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(holidays)) {
             holidays.forEach(item -> holidaMap.put(item.getHolidayTime(), item.getHolidayTime()));
@@ -389,6 +409,7 @@ public class TimingServiceImpl implements TimingService {
 
     /**
      * 节假日当天关闭所有的变量
+     * 
      * @return
      */
     @Override
@@ -398,7 +419,8 @@ public class TimingServiceImpl implements TimingService {
         List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
         List<CmdSendDto> allRegis = new ArrayList<>();
         timingList.forEach(item -> {
-            List<CmdSendDto> regisId = sysVarService.seachAllRegisId(item, BaseSysVar.CLOSE_SYS_VALUE);
+            List<CmdSendDto> regisId =
+                    sysVarService.seachAllRegisId(item, BaseSysVar.CLOSE_SYS_VALUE);
             allRegis.addAll(regisId);
         });
         cmdService.writeSwitch(allRegis);

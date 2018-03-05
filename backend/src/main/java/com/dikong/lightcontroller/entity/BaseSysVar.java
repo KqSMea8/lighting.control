@@ -21,7 +21,9 @@ public class BaseSysVar {
 
     public static final String CLOSE_SYS_VALUE = "0";
     public static final String OPEN_SYS_VALUE = "1";
+
     private Long id;
+
     private String varName;
     // 模拟量还是数子量
     private String varType;
