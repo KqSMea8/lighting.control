@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.vo;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <p>
  * Description
@@ -12,6 +14,7 @@ package com.dikong.lightcontroller.vo;
  */
 public class TimeSpecifiedNodeAdd extends TimeOrdinaryNodeAdd{
     //月list
+    @NotNull
     private String[] monthList;
 
     public String[] getMonthList() {

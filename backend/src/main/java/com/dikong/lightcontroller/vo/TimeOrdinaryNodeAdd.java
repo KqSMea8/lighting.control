@@ -1,12 +1,8 @@
 package com.dikong.lightcontroller.vo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import java.sql.Time;
-import java.text.DateFormat;
-import java.util.Date;
-
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * <p>
@@ -24,7 +20,6 @@ public class TimeOrdinaryNodeAdd {
     // 自动生成
     private String nodeName;
     // 日期
-
     private Integer[] weekList;
     // 开始时间
     @JsonFormat(timezone = "GMT+8", pattern = "HH:mm:ss")

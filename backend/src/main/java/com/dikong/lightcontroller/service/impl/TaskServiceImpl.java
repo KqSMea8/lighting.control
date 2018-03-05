@@ -156,8 +156,7 @@ public class TaskServiceImpl implements TaskService {
         String taskName = UUID.randomUUID().toString();
         String callBack = deviceCallBackUrl + "/" + id;
         QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,
-                DEFAULT_DEVICE_JOB_GROUP, DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION,
-                callBack);
+                DEFAULT_DEVICE_JOB_GROUP, DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, callBack);
         return ReturnInfo.createReturnSuccessOne(task);
     }
 
@@ -203,8 +202,9 @@ public class TaskServiceImpl implements TaskService {
         // 先判断是否是节假日
         String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
         int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
-        if (todayIsHoliday > 0) {
-            LOG.info("有指定节假日,{}",nowDateYearMonthDay);
+        Timing timing = timingDAO.selectById(commandSend.getTimingId());
+        if (todayIsHoliday > 0 && Timing.STOP_YES.equals(timing.getStopWork())) {
+            LOG.info("有指定节假日,{}", nowDateYearMonthDay);
             return ReturnInfo.create(CodeEnum.SUCCESS);
         }
         // 判断是否有指定日运行
@@ -215,8 +215,7 @@ public class TaskServiceImpl implements TaskService {
         List<Timing> timings = timingDAO.selectByExample(example);
         if (!CollectionUtils.isEmpty(timings)) {
             // 有指定日节点
-            LOG.info("有指定日节点,{}",timings.size());
-            Timing timing = timingDAO.selectById(commandSend.getTimingId());
+            LOG.info("有指定日节点,{}", timings.size());
             if (Timing.SPECIFIED_NODE.equals(timing.getNodeType())) {
                 // 判断当前命令是否是指定日
                 cmdService.writeSwitch(commandSend.getVarIdS());

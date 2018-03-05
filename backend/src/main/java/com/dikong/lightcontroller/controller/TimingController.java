@@ -110,9 +110,7 @@ public class TimingController {
             @RequestBody @Valid TimeSpecifiedNodeAdd timeSpecifiedNodeAdd,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            if (null == bindingResult.getFieldError("weekList")) {
-                return ValidateLogUtil.paramError(bindingResult, LOG);
-            }
+            return ValidateLogUtil.paramError(bindingResult, LOG);
         }
         return timingService.addSpecifiedNode(timeSpecifiedNodeAdd);
     }
