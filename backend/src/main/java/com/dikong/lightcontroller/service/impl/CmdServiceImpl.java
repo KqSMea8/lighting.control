@@ -345,14 +345,15 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<String>(false, "发送命令异常");
         }
         LOG.info("命令发送响应：" + response);
-        String oldRes = response;
-        response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()), "");
-        if (StringUtils.isEmpty(response)) {
-            String info = "返回值为空或者去掉心跳包之后为空：" + oldRes;
+        if (StringUtils.isEmpty(response)
+                || StringUtils.isEmpty(response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()),
+                        ""))) {
+            String info = "返回值为空或处理之后为空:" + response;
             cmdRecord.setResult(info);
             cmdRecordDao.insert(cmdRecord);
             return new CmdRes<String>(false, info);
         }
+        response = response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()), "");
         SendCmdRes sendCmdRes = JSON.parseObject(response, SendCmdRes.class);
         cmdRecord.setResult(sendCmdRes.getData());
         cmdRecordDao.insert(cmdRecord);
