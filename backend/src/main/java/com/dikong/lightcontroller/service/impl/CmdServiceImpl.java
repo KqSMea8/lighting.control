@@ -111,10 +111,10 @@ public class CmdServiceImpl implements CmdService {
             Integer firstAddr = Integer.valueOf(varIds.get(i - 1).getRegisAddr());
             Integer secondAddr = Integer.valueOf(varIds.get(i).getRegisAddr());
             if ((firstAddr + 1) == secondAddr
-                    && (Register.BV.equals(varIds.get(i - 1).getRegisType())
-                            || Register.BI.equals(varIds.get(i - 1).getRegisType()))
-                    && (Register.BV.equals(varIds.get(i).getRegisType())
-                            || Register.BI.equals(varIds.get(i).getRegisType()))) {
+                    && (Register.BV.equals(varIds.get(i - 1).getRegisType()) || Register.BI
+                            .equals(varIds.get(i - 1).getRegisType()))
+                    && (Register.BV.equals(varIds.get(i).getRegisType()) || Register.BI
+                            .equals(varIds.get(i).getRegisType()))) {
                 // 开关连续
                 tempB.add(varIds.get(i - 1));
                 if (size != (i + 1)) {
@@ -123,10 +123,10 @@ public class CmdServiceImpl implements CmdService {
                     i += 1;
                 }
             } else if ((firstAddr + 1) == secondAddr
-                    && (Register.AV.equals(varIds.get(i - 1).getRegisType())
-                            || Register.AI.equals(varIds.get(i - 1).getRegisType()))
-                    && (Register.AV.equals(varIds.get(i).getRegisType())
-                            || Register.AI.equals(varIds.get(i).getRegisType()))) {
+                    && (Register.AV.equals(varIds.get(i - 1).getRegisType()) || Register.AI
+                            .equals(varIds.get(i - 1).getRegisType()))
+                    && (Register.AV.equals(varIds.get(i).getRegisType()) || Register.AI
+                            .equals(varIds.get(i).getRegisType()))) {
                 // 模拟连续
                 tempA.add(varIds.get(i - 1));
                 if (size != (i + 1)) {
@@ -284,7 +284,7 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<List<String>>(false, results);
         }
         results = CmdMsgUtils.analysisAnalogCmd(reqResult.getData());
-        if (results.size() > 0){
+        if (results.size() > 0) {
             return new CmdRes<List<String>>(true, results);
         }
         return new CmdRes<List<String>>(false, results);
@@ -345,9 +345,10 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<String>(false, "发送命令异常");
         }
         LOG.info("命令发送响应：" + response);
+        String oldRes = response;
         response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()), "");
         if (StringUtils.isEmpty(response)) {
-            String info = "返回值为空";
+            String info = "返回值为空或者去掉心跳包之后为空：" + oldRes;
             cmdRecord.setResult(info);
             cmdRecordDao.insert(cmdRecord);
             return new CmdRes<String>(false, info);
@@ -368,5 +369,4 @@ public class CmdServiceImpl implements CmdService {
         }
         return new CmdRes<String>(true, sendCmdRes.getData());
     }
-
 }
