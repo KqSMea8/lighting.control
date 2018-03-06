@@ -74,7 +74,6 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
 
     @Override
     public ReturnInfo add(EquipmentMonitor equipmentMonitor) {
-        equipmentMonitor.setPanelId(AuthCurrentUser.getCurrentProjectId());
         equipmentMonitor.setCreateBy(AuthCurrentUser.getUserId());
         equipmentMonitor.setProjectId(AuthCurrentUser.getCurrentProjectId());
         if (equipmentMonitor.getMonitorType() == 1) {

@@ -173,8 +173,8 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public ReturnInfo addGroupDevice(GroupDeviceMiddle groupDeviceMiddle) {
         Register register = registerDAO.selectRegisById(groupDeviceMiddle.getRegisId());
-        if (Register.AI.equals(register.getRegisType())
-                || Register.AV.equals(register.getRegisType())) {
+        if (null != register && (Register.AI.equals(register.getRegisType())
+                || Register.AV.equals(register.getRegisType()))) {
             return ReturnInfo.create(BussinessCode.NOADD_SIMULATION.getCode(),
                     BussinessCode.NOADD_SIMULATION.getMsg());
         }
