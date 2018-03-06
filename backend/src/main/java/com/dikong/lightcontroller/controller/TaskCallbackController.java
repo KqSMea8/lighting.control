@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.controller;
 
+import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TimingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +41,7 @@ public class TaskCallbackController {
     private static final Logger LOG = LoggerFactory.getLogger(TaskCallbackController.class);
 
     @Autowired
-    private TaskService taskService;
+    private SysVarService sysVarService;
 
     @Autowired
     private DeviceService deviceService;
@@ -51,7 +52,7 @@ public class TaskCallbackController {
     @PostMapping(path = "/command/send")
     public ReturnInfo commandSend(@RequestBody CommandSend commandSend) {
         LOG.info("时序控制任务回调,回调参数为{}",commandSend);
-        return taskService.callBack(commandSend);
+        return timingService.callBack(commandSend);
     }
 
 

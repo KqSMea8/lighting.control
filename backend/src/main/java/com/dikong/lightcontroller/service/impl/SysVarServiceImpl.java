@@ -1,12 +1,12 @@
 package com.dikong.lightcontroller.service.impl;
 
-import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dikong.lightcontroller.entity.History;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +24,7 @@ import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Dtu;
+import com.dikong.lightcontroller.entity.History;
 import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
@@ -57,6 +58,8 @@ import tk.mybatis.mapper.entity.Example;
  */
 @Service
 public class SysVarServiceImpl implements SysVarService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SysVarServiceImpl.class);
 
     @Autowired
     private SysVarDAO sysVarDAO;
@@ -198,6 +201,7 @@ public class SysVarServiceImpl implements SysVarService {
         List<Timing> timings = timingDAO.selectByExample(example);
         if (BaseSysVar.OPEN_SYS_VALUE.equals(value) && !CollectionUtils.isEmpty(timings)) {
             for (Timing item : timings) {
+                ReturnInfo<String> addTimingTask = null;
                 if (Timing.ORDINARY_NODE.equals(item.getNodeType())) {
                     String weekList = item.getWeekList();
                     String nodeContentRunTime = item.getNodeContentRunTime();
@@ -206,7 +210,8 @@ public class SysVarServiceImpl implements SysVarService {
                     commandSend.setTimingId(item.getId());
                     commandSend.setVarIdS(seachAllRegisId(item, value));
                     commandSend.setProjId(projId);
-                    taskService.addTimingTask(commandSend, cron);
+                    addTimingTask = taskService.addTimingTask(commandSend, cron);
+                    timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
                 } else if (Timing.SPECIFIED_NODE.equals(item.getNodeType())) {
                     String monthList = item.getMonthList();
                     if (null != monthList && !monthList.isEmpty()) {
@@ -218,7 +223,8 @@ public class SysVarServiceImpl implements SysVarService {
                             commandSend.setTimingId(item.getId());
                             commandSend.setVarIdS(seachAllRegisId(item, value));
                             commandSend.setProjId(projId);
-                            taskService.addTimingTask(commandSend, cron);
+                            addTimingTask = taskService.addTimingTask(commandSend, cron);
+                            timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
                         }
                     }
                 }
@@ -265,8 +271,11 @@ public class SysVarServiceImpl implements SysVarService {
             timings.forEach(item -> {
                 List<CmdSendDto> regisId = seachAllRegisId(item, value);
                 allRegis.addAll(regisId);
+                taskService.removeTimingTask(item.getTaskName());
+                timingDAO.updateTaskNameByID(item.getId(), "");
             });
             cmdService.writeSwitch(allRegis);
+
         }
         return;
     }

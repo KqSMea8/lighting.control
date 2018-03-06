@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,7 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.TimeCalculate;
 import com.dikong.lightcontroller.utils.TimeWeekUtils;
 import com.dikong.lightcontroller.vo.BoardList;
+import com.dikong.lightcontroller.vo.CommandSend;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
 import com.dikong.lightcontroller.vo.TimeOrdinaryNodeAdd;
 import com.dikong.lightcontroller.vo.TimeSpecifiedNodeAdd;
@@ -64,6 +67,7 @@ import tk.mybatis.mapper.entity.Example;
 @Service
 public class TimingServiceImpl implements TimingService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TimingServiceImpl.class);
 
     @Autowired
     private CnareaDAO cnareaDAO;
@@ -98,11 +102,11 @@ public class TimingServiceImpl implements TimingService {
     @SuppressWarnings("all")
     @Override
     public ReturnInfo addOrdinaryNode(TimeOrdinaryNodeAdd ordinaryNodeAdd) {
-        Long runId = ordinaryNodeAdd.getRunId();
+        Long runId = ordinaryNodeAdd.getRunVar();
         if (runId != null) {
             Register register = registerDAO.selectRegisById(runId);
-            if (Register.AI.equals(register.getRegisType())
-                    || Register.AV.equals(register.getRegisType())) {
+            if (null != register && (Register.AI.equals(register.getRegisType())
+                    || Register.AV.equals(register.getRegisType()))) {
                 return ReturnInfo.create(BussinessCode.NOADD_SIMULATION.getCode(),
                         BussinessCode.NOADD_SIMULATION.getMsg());
             }
@@ -163,11 +167,11 @@ public class TimingServiceImpl implements TimingService {
     @SuppressWarnings("all")
     @Override
     public ReturnInfo addSpecifiedNode(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd) {
-        Long runId = timeSpecifiedNodeAdd.getRunId();
+        Long runId = timeSpecifiedNodeAdd.getRunVar();
         if (runId != null) {
             Register register = registerDAO.selectRegisById(runId);
-            if (Register.AI.equals(register.getRegisType())
-                    || Register.AV.equals(register.getRegisType())) {
+            if (null != register && (Register.AI.equals(register.getRegisType())
+                    || Register.AV.equals(register.getRegisType()))) {
                 return ReturnInfo.create(BussinessCode.NOADD_SIMULATION.getCode(),
                         BussinessCode.NOADD_SIMULATION.getMsg());
             }
@@ -424,6 +428,43 @@ public class TimingServiceImpl implements TimingService {
             allRegis.addAll(regisId);
         });
         cmdService.writeSwitch(allRegis);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    /**
+     * 回调执行任务
+     *
+     * @param commandSend
+     * @return
+     */
+    @Override
+    public ReturnInfo callBack(CommandSend commandSend) {
+        int projId = commandSend.getProjId();
+        // 先判断是否是节假日
+        String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
+        int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
+        Timing timing = timingDAO.selectById(commandSend.getTimingId());
+        if (todayIsHoliday > 0 && null != timing && Timing.STOP_YES.equals(timing.getStopWork())) {
+            LOG.info("有指定节假日,{}", nowDateYearMonthDay);
+            return ReturnInfo.create(CodeEnum.SUCCESS);
+        }
+        // 判断是否有指定日运行
+        Example example = new Example(Timing.class);
+        example.createCriteria().andEqualTo("nodeType", Timing.SPECIFIED_NODE)
+                .andEqualTo("isDelete", Timing.DEL_NO).andEqualTo("projId", projId)
+                .andLike("monthList", "%" + nowDateYearMonthDay + "%");
+        List<Timing> timings = timingDAO.selectByExample(example);
+        if (!CollectionUtils.isEmpty(timings)) {
+            // 有指定日节点
+            LOG.info("有指定日节点,{}", timings.size());
+            if (Timing.SPECIFIED_NODE.equals(timing.getNodeType())) {
+                // 判断当前命令是否是指定日
+                cmdService.writeSwitch(commandSend.getVarIdS());
+            }
+            return ReturnInfo.create(CodeEnum.SUCCESS);
+        }
+        // 普通节点,直接运行
+        cmdService.writeSwitch(commandSend.getVarIdS());
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

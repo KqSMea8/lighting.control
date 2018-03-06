@@ -157,12 +157,14 @@ public class TaskServiceImpl implements TaskService {
         String callBack = deviceCallBackUrl + "/" + id;
         QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,
                 DEFAULT_DEVICE_JOB_GROUP, DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, callBack);
+        LOG.info("添加设置状态命令成功,返回值为{}",JSON.toJSONString(task));
         return ReturnInfo.createReturnSuccessOne(task);
     }
 
     @Override
     public ReturnInfo removeDeviceTask(String taskName) {
         boolean delTask = removeTask(taskName, DEFAULT_DEVICE_JOB_GROUP);
+        LOG.info("删除设置状态命令成功,返回值为{}",delTask);
         return ReturnInfo.createReturnSuccessOne(delTask);
     }
 
@@ -173,7 +175,7 @@ public class TaskServiceImpl implements TaskService {
      * @return
      */
     @Override
-    public ReturnInfo addTimingTask(CommandSend commandSend, String cron) {
+    public ReturnInfo<String> addTimingTask(CommandSend commandSend, String cron) {
         long id = commandSend.getTimingId();
         String uuid = UUID.randomUUID().toString();
         commandSend.setTaskName(uuid);
@@ -184,48 +186,15 @@ public class TaskServiceImpl implements TaskService {
             TimingCron timingCron = new TimingCron();
             timingCron.setTimingId(id);
             timingCron.setTaskName(uuid);
-            timingCron.setCronJson(JSON.toJSONString(quartzJobDto));
+            String jsonString = JSON.toJSONString(quartzJobDto);
+            timingCron.setCronJson(jsonString);
             timingCronDAO.insertSelective(timingCron);
+            LOG.info("添加时序定时任务成功,返回值为{}",jsonString);
         }
-        return ReturnInfo.create(CodeEnum.SUCCESS);
+        return ReturnInfo.create(uuid);
     }
 
-    /**
-     * 回调执行任务
-     * 
-     * @param commandSend
-     * @return
-     */
-    @Override
-    public ReturnInfo callBack(CommandSend commandSend) {
-        int projId = commandSend.getProjId();
-        // 先判断是否是节假日
-        String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-        int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
-        Timing timing = timingDAO.selectById(commandSend.getTimingId());
-        if (todayIsHoliday > 0 && Timing.STOP_YES.equals(timing.getStopWork())) {
-            LOG.info("有指定节假日,{}", nowDateYearMonthDay);
-            return ReturnInfo.create(CodeEnum.SUCCESS);
-        }
-        // 判断是否有指定日运行
-        Example example = new Example(Timing.class);
-        example.createCriteria().andEqualTo("nodeType", Timing.SPECIFIED_NODE)
-                .andEqualTo("isDelete", Timing.DEL_NO).andEqualTo("projId", projId)
-                .andLike("monthList", "%" + nowDateYearMonthDay + "%");
-        List<Timing> timings = timingDAO.selectByExample(example);
-        if (!CollectionUtils.isEmpty(timings)) {
-            // 有指定日节点
-            LOG.info("有指定日节点,{}", timings.size());
-            if (Timing.SPECIFIED_NODE.equals(timing.getNodeType())) {
-                // 判断当前命令是否是指定日
-                cmdService.writeSwitch(commandSend.getVarIdS());
-            }
-            return ReturnInfo.create(CodeEnum.SUCCESS);
-        }
-        // 普通节点,直接运行
-        cmdService.writeSwitch(commandSend.getVarIdS());
-        return ReturnInfo.create(CodeEnum.SUCCESS);
-    }
+
 
 
     @Override

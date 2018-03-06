@@ -5,6 +5,7 @@ import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.entity.Timing;
+import com.dikong.lightcontroller.vo.CommandSend;
 import com.dikong.lightcontroller.vo.SysVarList;
 import com.dikong.lightcontroller.vo.VarListSearch;
 
@@ -37,4 +38,6 @@ public interface SysVarService {
     List<CmdSendDto> seachAllRegisId(Timing timing, String value);
 
     ReturnInfo<List<Dtu>> dtuVarList();
+
+
 }

@@ -19,9 +19,7 @@ public interface TaskService {
 
     ReturnInfo removeDeviceTask(String taskName);
 
-    ReturnInfo addTimingTask(CommandSend commandSend,String cron);
-
-    ReturnInfo callBack(CommandSend commandSend);
+    ReturnInfo<String> addTimingTask(CommandSend commandSend,String cron);
 
     ReturnInfo removeTimingTask(String taskName);
 
