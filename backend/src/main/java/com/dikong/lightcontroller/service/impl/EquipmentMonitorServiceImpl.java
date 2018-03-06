@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import tk.mybatis.mapper.entity.Example;
+
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.EquipmentMonitorDao;
@@ -17,18 +19,16 @@ import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.CmdRes;
+import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
-import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
-
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -57,7 +57,6 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
 
     @Override
     public ReturnInfo add(EquipmentMonitor equipmentMonitor) {
-        equipmentMonitor.setPanelId(AuthCurrentUser.getCurrentProjectId());
         equipmentMonitor.setCreateBy(AuthCurrentUser.getUserId());
         equipmentMonitor.setProjectId(AuthCurrentUser.getCurrentProjectId());
         if (equipmentMonitor.getMonitorType() == 1) {
@@ -72,9 +71,8 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 if (!value.isSuccess()) {
                     value.setData("0");
                 }
-                equipmentMonitor.setCurrentValue(
-                        new BigDecimal(String.valueOf(new BigDecimal(value.getData())
-                                .multiply(equipmentMonitor.getFactor()).doubleValue())));
+                equipmentMonitor.setCurrentValue(new BigDecimal(String.valueOf(new BigDecimal(value
+                        .getData()).multiply(equipmentMonitor.getFactor()).doubleValue())));
             }
         } else {
             equipmentMonitor.setCurrentValue(new BigDecimal(SwitchEnum.CLOSE.getCode()));
