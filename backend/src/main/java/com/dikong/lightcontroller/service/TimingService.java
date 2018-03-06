@@ -4,6 +4,7 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Holiday;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.vo.BoardList;
+import com.dikong.lightcontroller.vo.CommandSend;
 import com.dikong.lightcontroller.vo.TimeOrdinaryNodeAdd;
 import com.dikong.lightcontroller.vo.TimeSpecifiedNodeAdd;
 import com.dikong.lightcontroller.vo.TimingList;
@@ -44,4 +45,6 @@ public interface TimingService {
     ReturnInfo<Timing> getOrdinary(Long id);
 
     ReturnInfo holidayTask();
+
+    ReturnInfo callBack(CommandSend commandSend);
 }
