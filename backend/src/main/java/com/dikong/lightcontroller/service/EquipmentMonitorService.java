@@ -20,4 +20,5 @@ public interface EquipmentMonitorService {
 
     public ReturnInfo refreshStatus(Integer type, Integer panelId);
 
+    public ReturnInfo sourceList();
 }
