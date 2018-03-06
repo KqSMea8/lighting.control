@@ -67,16 +67,17 @@ public class HistoryServiceImpl implements HistoryService {
     public ReturnInfo updateHistory(BaseSysVar sysVar) {
         History history = new History();
         if (BaseSysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
-            history.setVarId(sysVar.getId());
+//            history.setVarId(sysVar.getId());
             history.setVarType(History.SEQUENCE_TYPE);
         } else if (BaseSysVar.GROUP.equals(sysVar.getSysVarType())) {
-            history.setVarId(sysVar.getId());
+//            history.setVarId(sysVar.getId());
             history.setVarType(History.GROUP_TYPE);
         } else {
-            // 变量id
-            history.setVarId(sysVar.getVarId());
+
             history.setVarType(History.REGISTER_TYPE);
         }
+        // 变量id
+        history.setVarId(sysVar.getVarId());
         history.setVarValue(sysVar.getVarValue());
         updateHistory(history);
         return ReturnInfo.create(CodeEnum.SUCCESS);

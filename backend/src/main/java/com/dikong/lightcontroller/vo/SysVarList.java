@@ -27,6 +27,9 @@ public class SysVarList {
     private String varValue;
     //更新时间
     private Date varTime;
+    //变量id
+    private Long varId;
+
 
     private Integer itemType;
 
@@ -92,5 +95,13 @@ public class SysVarList {
 
     public void setItemType(Integer itemType) {
         this.itemType = itemType;
+    }
+
+    public Long getVarId() {
+        return varId;
+    }
+
+    public void setVarId(Long varId) {
+        this.varId = varId;
     }
 }

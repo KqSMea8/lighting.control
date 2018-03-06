@@ -28,10 +28,10 @@ public interface HolidayDAO {
             + " (#{item.holidayTime},#{item.projId},#{item.startTask}) " + "</foreach>" + "</script>"})
     int insertList(@Param("list") List<Holiday> holidays);
 
-    @Select({"<script>" + "select * from holiday where holiday_time in "
+    @Select({"<script>" + "select * from holiday where proj_id=#{projId} AND holiday_time in "
             + "<foreach collection=\"list\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
             + "#{item}" + "</foreach>" + "</script>"})
-    List<Holiday> selectAllHoliday(@Param("list") List<String> weekTimes);
+    List<Holiday> selectAllHoliday(@Param("list") List<String> weekTimes,@Param("projId")Integer projId);
 
     @Select({"select count(0) from holiday where holiday_time=#{today} AND proj_id=#{projId}"})
     int selectTodayIsHoliday(@Param("today")String today,@Param("projId")int projId);

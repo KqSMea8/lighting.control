@@ -156,6 +156,7 @@ public class SysVarServiceImpl implements SysVarService {
                     varList.setVarValue(sysVar.getVarValue());
                     varList.setVarTime(sysVar.getUpdateTime());
                     varList.setItemType(sysVar.getSysVarType());
+                    varList.setVarId(sysVar.getVarId());
                     sysVarLists.add(varList);
                 }
                 pageNation = ReturnInfo.create(sysVarList);
@@ -175,6 +176,7 @@ public class SysVarServiceImpl implements SysVarService {
                     varList.setVarValue(reg.getRegisValue());
                     varList.setVarTime(reg.getUpdateTime());
                     varList.setItemType(History.REGISTER_TYPE);
+                    varList.setVarId(reg.getId());
                     sysVarLists.add(varList);
                 }
                 pageNation = ReturnInfo.create(registers);
