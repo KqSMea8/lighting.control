@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
+import io.swagger.annotations.Api;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,8 +13,6 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
-
-import io.swagger.annotations.Api;
 
 /**
  * @author huangwenjun
@@ -69,8 +69,15 @@ public class MonitorController {
         return monitorService.refreshStatus(type, panelId);
     }
 
-    @RequestMapping("/source/list")
-    public ReturnInfo sourceList() {
-        return monitorService.sourceList();
+    @RequestMapping("/source/list/{dtu-id}")
+    public ReturnInfo sourceList(@PathVariable("dtu-id") Integer dtuId) {
+        if (dtuId == null) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        if (dtuId == 0) {
+            return monitorService.sourceList();
+        } else {
+            return monitorService.sourceList(dtuId);
+        }
     }
 }

@@ -176,7 +176,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public ReturnInfo add(User user) {
         Example example = new Example(User.class);
-        example.createCriteria().andEqualTo("userName", user.getUserName());
+        example.createCriteria().andEqualTo("userName", user.getUserName())
+                .andEqualTo("isDelete", 1);
         List<User> users = userDao.selectByExample(example);
         if (users.size() > 0) {
             return ReturnInfo.create(CodeEnum.USER_EXIST);
