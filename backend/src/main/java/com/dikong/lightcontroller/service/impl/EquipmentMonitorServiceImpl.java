@@ -84,6 +84,9 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 }
                 equipmentMonitor.setCurrentValue(new BigDecimal(value.getData()));
             } else {
+                if (equipmentMonitor.getSourceType() != EquipmentMonitor.DEVICE_TYPE) {
+                    equipmentMonitor.setValueType("BV");
+                }
                 CmdRes<String> value = cmdService.readOneAnalog(equipmentMonitor.getSourceId());
                 if (!value.isSuccess()) {
                     value.setData("0");
@@ -214,14 +217,14 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     sysVar.setSysVarType(2);
                     sysVar.setVarValue(value);
                     sysVarService.updateSysVar(sysVar);
-                    monitor.setCurrentValue(new BigDecimal(value));
-                    monitorDao.updateByPrimaryKeySelective(monitor);
                     break;
 
                 default:
                     break;
             }
         }
+        monitor.setCurrentValue(new BigDecimal(value));
+        monitorDao.updateByPrimaryKeySelective(monitor);
         Map<String, String> result = new HashMap<String, String>();
         result.put("success", String.valueOf(sendResult[0]));
         result.put("fail", String.valueOf(sendResult[1]));
