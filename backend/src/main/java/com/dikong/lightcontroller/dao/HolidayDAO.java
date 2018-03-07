@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -25,17 +26,24 @@ public interface HolidayDAO {
 
     @Insert({"<script>" + "insert into holiday (holiday_time,proj_id,start_task) values "
             + "<foreach collection=\"list\" index=\"index\" item=\"item\" separator=\",\"> "
-            + " (#{item.holidayTime},#{item.projId},#{item.startTask}) " + "</foreach>" + "</script>"})
+            + " (#{item.holidayTime},#{item.projId},#{item.startTask}) " + "</foreach>"
+            + "</script>"})
     int insertList(@Param("list") List<Holiday> holidays);
 
     @Select({"<script>" + "select * from holiday where proj_id=#{projId} AND holiday_time in "
             + "<foreach collection=\"list\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
             + "#{item}" + "</foreach>" + "</script>"})
-    List<Holiday> selectAllHoliday(@Param("list") List<String> weekTimes,@Param("projId")Integer projId);
+    List<Holiday> selectAllHoliday(@Param("list") List<String> weekTimes,
+            @Param("projId") Integer projId);
 
     @Select({"select count(0) from holiday where holiday_time=#{today} AND proj_id=#{projId}"})
-    int selectTodayIsHoliday(@Param("today")String today,@Param("projId")int projId);
+    int selectTodayIsHoliday(@Param("today") String today, @Param("projId") int projId);
 
-    @Select({"select * from holiday where proj_id=#{projId} AND holiday_time like concat(#{time},'%')"})
-    List<Holiday> selectHoliday(@Param("time") String time,@Param("projId") Integer projId);
+    @Select({
+            "select * from holiday where proj_id=#{projId} AND holiday_time like concat(#{time},'%')"})
+    List<Holiday> selectHoliday(@Param("time") String time, @Param("projId") Integer projId);
+
+
+    @Delete({" delete from holiday where holiday_time=#{time}"})
+    int deleteHoliday(@Param("time") String time);
 }

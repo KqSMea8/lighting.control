@@ -54,8 +54,8 @@ public interface GroupDAO{
     @Select({"select group_code from `group` where id=#{id}"})
     String selectCodeById(@Param("id") Long id);
 
-    @Select({"select id,group_name,group_code from `group` where proj_id=#{projId}"})
-    List<Group> selectByProjId(@Param("projId")Integer projId);
+    @Select({"select id,group_name,group_code from `group` where proj_id=#{projId} AND is_delete=#{isDelete}"})
+    List<Group> selectByProjId(@Param("projId")Integer projId,@Param("isDelete")Byte isDelete);
 
 
     @Select({"select count(0) from `group` where proj_id=#{projId} and group_name=#{groupName} and is_delete=#{isDelete}"})

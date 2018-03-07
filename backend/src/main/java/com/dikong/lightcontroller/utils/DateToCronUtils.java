@@ -68,8 +68,8 @@ public class DateToCronUtils {
             if (builder.length() > 0) {
                 builder.append(",");
             }
-            if (Integer.valueOf(w) == 6) {
-                builder.append("7");
+            if (Integer.valueOf(w) == 7) {
+                builder.append("1");
                 continue;
             }
             int w_1 = Integer.valueOf(w) + 1;

@@ -200,71 +200,80 @@ public class SysVarServiceImpl implements SysVarService {
         example.createCriteria().andEqualTo("isDelete", Timing.DEL_NO).andEqualTo("projId", projId);
         List<Timing> timings = timingDAO.selectByExample(example);
         if (BaseSysVar.OPEN_SYS_VALUE.equals(value) && !CollectionUtils.isEmpty(timings)) {
-            for (Timing item : timings) {
-                ReturnInfo<String> addTimingTask = null;
-                if (Timing.ORDINARY_NODE.equals(item.getNodeType())) {
-                    String weekList = item.getWeekList();
-                    String nodeContentRunTime = item.getNodeContentRunTime();
-                    String cron = DateToCronUtils.cronFormtHHssMM(nodeContentRunTime, weekList);
-                    CommandSend commandSend = new CommandSend();
-                    commandSend.setTimingId(item.getId());
-                    commandSend.setVarIdS(seachAllRegisId(item, value));
-                    commandSend.setProjId(projId);
-                    addTimingTask = taskService.addTimingTask(commandSend, cron);
-                    timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
-                } else if (Timing.SPECIFIED_NODE.equals(item.getNodeType())) {
-                    String monthList = item.getMonthList();
-                    if (null != monthList && !monthList.isEmpty()) {
-                        String[] month = monthList.split(",");
-                        for (String ymd : month) {
-                            String date = ymd + " " + item.getNodeContentRunTime();
-                            String cron = DateToCronUtils.cronFormt(date);
-                            CommandSend commandSend = new CommandSend();
-                            commandSend.setTimingId(item.getId());
-                            commandSend.setVarIdS(seachAllRegisId(item, value));
-                            commandSend.setProjId(projId);
-                            addTimingTask = taskService.addTimingTask(commandSend, cron);
-                            timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
+            List<String> taskNames = new ArrayList<>();
+            try {
+                for (Timing item : timings) {
+                    ReturnInfo<String> addTimingTask = null;
+                    if (Timing.ORDINARY_NODE.equals(item.getNodeType())) {
+                        String weekList = item.getWeekList();
+                        String nodeContentRunTime = item.getNodeContentRunTime();
+                        String cron = DateToCronUtils.cronFormtHHssMM(nodeContentRunTime, weekList);
+                        CommandSend commandSend = new CommandSend();
+                        commandSend.setTimingId(item.getId());
+                        commandSend.setVarIdS(seachAllRegisId(item, value));
+                        commandSend.setProjId(projId);
+                        addTimingTask = taskService.addTimingTask(commandSend, cron);
+                        timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
+                        taskNames.add(addTimingTask.getData());
+                    } else if (Timing.SPECIFIED_NODE.equals(item.getNodeType())) {
+                        String monthList = item.getMonthList();
+                        if (null != monthList && !monthList.isEmpty()) {
+                            String[] month = monthList.split(",");
+                            for (String ymd : month) {
+                                String date = ymd + " " + item.getNodeContentRunTime();
+                                String cron = DateToCronUtils.cronFormt(date);
+                                CommandSend commandSend = new CommandSend();
+                                commandSend.setTimingId(item.getId());
+                                commandSend.setVarIdS(seachAllRegisId(item, value));
+                                commandSend.setProjId(projId);
+                                addTimingTask = taskService.addTimingTask(commandSend, cron);
+                                timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
+                                taskNames.add(addTimingTask.getData());
+                            }
                         }
                     }
                 }
-            }
-            // 如果是指定节假日,就把所有变量都设为0
-            String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-            int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
-            if (todayIsHoliday > 0) {
-                List<CmdSendDto> allRegis = new ArrayList<>();
-                timings.forEach(item -> {
-                    List<CmdSendDto> regisId = seachAllRegisId(item, BaseSysVar.CLOSE_SYS_VALUE);
-                    allRegis.addAll(regisId);
-                });
-                cmdService.writeSwitch(allRegis);
-            } else {
-                // 马上执行最近的时间点,
-                String weekNowDate = TimeWeekUtils.getWeekNowDate();
-                String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-                List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
-                if (!CollectionUtils.isEmpty(timingList)) {
-                    Map<Long, Timing> groupTime = new HashMap<>();
-                    Map<Long, Timing> deviceTime = new HashMap<>();
-                    for (Timing timing : timingList) {
-                        if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
-                            groupTime.put(timing.getRunId(), timing);
-                        } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
-                            deviceTime.put(timing.getRunId(), timing);
+                // 如果是指定节假日,就把所有变量都设为0
+                String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
+                int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
+                if (todayIsHoliday > 0) {
+                    List<CmdSendDto> allRegis = new ArrayList<>();
+                    timings.forEach(item -> {
+                        List<CmdSendDto> regisId =
+                                seachAllRegisId(item, BaseSysVar.CLOSE_SYS_VALUE);
+                        allRegis.addAll(regisId);
+                    });
+                    cmdService.writeSwitch(allRegis);
+                } else {
+                    // 马上执行最近的时间点,
+                    String weekNowDate = TimeWeekUtils.getWeekNowDate();
+                    String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
+                    List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
+                    if (!CollectionUtils.isEmpty(timingList)) {
+                        Map<Long, Timing> groupTime = new HashMap<>();
+                        Map<Long, Timing> deviceTime = new HashMap<>();
+                        for (Timing timing : timingList) {
+                            if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
+                                groupTime.put(timing.getRunId(), timing);
+                            } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
+                                deviceTime.put(timing.getRunId(), timing);
+                            }
+                        }
+                        // 群组
+                        for (Map.Entry<Long, Timing> map : groupTime.entrySet()) {
+                            List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
+                            cmdService.writeSwitch(thenRunRegis);
+                        }
+                        // 设备
+                        for (Map.Entry<Long, Timing> map : deviceTime.entrySet()) {
+                            List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
+                            cmdService.writeSwitch(thenRunRegis);
                         }
                     }
-                    // 群组
-                    for (Map.Entry<Long, Timing> map : groupTime.entrySet()) {
-                        List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
-                        cmdService.writeSwitch(thenRunRegis);
-                    }
-                    // 设备
-                    for (Map.Entry<Long, Timing> map : deviceTime.entrySet()) {
-                        List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
-                        cmdService.writeSwitch(thenRunRegis);
-                    }
                 }
+            } catch (Exception e) {
+                taskNames.forEach(item -> taskService.removeTimingTask(item));
+                throw e;
             }
         } else if (BaseSysVar.CLOSE_SYS_VALUE.equals(value) && !CollectionUtils.isEmpty(timings)) {
             List<CmdSendDto> allRegis = new ArrayList<>();

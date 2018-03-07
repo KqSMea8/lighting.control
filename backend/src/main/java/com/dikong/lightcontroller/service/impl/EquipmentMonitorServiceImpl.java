@@ -279,7 +279,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardLists.add(boardList);
             }
         }
-        List<Group> groups = groupDAO.selectByProjId(projId);
+        List<Group> groups = groupDAO.selectByProjId(projId,Group.DEL_NO);
         if (!CollectionUtils.isEmpty(groups)) {
             for (Group group : groups) {
                 BoardList boardList = new BoardList();

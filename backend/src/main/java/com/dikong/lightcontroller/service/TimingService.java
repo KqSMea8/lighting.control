@@ -36,6 +36,8 @@ public interface TimingService {
 
     ReturnInfo addHolidayNode(String[] holidayTimes);
 
+    ReturnInfo delHolidayNode(String time);
+
     ReturnInfo<TimingView> timingView(String viewTime) throws ParseException;
 
     ReturnInfo<List<BoardList>> boardList();

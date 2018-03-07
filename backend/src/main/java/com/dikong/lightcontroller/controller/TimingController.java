@@ -83,7 +83,7 @@ public class TimingController {
     public ReturnInfo addOrdinaryNode(@RequestBody @Valid TimeOrdinaryNodeAdd ordinaryNodeAdd,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return ValidateLogUtil.paramError(bindingResult,LOG);
+            return ValidateLogUtil.paramError(bindingResult, LOG);
         }
         return timingService.addOrdinaryNode(ordinaryNodeAdd);
     }
@@ -91,7 +91,7 @@ public class TimingController {
     @ApiOperation(value = "获取修改普通 节点")
     @GetMapping(path = "/timing/ordinary/{id}")
     public ReturnInfo getOrdinary(@PathVariable("id") Long id) {
-        if (id == 0){
+        if (id == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return null;
@@ -128,6 +128,13 @@ public class TimingController {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return timingService.addHolidayNode(holidayTimes);
+    }
+
+
+    @ApiOperation(value = "删除指定节假日")
+    @DeleteMapping(path = "/timing/del/holiday/{time}")
+    public ReturnInfo delHoliday(@PathVariable("time") String time) {
+        return timingService.delHolidayNode(time);
     }
 
     @ApiOperation(value = "获取指定年月的指定节假日")

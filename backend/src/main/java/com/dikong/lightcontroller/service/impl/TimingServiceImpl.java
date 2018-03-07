@@ -318,6 +318,12 @@ public class TimingServiceImpl implements TimingService {
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
+    @Override
+    public ReturnInfo delHolidayNode(String time) {
+        holidayDAO.deleteHoliday(time);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
 
     @Override
     public ReturnInfo<TimingView> timingView(String viewTime) throws ParseException {
@@ -380,7 +386,7 @@ public class TimingServiceImpl implements TimingService {
                 boardLists.add(boardList);
             }
         }
-        List<Group> groups = groupDAO.selectByProjId(projId);
+        List<Group> groups = groupDAO.selectByProjId(projId,Group.DEL_NO);
         if (!CollectionUtils.isEmpty(groups)) {
             for (Group group : groups) {
                 BoardList boardList = new BoardList();

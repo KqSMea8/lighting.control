@@ -15,29 +15,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
-import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.HolidayDAO;
 import com.dikong.lightcontroller.dao.TimingCronDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.QuartzJobDto;
-import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.api.TaskServiceApi;
 import com.dikong.lightcontroller.utils.DateToCronUtils;
-import com.dikong.lightcontroller.utils.TimeWeekUtils;
 import com.dikong.lightcontroller.vo.CommandSend;
 
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * <p>
@@ -138,6 +133,7 @@ public class TaskServiceImpl implements TaskService {
         Set<QuartzJobDto.TriggerDos> triggerDosSet = new HashSet<>();
         triggerDosSet.add(triggerDos);
         quartzJobDto.setTriggerDOs(triggerDosSet);
+        LOG.info("发起添加定时任务的请求,请求参数为{}", JSON.toJSONString(quartzJobDto));
         boolean addSuccess = taskServiceApi.addTask(quartzJobDto);
         if (addSuccess) {
             return quartzJobDto;
@@ -157,14 +153,14 @@ public class TaskServiceImpl implements TaskService {
         String callBack = deviceCallBackUrl + "/" + id;
         QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,
                 DEFAULT_DEVICE_JOB_GROUP, DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, callBack);
-        LOG.info("添加设置状态命令成功,返回值为{}",JSON.toJSONString(task));
+        LOG.info("添加设置状态命令成功,返回值为{}", JSON.toJSONString(task));
         return ReturnInfo.createReturnSuccessOne(task);
     }
 
     @Override
     public ReturnInfo removeDeviceTask(String taskName) {
         boolean delTask = removeTask(taskName, DEFAULT_DEVICE_JOB_GROUP);
-        LOG.info("删除设置状态命令成功,返回值为{}",delTask);
+        LOG.info("删除设置状态命令成功,返回值为{}", delTask);
         return ReturnInfo.createReturnSuccessOne(delTask);
     }
 
@@ -189,11 +185,10 @@ public class TaskServiceImpl implements TaskService {
             String jsonString = JSON.toJSONString(quartzJobDto);
             timingCron.setCronJson(jsonString);
             timingCronDAO.insertSelective(timingCron);
-            LOG.info("添加时序定时任务成功,返回值为{}",jsonString);
+            LOG.info("添加时序定时任务成功,返回值为{}", jsonString);
         }
         return ReturnInfo.create(uuid);
     }
-
 
 
 
