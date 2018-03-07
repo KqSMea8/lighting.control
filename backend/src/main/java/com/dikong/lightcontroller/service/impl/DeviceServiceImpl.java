@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.BussinessCode;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
@@ -120,7 +121,8 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     @Transactional
     public ReturnInfo addDevice(DeviceAdd deviceAdd) {
-        int existNum = deviceDAO.selectByDtuIdAndCode(deviceAdd.getDtuId(), deviceAdd.getCode(),Device.DEL_NO);
+        int existNum = deviceDAO.selectByDtuIdAndCode(deviceAdd.getDtuId(), deviceAdd.getCode(),
+                Device.DEL_NO);
         if (existNum > 0) {
             return ReturnInfo.create(BussinessCode.DEVICE_EXIST.getCode(),
                     BussinessCode.DEVICE_EXIST.getMsg());
@@ -266,26 +268,30 @@ public class DeviceServiceImpl implements DeviceService {
         } else {
             readResult = cmdService.readOneAnalog(register.getId());
         }
+        LOG.info("设备状态读取返回值为{}", JSON.toJSONString(readResult));
         Device device = deviceDAO.selectDeviceById(deviceId);
         Device update = new Device();
-        if (null != readResult && !readResult.isSuccess()) {
-            // 掉线
-            if (Device.ONLINE.equals(device.getStatus())) {
+        if (null != readResult && readResult.isSuccess()) {
+            // 取到返回值,在线
+            if (Device.OFFLINE.equals(device.getStatus())) {
                 update.setDisconnectCount(
                         device.getDisconnectCount() == null ? 0 : device.getDisconnectCount() + 1);
-                update.setUseTimes(device.getUseTimes() == null ? 0
-                        : device.getUseTimes()
-                                + calLastedTime(device.getLastOfflineTime(), new Date()));
-                update.setStatus(Device.OFFLINE);
+                update.setStatus(Device.ONLINE);
                 update.setLastOfflineTime(new Date());
             }
-        } else if (Device.OFFLINE.equals(device.getStatus())) {
-            update.setConnectCount(
-                    device.getConnectCount() == null ? 0 : device.getConnectCount() + 1);
             update.setUseTimes(device.getUseTimes() == null ? 0
-                    : device.getUseTimes() + calLastedTime(device.getLastOnlineTime(), new Date()));
-            update.setStatus(Device.ONLINE);
-            update.setLastOnlineTime(new Date());
+                    : device.getUseTimes()
+                            + calLastedTime(device.getLastOfflineTime(), new Date()));
+        } else {
+            if (Device.ONLINE.equals(device.getStatus())) {
+                update.setConnectCount(
+                        device.getConnectCount() == null ? 0 : device.getConnectCount() + 1);
+                update.setUseTimes(device.getUseTimes() == null ? 0
+                        : device.getUseTimes()
+                                + calLastedTime(device.getLastOnlineTime(), new Date()));
+                update.setStatus(Device.OFFLINE);
+                update.setLastOnlineTime(new Date());
+            }
         }
         if (null != update.getStatus()) {
             update.setId(deviceId);
