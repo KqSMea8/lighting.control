@@ -8,27 +8,35 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
-import tk.mybatis.mapper.entity.Example;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.EquipmentMonitorDao;
+import com.dikong.lightcontroller.dao.GroupDAO;
 import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
+import com.dikong.lightcontroller.dao.SysVarDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.CmdRes;
 import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
+import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
+import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
+import com.dikong.lightcontroller.vo.BoardList;
+import com.dikong.lightcontroller.vo.DeviceBoardList;
+
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -55,6 +63,15 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     @Autowired
     private SysVarService sysVarService;
 
+    @Autowired
+    private GroupDAO groupDAO;
+
+    @Autowired
+    private DeviceDAO deviceDAO;
+
+    @Autowired
+    private SysVarDAO sysVarDAO;
+
     @Override
     public ReturnInfo add(EquipmentMonitor equipmentMonitor) {
         equipmentMonitor.setCreateBy(AuthCurrentUser.getUserId());
@@ -71,8 +88,9 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 if (!value.isSuccess()) {
                     value.setData("0");
                 }
-                equipmentMonitor.setCurrentValue(new BigDecimal(String.valueOf(new BigDecimal(value
-                        .getData()).multiply(equipmentMonitor.getFactor()).doubleValue())));
+                equipmentMonitor.setCurrentValue(
+                        new BigDecimal(String.valueOf(new BigDecimal(value.getData())
+                                .multiply(equipmentMonitor.getFactor()).doubleValue())));
             }
         } else {
             equipmentMonitor.setCurrentValue(new BigDecimal(SwitchEnum.CLOSE.getCode()));
@@ -179,7 +197,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     break;
                 case 3:
                     // 查询时序信息和ID
-                    Timing timing = timingDao.selectByPrimaryKey((long) sourceId);
+                    Timing timing = timingDao.selectByLastNodeName(sourceId, (byte) 1);
                     if (timing.getRunType() == 1) {// 群组
                         long groupId = timing.getRunVar();// 群组id
                         List<GroupDeviceMiddle> middles2 =
@@ -240,5 +258,61 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public ReturnInfo sourceList() {
+        List<BoardList> boardLists = new ArrayList<>();
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId);
+        if (!CollectionUtils.isEmpty(deviceBoardLists)) {
+            for (DeviceBoardList deviceBoardList : deviceBoardLists) {
+                BoardList boardList = new BoardList();
+                boardList.setDeviceIdOrGroupId(deviceBoardList.getId());
+                boardList.setDtuOrSysName(deviceBoardList.getDtuName());
+                boardList.setDeviceOrGroupName(deviceBoardList.getDeviceName());
+                boardList.setDeviceCodeOrGroup(
+                        Integer.parseInt(deviceBoardList.getDeviceCode()) + "");
+                boardList.setDeviceLocation(
+                        boardList.getDtuOrSysName() + ":ID" + boardList.getDeviceCodeOrGroup());
+                boardList.setItemType(EquipmentMonitor.DEVICE_TYPE);
+                boardLists.add(boardList);
+            }
+        }
+        List<Group> groups = groupDAO.selectByProjId(projId);
+        if (!CollectionUtils.isEmpty(groups)) {
+            for (Group group : groups) {
+                BoardList boardList = new BoardList();
+                boardList.setDeviceIdOrGroupId(group.getId());
+                boardList.setDtuOrSysName("SYS");
+                boardList.setDeviceOrGroupName(group.getGroupName());
+                boardList.setDeviceCodeOrGroup("Group" + group.getGroupCode());
+                boardList.setDeviceLocation(
+                        boardList.getDtuOrSysName() + ":" + boardList.getDeviceCodeOrGroup());
+                boardList.setItemType(EquipmentMonitor.GROUP_TYPE);
+                boardLists.add(boardList);
+            }
+        }
+        List<SysVar> sysVars = sysVarDAO.selectAllByProjIdAndType(projId, 1);
+        if (!CollectionUtils.isEmpty(sysVars)) {
+            for (SysVar sysVar : sysVars) {
+                BoardList boardList = new BoardList();
+                boardList.setDeviceIdOrGroupId((long) sysVar.getProjId());
+                boardList.setDtuOrSysName("SYS");
+                boardList.setDeviceOrGroupName(sysVar.getVarName());
+                boardList.setDeviceCodeOrGroup(sysVar.getVarName());
+                boardList.setDeviceLocation("SYS:" + sysVar.getVarName());
+                boardList.setItemType(EquipmentMonitor.FREQUENCE_TYPE);
+                boardLists.add(boardList);
+            }
+        }
+        // 1->单个设备 2->群组 3->时序
+        // // 群组类型
+        // public static final Integer GROUP_TYPE = 1;
+        // // 设备类型
+        // public static final Integer DEVICE_TYPE = 2;
+        // // 变量类型
+        // public static final Integer REGISTER_TYPE = 3;
+        return ReturnInfo.createReturnSuccessOne(boardLists);
     }
 }

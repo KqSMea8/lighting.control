@@ -6,6 +6,9 @@ import javax.persistence.Id;
 
 public class EquipmentMonitor {
 
+    public static int DEVICE_TYPE = 1;
+    public static int GROUP_TYPE = 2;
+    public static int FREQUENCE_TYPE = 3;
     @Id
     private Integer monitorId;
     /**

@@ -362,7 +362,7 @@ public class TimingServiceImpl implements TimingService {
 
 
     @Override
-    public ReturnInfo<List<BoardList>> boardList() {
+    public ReturnInfo boardList() {
         List<BoardList> boardLists = new ArrayList<>();
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId);
