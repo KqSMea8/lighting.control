@@ -1,9 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
-import com.dikong.lightcontroller.service.SysVarService;
-import com.dikong.lightcontroller.service.TimingService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.service.DeviceService;
-import com.dikong.lightcontroller.service.TaskService;
+import com.dikong.lightcontroller.service.SysVarService;
+import com.dikong.lightcontroller.service.TimingService;
+import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.vo.CommandSend;
 
-import java.util.Date;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
  * <p>
@@ -49,6 +52,11 @@ public class TaskCallbackController {
     @Autowired
     private TimingService timingService;
 
+    @Autowired
+    private JedisPool jedisPool;
+
+    public static final String DEVICE_STATUS_KEY = "device.status.key";
+
     @PostMapping(path = "/command/send")
     public ReturnInfo commandSend(@RequestBody CommandSend commandSend) {
         LOG.info("时序控制任务回调,回调参数为{}",commandSend);
@@ -62,7 +70,9 @@ public class TaskCallbackController {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         LOG.info("设置状态查找回调,设备id为{}",deviceId);
-        return deviceService.conncationInfo(deviceId);
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        jedis.rpush(DEVICE_STATUS_KEY,String.valueOf(deviceId));
+        return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
     @ApiOperation(value = "节假日回调任务")

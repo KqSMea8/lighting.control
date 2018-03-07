@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import tk.mybatis.mapper.entity.Example;
+
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.ProjectDao;
@@ -17,8 +19,6 @@ import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.ProjectService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.github.pagehelper.PageHelper;
-
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -51,11 +51,12 @@ public class ProjectServiceImpl implements ProjectService {
         for (UserProject userProject : userProjects) {
             projectIds.add(userProject.getProjectId());
         }
-        if (projectIds.size() == 0) {
-            return ReturnInfo.create(CodeEnum.NOT_CONTENT);
-        }
         PageHelper.startPage(projectListReq.getPageNo(), projectListReq.getPageSize());
-        List<Project> projects = projectDao.projectList(projectIds);
+        List<Project> projects = new ArrayList<Project>();
+        if (projectIds.size() != 0) {
+            // return ReturnInfo.create(CodeEnum.NOT_CONTENT);
+            projects = projectDao.projectList(projectIds);
+        }
         return ReturnInfo.createReturnSucces(projects);
     }
 

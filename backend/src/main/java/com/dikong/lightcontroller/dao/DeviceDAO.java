@@ -9,13 +9,13 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
+import tk.mybatis.mapper.common.Mapper;
+
 import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.vo.DeviceAdd;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
 import com.dikong.lightcontroller.vo.DeviceOnlineList;
-
-import tk.mybatis.mapper.common.Mapper;
 
 /**
  * <p>
@@ -25,21 +25,20 @@ import tk.mybatis.mapper.common.Mapper;
  *
  * @author lengrongfu
  * @create 2018年01月20日下午1:50
- * @see
- *      </P>
+ * @see </P>
  */
 @Repository
 public interface DeviceDAO extends Mapper<Device> {
 
-    @Select({
-            "select id,external_id,name,code,model from device where dtu_id=#{dtuId} AND is_delete=#{isDelete}"})
+    @Select({"select id,external_id,name,code,model from device where dtu_id=#{dtuId} AND is_delete=#{isDelete}"})
     List<Device> selectAllByDtuId(@Param("dtuId") Long dtuId, @Param("isDelete") Byte isDelete);
 
     @Update({"update device set is_delete=#{isDelete} where id=#{id}"})
     int updateDeleteById(@Param("id") Long id, @Param("isDelete") Byte isDelete);
 
     @Select({"select count(0) from device where dtu_id=#{dtuId} AND code=#{code} AND is_delete=#{isDelete}"})
-    int selectByDtuIdAndCode(@Param("dtuId") Long dtuId, @Param("code") String code,@Param("isDelete")Byte isDelete);
+    int selectByDtuIdAndCode(@Param("dtuId") Long dtuId, @Param("code") String code,
+            @Param("isDelete") Byte isDelete);
 
     @Insert({"insert into device (dtu_id,external_id,name,code,model) "
             + "values (#{add.dtuId},#{add.externalId},#{add.name},#{add.code},#{add.model})"})
@@ -65,16 +64,18 @@ public interface DeviceDAO extends Mapper<Device> {
     List<DeviceDtu> selectByDeviceId(@Param("ids") List<Long> ids);
 
 
-    @Select({
-            "SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId}"})
+    @Select({"SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId}"})
     List<DeviceBoardList> selectNotIn(@Param("projId") Integer projId);
+
+    @Select({"SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId} and d.dtu_id=#{dtuId}"})
+    List<DeviceBoardList> selectByProjIdAndDutId(@Param("projId") Integer projId,
+            @Param("dtuId") Integer dtuId);
 
     @Select({"select status from device where id=#{id}"})
     Integer selectConntionStatus(@Param("id") Long id);
 
 
-    @Select({
-            "SELECT d.code AS `device_code`,dt.device AS `dtu_name` FROM device d LEFT JOIN dtu dt ON d.dtu_id=dt.id WHERE d.id=#{id}"})
+    @Select({"SELECT d.code AS `device_code`,dt.device AS `dtu_name` FROM device d LEFT JOIN dtu dt ON d.dtu_id=dt.id WHERE d.id=#{id}"})
     DeviceDtu selectById(@Param("id") Long id);
 
     @Select({"select model_file from device where id=#{id}"})

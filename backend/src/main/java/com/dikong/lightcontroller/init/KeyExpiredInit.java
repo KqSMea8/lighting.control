@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.init;
 
+import com.dikong.lightcontroller.listener.DeviceStatusListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,12 @@ public class KeyExpiredInit implements CommandLineRunner {
     @Autowired
     private Subscriber subscriber;
 
+    @Autowired
+    private DeviceStatusListener deviceStatusListener;
+
     @Override
     public void run(String... args) throws Exception {
         subscriber.subscriber();
+        deviceStatusListener.deviceStatusSearch();
     }
 }

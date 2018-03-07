@@ -11,19 +11,19 @@ package com.dikong.lightcontroller.vo;
  * @see </P>
  */
 public class BoardList {
-    //设备id
+    // 设备id
     private Long deviceIdOrGroupId;
-    //对外id
+    // 对外id
     private String externalId;
-    //dtu名字
+    // dtu名字
     private String dtuOrSysName;
-    //设备名称
+    // 设备名称
     private String deviceOrGroupName;
-    //设备id
+    // 设备id
     private String deviceCodeOrGroup;
-    //设备位置
+    // 设备位置
     private String deviceLocation;
-    //类型 是设备还是群组
+    // 类型 是设备还是群组
     private Integer itemType;
 
     public Long getDeviceIdOrGroupId() {
@@ -73,5 +73,13 @@ public class BoardList {
 
     public void setItemType(Integer itemType) {
         this.itemType = itemType;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 }
