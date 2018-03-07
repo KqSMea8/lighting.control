@@ -176,11 +176,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public ReturnInfo add(User user) {
         Example example = new Example(User.class);
-        example.createCriteria().andEqualTo("userName", user.getUserName())
-                .andEqualTo("isDelete", 1);
+        example.createCriteria().andEqualTo("userName", user.getUserName());
         List<User> users = userDao.selectByExample(example);
         if (users.size() > 0) {
-            return ReturnInfo.create(CodeEnum.USER_EXIST);
+            User oldUser = users.get(0);
+            if (oldUser.getIsDelete() == Constant.USER.NOTDELETE) {
+                return ReturnInfo.create(CodeEnum.USER_EXIST);
+            }
+            user.setUserId(oldUser.getUserId());
+            user.setIsDelete(Constant.USER.NOTDELETE);
+            userDao.updateByPrimaryKeySelective(user);
+            return ReturnInfo.create(CodeEnum.SUCCESS);
         }
         user.setPassword(MD5Util.getMD5Str(user.getPassword()));
         userDao.insertSelective(user);

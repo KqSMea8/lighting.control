@@ -21,4 +21,8 @@ public interface Constant {
     interface ROLE {
         int SUPER_MANAGER_ID = 1;
     }
+    interface USER {
+        int NOTDELETE = 1;// 未删除
+        int ISDELETE = 2;// 已删除
+    }
 }

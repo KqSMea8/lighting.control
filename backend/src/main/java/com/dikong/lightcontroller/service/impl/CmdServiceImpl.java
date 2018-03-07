@@ -244,7 +244,7 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<String>(false, sendCmdRes.getData());
         }
         // 判断是否成功
-        if (sendMsg.equals(sendCmdRes.getData())) {
+        if (sendMsg.equals(sendCmdRes.getData().toLowerCase())) {
             return new CmdRes<String>(true, sendCmdRes.getData());
         }
         return new CmdRes<String>(false, sendCmdRes.getData());
@@ -362,7 +362,7 @@ public class CmdServiceImpl implements CmdService {
         }
         if (readWriteEnum == ReadWriteEnum.WRITE) {
             // 判断是否成功
-            if (sendMsg.equals(sendCmdRes.getData())) {
+            if (sendMsg.equals(sendCmdRes.getData().toLowerCase())) {
                 return new CmdRes<String>(true, "true");
             } else {
                 return new CmdRes<String>(true, "false");
