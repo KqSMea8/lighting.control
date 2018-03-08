@@ -145,7 +145,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     result = cmdService.readOneAnalog(temp.getSourceId());
                 }
                 if (!result.isSuccess()) {
-                    return ReturnInfo.create(CodeEnum.ACCESS_REFULE, result.getData());
+                    return ReturnInfo.create(CodeEnum.ACCESS_REFULE, monitors);
                 }
                 if (StringUtils.isEmpty(result)) {
                     return ReturnInfo.create(CodeEnum.NOT_CONTENT);

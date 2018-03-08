@@ -218,11 +218,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ReturnInfo update(User user) {
-        user.setUpdateBy(AuthCurrentUser.getUserId());
-        if (!StringUtils.isEmpty(user.getPassword())) {
-            user.setPassword(MD5Util.getMD5Str(user.getPassword()));
+        Example example = new Example(User.class);
+        example.createCriteria().andEqualTo("userName", user.getUserName());
+        List<User> users = userDao.selectByExample(example);
+        if (users.size() > 0) {
+            User oldUser = users.get(0);
+            if (!oldUser.getUserId().equals(user.getUserId())) {
+                return ReturnInfo.create(CodeEnum.USER_EXIST);
+            }
+        }
+        if (StringUtils.isEmpty(user.getPassword())) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         } else {
-            user.setPassword(null);
+            user.setPassword(MD5Util.getMD5Str(user.getPassword()));
         }
         userDao.updateByPrimaryKeySelective(user);
         return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -301,5 +309,15 @@ public class UserServiceImpl implements UserService {
         example.createCriteria().andEqualTo("userId", userId);
         List<UserProject> userProjects = userProjectDao.selectByExample(example);
         return ReturnInfo.createReturnSuccessOne(userProjects);
+    }
+
+    @Override
+    public ReturnInfo changePwd(User user) {
+        user.setIsDelete(null);
+        user.setUserStatus(null);
+        user.setUserId(AuthCurrentUser.getUserId());
+        user.setPassword(MD5Util.getMD5Str(user.getPassword()));
+        userDao.updateByPrimaryKeySelective(user);
+        return ReturnInfo.createReturnSuccessOne(null);
     }
 }
