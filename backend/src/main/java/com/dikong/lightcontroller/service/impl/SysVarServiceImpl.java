@@ -249,7 +249,7 @@ public class SysVarServiceImpl implements SysVarService {
                     timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay, Timing.DEL_NO,
                             projId);
                     if (!CollectionUtils.isEmpty(timingList)) {
-                        return;
+                        break;
                     }
                 }
                 LOG.info("马上执行最近时间点:{}", JSON.toJSONString(timingList));
