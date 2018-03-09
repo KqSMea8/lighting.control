@@ -1,6 +1,8 @@
 package com.dikong.lightcontroller.config;
 
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +32,13 @@ public class BeanConfig {
         properties.setProperty("mappers", "com.dikong.lightcontroller.dao.EquipmentMonitorDao");
         configurer.setProperties(properties);
         return configurer;
+    }
+
+
+    @Bean
+    public BlockingQueue getQueue(){
+        BlockingQueue queue = new ArrayBlockingQueue(1024);
+        return queue;
     }
 
 

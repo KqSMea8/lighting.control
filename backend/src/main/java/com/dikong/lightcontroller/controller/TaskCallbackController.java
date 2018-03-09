@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +18,10 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.service.DeviceService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TimingService;
-import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.vo.CommandSend;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 /**
  * <p>
@@ -51,11 +49,11 @@ public class TaskCallbackController {
 
     @Autowired
     private TimingService timingService;
-
+    
     @Autowired
-    private JedisPool jedisPool;
+    private BlockingQueue queue;
 
-    public static final String DEVICE_STATUS_KEY = "device.status.key";
+//    public static final String DEVICE_STATUS_KEY = "device.status.key";
 
     @PostMapping(path = "/command/send")
     public ReturnInfo commandSend(@RequestBody CommandSend commandSend) {
@@ -65,13 +63,13 @@ public class TaskCallbackController {
 
 
     @GetMapping(path = "/device/status/{deviceId}")
-    public ReturnInfo deviceStatus(@PathVariable("deviceId") Long deviceId) {
+    public ReturnInfo deviceStatus(@PathVariable("deviceId") Long deviceId)
+            throws InterruptedException {
         if (null == deviceId || deviceId == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         LOG.info("设置状态查找回调,设备id为{}",deviceId);
-        Jedis jedis = new JedisProxy(jedisPool).createProxy();
-        jedis.rpush(DEVICE_STATUS_KEY,String.valueOf(deviceId));
+        queue.put(deviceId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

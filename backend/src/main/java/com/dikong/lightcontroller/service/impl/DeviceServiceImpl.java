@@ -140,7 +140,18 @@ public class DeviceServiceImpl implements DeviceService {
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
-    // l_1#wqweq$ht
+    @Override
+    public ReturnInfo updateDevice(DeviceAdd deviceAdd) {
+        Device device = new Device();
+        device.setId(deviceAdd.getId());
+        device.setExternalId(deviceAdd.getExternalId());
+        device.setName(deviceAdd.getName());
+        device.setCode(deviceAdd.getCode());
+        deviceDAO.updateByPrimaryKeySelective(device);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    //
     @Override
     public ReturnInfo uploadPointTableFile(MultipartFile multipartFile, Long id) {
         String filePath = environment.getProperty("file.path");
@@ -307,6 +318,30 @@ public class DeviceServiceImpl implements DeviceService {
         List<DeviceOnlineList> deviceOnlineLists =
                 deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
+            deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
+        }
+        return ReturnInfo.createReturnSucces(deviceOnlineLists);
+    }
+
+    @Override
+    public ReturnInfo<List<DeviceOnlineList>> onlineRefresh(BasePage basePage) {
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        PageHelper.startPage(basePage.getPageNo(), basePage.getPageSize());
+        List<DeviceOnlineList> deviceOnlineLists =
+                deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
+        List<Register> registerList = new ArrayList<>();
+        deviceOnlineLists.forEach(item->{
+            Register register =
+                    registerDAO.selectIdAndTypeByDeviceId(item.getDeviceId());
+            registerList.add(register);
+        });
+        List<String> result = cmdService.readMuchVar(registerList).getData();
+        int i = 0;
+        for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
+            String cmd = result.get(i);
+            if (cmd != null){
+                deviceOnlineList.setOnlineStatus(Device.ONLINE);
+            }
             deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
         }
         return ReturnInfo.createReturnSucces(deviceOnlineLists);

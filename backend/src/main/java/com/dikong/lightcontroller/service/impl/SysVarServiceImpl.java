@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +111,8 @@ public class SysVarServiceImpl implements SysVarService {
 
     @Override
     public ReturnInfo deleteSysVar(Long varId, Integer sysVarType) {
-        sysVarDAO.delete(varId, sysVarType);
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        sysVarDAO.delete(varId, sysVarType,projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -234,43 +236,51 @@ public class SysVarServiceImpl implements SysVarService {
                     }
                 }
                 // 如果是指定节假日,就把所有变量都设为0
-                String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-                int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
-                if (todayIsHoliday > 0) {
-                    List<CmdSendDto> allRegis = new ArrayList<>();
-                    timings.forEach(item -> {
-                        List<CmdSendDto> regisId =
-                                seachAllRegisId(item, BaseSysVar.CLOSE_SYS_VALUE);
-                        allRegis.addAll(regisId);
-                    });
-                    cmdService.writeSwitch(allRegis);
-                } else {
-                    // 马上执行最近的时间点,
-                    String weekNowDate = TimeWeekUtils.getWeekNowDate();
-                    String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-                    List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
-                    if (!CollectionUtils.isEmpty(timingList)) {
-                        Map<Long, Timing> groupTime = new HashMap<>();
-                        Map<Long, Timing> deviceTime = new HashMap<>();
-                        for (Timing timing : timingList) {
-                            if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
+                // String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
+                // int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay,
+                // projId);
+
+                // 马上执行最近的时间点,
+                String weekNowDate = TimeWeekUtils.getWeekNowDate();
+                String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
+                List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
+                LOG.info("马上执行最近时间点:{}", JSON.toJSONString(timingList));
+                if (!CollectionUtils.isEmpty(timingList)) {
+                    Map<Long, Timing> groupTime = new HashMap<>();
+                    Map<Long, Timing> deviceTime = new HashMap<>();
+                    for (Timing timing : timingList) {
+                        if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
+                            if (Timing.STOP_NO.equals(timing.getStopWork())) {
                                 groupTime.put(timing.getRunId(), timing);
-                            } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
+                            }
+                        } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
+                            if (Timing.STOP_NO.equals(timing.getStopWork())) {
                                 deviceTime.put(timing.getRunId(), timing);
                             }
                         }
-                        // 群组
-                        for (Map.Entry<Long, Timing> map : groupTime.entrySet()) {
-                            List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
-                            cmdService.writeSwitch(thenRunRegis);
-                        }
-                        // 设备
-                        for (Map.Entry<Long, Timing> map : deviceTime.entrySet()) {
-                            List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
-                            cmdService.writeSwitch(thenRunRegis);
-                        }
+                    }
+                    // 群组
+                    for (Map.Entry<Long, Timing> map : groupTime.entrySet()) {
+                        List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
+                        cmdService.writeSwitch(thenRunRegis);
+                    }
+                    // 设备
+                    for (Map.Entry<Long, Timing> map : deviceTime.entrySet()) {
+                        List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
+                        cmdService.writeSwitch(thenRunRegis);
                     }
                 }
+                // if (todayIsHoliday > 0) {
+                // List<CmdSendDto> allRegis = new ArrayList<>();
+                // timings.forEach(item -> {
+                // List<CmdSendDto> regisId =
+                // seachAllRegisId(item, BaseSysVar.CLOSE_SYS_VALUE);
+                // allRegis.addAll(regisId);
+                // });
+                // cmdService.writeSwitch(allRegis);
+                // } else {
+                //
+                // }
             } catch (Exception e) {
                 taskNames.forEach(item -> taskService.removeTimingTask(item));
                 throw e;

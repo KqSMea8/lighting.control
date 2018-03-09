@@ -40,7 +40,7 @@ public interface SysVarDAO {
     List<BaseSysVar> selectAll(@Param("sysVarType") Integer sysVarType);
 
     @Delete({"delete from sys_var where var_id=#{varId} AND sys_var_type=#{sysVarType}"})
-    int delete(@Param("varId") Long varId, @Param("sysVarType") Integer sysVarType);
+    int delete(@Param("varId") Long varId, @Param("sysVarType") Integer sysVarType,@Param("projId")Integer projId);
 
     @Select({"select * from sys_var where proj_id=#{projId}"})
     List<SysVar> selectAllByProjId(@Param("projId") Integer projId);

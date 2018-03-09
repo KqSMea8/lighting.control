@@ -44,6 +44,6 @@ public interface HolidayDAO {
     List<Holiday> selectHoliday(@Param("time") String time, @Param("projId") Integer projId);
 
 
-    @Delete({" delete from holiday where holiday_time=#{time}"})
-    int deleteHoliday(@Param("time") String time);
+    @Delete({" delete from holiday where holiday_time=#{time} and proj_id=#{projId}"})
+    int deleteHoliday(@Param("time") String time, @Param("projId") Integer projId);
 }

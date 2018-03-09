@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -74,6 +75,11 @@ public class DeviceController {
         return deviceService.addDevice(deviceAdd);
     }
 
+    @PutMapping(path = "/device/update")
+    public ReturnInfo updateDevice(@RequestBody DeviceAdd deviceAdd){
+        return deviceService.updateDevice(deviceAdd);
+    }
+
     /**
      * 上传点表文件 重复上传的时候就先去判断数据库是否存在，如果存在就看之前的是否变化，如果有就更新， 不存在就插入
      * 
@@ -118,5 +124,12 @@ public class DeviceController {
     @PostMapping(path = "/device/online")
     public ReturnInfo<List<DeviceOnlineList>> onlineList(@RequestBody BasePage basePage){
         return deviceService.online(basePage);
+    }
+
+
+    @ApiOperation(value = "在线设备状态,手动刷新")
+    @PostMapping(path = "/device/online/refresh")
+    public ReturnInfo<List<DeviceOnlineList>> onlineListRefresh(@RequestBody BasePage basePage){
+        return deviceService.onlineRefresh(basePage);
     }
 }

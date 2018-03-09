@@ -1,17 +1,16 @@
 package com.dikong.lightcontroller.service;
 
-import com.dikong.lightcontroller.dto.BasePage;
-import com.dikong.lightcontroller.entity.Device;
-import com.dikong.lightcontroller.entity.Dtu;
-import com.dikong.lightcontroller.vo.DeviceBoardList;
-import com.dikong.lightcontroller.vo.DeviceList;
-import com.dikong.lightcontroller.vo.DeviceOnlineList;
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.BasePage;
+import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.vo.DeviceAdd;
-
-import java.util.List;
+import com.dikong.lightcontroller.vo.DeviceBoardList;
+import com.dikong.lightcontroller.vo.DeviceList;
+import com.dikong.lightcontroller.vo.DeviceOnlineList;
 
 /**
  * <p>
@@ -33,6 +32,8 @@ public interface DeviceService {
 
     ReturnInfo addDevice(DeviceAdd deviceAdd);
 
+    ReturnInfo updateDevice(DeviceAdd deviceAdd);
+
     ReturnInfo uploadPointTableFile(MultipartFile multipartFile, Long id);
 
     ReturnInfo<List<Device>> idList(Long dtuId);
@@ -42,4 +43,6 @@ public interface DeviceService {
     ReturnInfo conncationInfo(Long id);
 
     ReturnInfo<List<DeviceOnlineList>> online(BasePage basePage);
+
+    ReturnInfo<List<DeviceOnlineList>> onlineRefresh(BasePage basePage);
 }

@@ -135,6 +135,7 @@ public class TaskServiceImpl implements TaskService {
         quartzJobDto.setTriggerDOs(triggerDosSet);
         LOG.info("发起添加定时任务的请求,请求参数为{}", JSON.toJSONString(quartzJobDto));
         boolean addSuccess = taskServiceApi.addTask(quartzJobDto);
+        LOG.info("添加时序定时任务成功,返回值为{}", addSuccess);
         if (addSuccess) {
             return quartzJobDto;
         }
@@ -185,7 +186,6 @@ public class TaskServiceImpl implements TaskService {
             String jsonString = JSON.toJSONString(quartzJobDto);
             timingCron.setCronJson(jsonString);
             timingCronDAO.insertSelective(timingCron);
-            LOG.info("添加时序定时任务成功,返回值为{}", jsonString);
         }
         return ReturnInfo.create(uuid);
     }

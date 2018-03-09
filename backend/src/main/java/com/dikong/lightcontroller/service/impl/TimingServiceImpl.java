@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dikong.lightcontroller.dao.SysVarDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +99,9 @@ public class TimingServiceImpl implements TimingService {
 
     @Autowired
     private CmdService cmdService;
+
+    @Autowired
+    private SysVarDAO sysVarDAO;
 
     @SuppressWarnings("all")
     @Override
@@ -230,12 +234,20 @@ public class TimingServiceImpl implements TimingService {
     @Override
     @Transactional
     public ReturnInfo deleteNode(Long id) {
+        int projId = AuthCurrentUser.getCurrentProjectId();
         timingDAO.updateDeleteById(id, Timing.DEL_YES);
         List<TimingCron> timingCrons = timingCronDAO.selectAllByTimingId(id);
         if (!CollectionUtils.isEmpty(timingCrons)) {
             for (TimingCron timingCron : timingCrons) {
                 taskService.removeTimingTask(timingCron.getTaskName());
             }
+        }
+        Timing timing = new Timing();
+        timing.setProjId(projId);
+        timing.setIsDelete(Timing.DEL_NO);
+        int count = timingDAO.selectCount(timing);
+        if (count == 1){
+            sysVarDAO.delete(BaseSysVar.SEQUENCE_VAR_ID,BaseSysVar.SEQUENCE,projId);
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -319,8 +331,16 @@ public class TimingServiceImpl implements TimingService {
     }
 
     @Override
+    @Transactional
     public ReturnInfo delHolidayNode(String time) {
-        holidayDAO.deleteHoliday(time);
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        List<Holiday> holidays = holidayDAO.selectHoliday(time, projId);
+        if (CollectionUtils.isEmpty(holidays)){
+            for (Holiday holiday : holidays) {
+                taskService.removeHolidayTask(holiday.getStartTask());
+            }
+        }
+        holidayDAO.deleteHoliday(time,projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
