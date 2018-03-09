@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
 import com.alibaba.fastjson.JSON;
+import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.dao.CmdRecordDao;
 import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
@@ -27,7 +32,9 @@ import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
+import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.OkhttpUtils;
+import com.dikong.lightcontroller.utils.RedisLockUtils;
 import com.dikong.lightcontroller.utils.cmd.CmdMsgUtils;
 import com.dikong.lightcontroller.utils.cmd.ReadWriteEnum;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
@@ -56,6 +63,9 @@ public class CmdServiceImpl implements CmdService {
 
     @Autowired
     private Environment envioroment;
+
+    @Autowired
+    private JedisPool jedisPool;
 
     @Override
     public CmdRes<String> readOneSwitch(long varId) {
@@ -218,11 +228,28 @@ public class CmdServiceImpl implements CmdService {
         req.put("cmd", sendMsg);
         LOG.info("发送信息：" + JSON.toJSONString(req));
         String response = "";
+        String requestId = UUID.randomUUID().toString();
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
         try {
+            int flag;
+            for (flag = 0; flag < Constant.CMD.LOCK_TIME_OUT; flag++) {
+                if (!RedisLockUtils.tryGetDistributedLock(jedis, dtu.getDeviceCode(), requestId,
+                        Constant.CMD.LOCK_TIME_OUT * 1000)) {
+                    Thread.sleep(1000);
+                } else {
+                    break;
+                }
+            }
+            if (flag == Constant.CMD.LOCK_TIME_OUT) {
+                return new CmdRes<String>(false, null);
+            }
             response =
                     OkhttpUtils.postFrom(envioroment.getProperty(serviceIpKey) + "/device/command",
                             req, null);
-        } catch (IOException e) {
+            if (!RedisLockUtils.releaseDistributedLock(jedis, dtu.getDeviceCode(), requestId)) {
+                LOG.info("解锁失败！dutCode:" + dtu.getDeviceCode() + " requestId：" + requestId);
+            }
+        } catch (Exception e) {
             String info = "发送命令异常" + e.toString();
             LOG.error(info);
             e.printStackTrace();
@@ -230,6 +257,7 @@ public class CmdServiceImpl implements CmdService {
             cmdRecordDao.insert(cmdRecord);
             return new CmdRes<String>(false, "发送命令异常");
         }
+
         LOG.info("命令发送响应：" + response);
         if (StringUtils.isEmpty(response)) {
             String info = "返回值为空";
@@ -249,7 +277,6 @@ public class CmdServiceImpl implements CmdService {
         }
         return new CmdRes<String>(false, sendCmdRes.getData());
     }
-
 
     @Override
     public boolean writeSwitch(List<CmdSendDto> allRegis) {
@@ -300,6 +327,7 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<String>(true, reqResult.getData());
         }
         return new CmdRes<String>(false, reqResult.getData());
+
     }
 
     private CmdRes<String> reqUtil(long varId, ReadWriteEnum readWriteEnum, int varNum) {
@@ -309,9 +337,33 @@ public class CmdServiceImpl implements CmdService {
         Device device = deviceDAO.selectDeviceById(register.getDeviceId());
         // 查询DTU信息
         Dtu dtu = dtuDao.selectDtuById(device.getDtuId());
+        String requestId = UUID.randomUUID().toString();
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        try {
+            int flag;
+            for (flag = 0; flag < Constant.CMD.LOCK_TIME_OUT; flag++) {
+                if (!RedisLockUtils.tryGetDistributedLock(jedis, dtu.getDeviceCode(), requestId,
+                        Constant.CMD.LOCK_TIME_OUT * 1000)) {
+                    Thread.sleep(1000);
+                } else {
+                    break;
+                }
+            }
+            if (flag == Constant.CMD.LOCK_TIME_OUT) {
+                return new CmdRes<String>(false, null);
+            }
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         // 查询一个变量当前值，默认为1
-        return reqUtil(dtu, device.getCode(), readWriteEnum, register.getRegisType(),
-                register.getRegisAddr(), varNum);
+        CmdRes<String> result =
+                reqUtil(dtu, device.getCode(), readWriteEnum, register.getRegisType(),
+                        register.getRegisAddr(), varNum);
+        if (!RedisLockUtils.releaseDistributedLock(jedis, dtu.getDeviceCode(), requestId)) {
+            LOG.info("解锁失败！dutCode:" + dtu.getDeviceCode() + " requestId：" + requestId);
+        }
+        return result;
     }
 
     private CmdRes<String> reqUtil(Dtu dtu, String devAddr, ReadWriteEnum readWriteEnum,

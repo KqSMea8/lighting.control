@@ -33,4 +33,6 @@ public interface UserService {
     public ReturnInfo userProjectList(Integer userId);
 
     public ReturnInfo enterProject(String token, Integer projectId);
+
+    public ReturnInfo changePwd(User user);
 }

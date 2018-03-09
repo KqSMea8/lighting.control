@@ -144,13 +144,15 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 } else {
                     result = cmdService.readOneAnalog(temp.getSourceId());
                 }
-                if (!result.isSuccess()) {
-                    return ReturnInfo.create(CodeEnum.ACCESS_REFULE, result.getData());
-                }
+                // if (!result.isSuccess()) {
+                // return ReturnInfo.create(CodeEnum.ACCESS_REFULE, monitors);
+                // }
                 if (StringUtils.isEmpty(result)) {
                     return ReturnInfo.create(CodeEnum.NOT_CONTENT);
                 }
-                temp.setCurrentValue(new BigDecimal(result.getData()));
+                if (result.isSuccess()) {
+                    temp.setCurrentValue(new BigDecimal(result.getData()));
+                }
                 resultMonitors.add(temp);
                 monitorDao.updateByPrimaryKeySelective(temp);
             }
@@ -223,8 +225,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     break;
             }
         }
-        monitor.setCurrentValue(new BigDecimal(value));
-        monitorDao.updateByPrimaryKeySelective(monitor);
+        if (sendResult[0] != 0) {
+            monitor.setCurrentValue(new BigDecimal(value));
+            monitorDao.updateByPrimaryKeySelective(monitor);
+        }
         Map<String, String> result = new HashMap<String, String>();
         result.put("success", String.valueOf(sendResult[0]));
         result.put("fail", String.valueOf(sendResult[1]));
@@ -242,10 +246,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         }
         if (result.isSuccess()) {
             // 成功
-            EquipmentMonitor monitor = new EquipmentMonitor();
-            monitor.setMonitorId(monitorId);
-            monitor.setCurrentValue(new BigDecimal(value));
-            monitorDao.updateByPrimaryKeySelective(monitor);
+            // EquipmentMonitor monitor = new EquipmentMonitor();
+            // monitor.setMonitorId(monitorId);
+            // monitor.setCurrentValue(new BigDecimal(value));
+            // monitorDao.updateByPrimaryKeySelective(monitor);
             sendResult[0]++;
             return true;
         } else {
