@@ -25,4 +25,8 @@ public interface Constant {
         int NOTDELETE = 1;// 未删除
         int ISDELETE = 2;// 已删除
     }
+
+    interface CMD {
+        int LOCK_TIME_OUT = 5;
+    }
 }
