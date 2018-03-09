@@ -1,7 +1,5 @@
 package com.dikong.lightcontroller.controller;
 
-import io.swagger.annotations.Api;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +12,8 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 
+import io.swagger.annotations.Api;
+
 /**
  * @author huangwenjun
  * @Datetime 2018年1月25日
@@ -25,6 +25,15 @@ public class MonitorController {
 
     @Autowired
     private EquipmentMonitorService monitorService;
+
+    @RequestMapping("/info/{monitor-id}")
+    public ReturnInfo oneMonitor(@PathVariable("monitor-id") Integer monitorId) {
+        if (monitorId == null) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
+        return monitorService.oneMonitor(monitorId);
+    }
+
 
     @PostMapping("/add")
     public ReturnInfo add(@RequestBody EquipmentMonitor equipmentMonitor) {

@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import tk.mybatis.mapper.entity.Example;
-
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
@@ -23,7 +21,9 @@ import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dao.SysVarDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.CmdRes;
+import com.dikong.lightcontroller.dto.OneMonitorInfo;
 import com.dikong.lightcontroller.entity.BaseSysVar;
+import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
@@ -37,6 +37,8 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 import com.dikong.lightcontroller.vo.BoardList;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
+
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -91,8 +93,9 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 if (!value.isSuccess()) {
                     value.setData("0");
                 }
-                equipmentMonitor.setCurrentValue(new BigDecimal(String.valueOf(new BigDecimal(value
-                        .getData()).multiply(equipmentMonitor.getFactor()).doubleValue())));
+                equipmentMonitor.setCurrentValue(
+                        new BigDecimal(String.valueOf(new BigDecimal(value.getData())
+                                .multiply(equipmentMonitor.getFactor()).doubleValue())));
             }
         } else {
             equipmentMonitor.setCurrentValue(new BigDecimal(SwitchEnum.CLOSE.getCode()));
@@ -278,15 +281,15 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDeviceIdOrGroupId(deviceBoardList.getId());
                 boardList.setDtuOrSysName(deviceBoardList.getDtuName());
                 boardList.setDeviceOrGroupName(deviceBoardList.getDeviceName());
-                boardList.setDeviceCodeOrGroup(Integer.parseInt(deviceBoardList.getDeviceCode())
-                        + "");
-                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":ID"
-                        + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceCodeOrGroup(
+                        Integer.parseInt(deviceBoardList.getDeviceCode()) + "");
+                boardList.setDeviceLocation(
+                        boardList.getDtuOrSysName() + ":ID" + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.DEVICE_TYPE);
                 boardLists.add(boardList);
             }
         }
-        List<Group> groups = groupDAO.selectByProjId(projId,Group.DEL_NO);
+        List<Group> groups = groupDAO.selectByProjId(projId, Group.DEL_NO);
         if (!CollectionUtils.isEmpty(groups)) {
             for (Group group : groups) {
                 BoardList boardList = new BoardList();
@@ -295,8 +298,8 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDtuOrSysName("SYS");
                 boardList.setDeviceOrGroupName(group.getGroupName());
                 boardList.setDeviceCodeOrGroup("Group" + group.getGroupCode());
-                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":"
-                        + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceLocation(
+                        boardList.getDtuOrSysName() + ":" + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.GROUP_TYPE);
                 boardLists.add(boardList);
             }
@@ -337,14 +340,40 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDeviceIdOrGroupId(deviceBoardList.getId());
                 boardList.setDtuOrSysName(deviceBoardList.getDtuName());
                 boardList.setDeviceOrGroupName(deviceBoardList.getDeviceName());
-                boardList.setDeviceCodeOrGroup(Integer.parseInt(deviceBoardList.getDeviceCode())
-                        + "");
-                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":ID"
-                        + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceCodeOrGroup(
+                        Integer.parseInt(deviceBoardList.getDeviceCode()) + "");
+                boardList.setDeviceLocation(
+                        boardList.getDtuOrSysName() + ":ID" + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.DEVICE_TYPE);
                 boardLists.add(boardList);
             }
         }
         return ReturnInfo.createReturnSuccessOne(boardLists);
+    }
+
+    @Override
+    public ReturnInfo oneMonitor(Integer monitorId) {
+        OneMonitorInfo oneMonitorInfo = new OneMonitorInfo();
+        EquipmentMonitor monitor = monitorDao.selectByPrimaryKey(monitorId);
+        oneMonitorInfo.setEquipmentMonitor(monitor);
+        if (monitor.getSourceType().equals(EquipmentMonitor.DEVICE_TYPE)) {
+            Register register = registerDao.selectRegisById((long) monitor.getSourceId());
+            oneMonitorInfo.setVarName(register.getVarName());
+            Device device = deviceDAO.selectByPrimaryKey(register.getDeviceId());
+            oneMonitorInfo.setSourceName(device.getName());
+        } else if (monitor.getSourceType().equals(EquipmentMonitor.GROUP_TYPE)) {
+            Group group = groupDAO.selectByGroupId(Long.valueOf(monitor.getSourceId()));
+            oneMonitorInfo.setSourceName(group.getGroupName());
+        } else {
+            List<SysVar> sysVars =
+                    sysVarDAO.selectAllByProjIdAndType(AuthCurrentUser.getCurrentProjectId(), 1);
+            for (SysVar sysVar : sysVars) {
+                if (sysVar.getId().equals(Long.valueOf(monitor.getSourceId()))) {
+                    oneMonitorInfo.setSourceName(sysVar.getVarName());
+                    break;
+                }
+            }
+        }
+        return ReturnInfo.createReturnSuccessOne(oneMonitorInfo);
     }
 }

@@ -13,10 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import tk.mybatis.mapper.entity.Example;
-
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
@@ -44,6 +40,10 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -167,6 +167,12 @@ public class UserServiceImpl implements UserService {
         example.selectProperties("userId", "userName", "userStatus", "isDelete");
         example.createCriteria().andEqualTo("isDelete", "1");
         List<User> users = userDao.selectByExample(example);
+        for (User user : users) {
+            if (user.getUserId() == 1) {
+                users.remove(user);
+                break;
+            }
+        }
         if (CollectionUtils.isEmpty(users)) {
             return ReturnInfo.create(CodeEnum.NOT_CONTENT);
         }

@@ -8,6 +8,8 @@ import com.dikong.lightcontroller.entity.EquipmentMonitor;
  * @Datetime 2018年1月25日
  */
 public interface EquipmentMonitorService {
+    public ReturnInfo oneMonitor(Integer monitorId);
+
     public ReturnInfo add(EquipmentMonitor equipmentMonitor);
 
     public ReturnInfo del(Integer monitorId);

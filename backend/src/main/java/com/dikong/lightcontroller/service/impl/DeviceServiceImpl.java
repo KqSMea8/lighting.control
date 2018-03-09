@@ -304,7 +304,7 @@ public class DeviceServiceImpl implements DeviceService {
                 update.setLastOnlineTime(new Date());
             }
         }
-        if (null != update.getStatus()) {
+        if (null != update.getUseTimes()) {
             update.setId(deviceId);
             deviceDAO.updateByPrimaryKeySelective(update);
         }
@@ -331,16 +331,15 @@ public class DeviceServiceImpl implements DeviceService {
         List<DeviceOnlineList> deviceOnlineLists =
                 deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
         List<Register> registerList = new ArrayList<>();
-        deviceOnlineLists.forEach(item->{
-            Register register =
-                    registerDAO.selectIdAndTypeByDeviceId(item.getDeviceId());
+        deviceOnlineLists.forEach(item -> {
+            Register register = registerDAO.selectIdAndTypeByDeviceId(item.getDeviceId());
             registerList.add(register);
         });
         List<String> result = cmdService.readMuchVar(registerList).getData();
         int i = 0;
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
             String cmd = result.get(i);
-            if (cmd != null){
+            if (cmd != null) {
                 deviceOnlineList.setOnlineStatus(Device.ONLINE);
                 Device device = new Device();
                 device.setId(deviceOnlineList.getDeviceId());

@@ -26,7 +26,7 @@ import tk.mybatis.mapper.common.Mapper;
  *      </P>
  */
 @Repository
-public interface GroupDAO{
+public interface GroupDAO extends Mapper<Group> {
 
     @Select({"<script>"
             + "select id,group_name from `group` where proj_id=#{groupList.projId} AND is_delete=#{groupList.isDelete}"
@@ -35,10 +35,10 @@ public interface GroupDAO{
             + "</script>"})
     List<Group> selectAllGroup(@Param("groupList") GroupList groupList);
 
-     @Insert({"insert into `group` (group_name,group_code,proj_id) "
-     + "values (#{group.groupName},#{group.groupCode},#{group.projId})"})
-     @Options(useGeneratedKeys = true, keyProperty = "group.id")
-     int addGroup(@Param("group") Group group);
+    @Insert({"insert into `group` (group_name,group_code,proj_id) "
+            + "values (#{group.groupName},#{group.groupCode},#{group.projId})"})
+    @Options(useGeneratedKeys = true, keyProperty = "group.id")
+    int addGroup(@Param("group") Group group);
 
 
     @Update({"update `group` set is_delete=#{isDelete} where id=#{id}"})
@@ -54,10 +54,16 @@ public interface GroupDAO{
     @Select({"select group_code from `group` where id=#{id}"})
     String selectCodeById(@Param("id") Long id);
 
-    @Select({"select id,group_name,group_code from `group` where proj_id=#{projId} AND is_delete=#{isDelete}"})
-    List<Group> selectByProjId(@Param("projId")Integer projId,@Param("isDelete")Byte isDelete);
+    @Select({
+            "select id,group_name,group_code from `group` where proj_id=#{projId} AND is_delete=#{isDelete}"})
+    List<Group> selectByProjId(@Param("projId") Integer projId, @Param("isDelete") Byte isDelete);
 
 
-    @Select({"select count(0) from `group` where proj_id=#{projId} and group_name=#{groupName} and is_delete=#{isDelete}"})
-    int selectByNameAndProj(@Param("projId")Integer projId,@Param("groupName")String name,@Param("isDelete") Byte isDelete);
+    @Select({
+            "select count(0) from `group` where proj_id=#{projId} and group_name=#{groupName} and is_delete=#{isDelete}"})
+    int selectByNameAndProj(@Param("projId") Integer projId, @Param("groupName") String name,
+            @Param("isDelete") Byte isDelete);
+
+    @Select({"select * from `group` where id=#{id}"})
+    Group selectByGroupId(@Param("id") Long id);
 }
