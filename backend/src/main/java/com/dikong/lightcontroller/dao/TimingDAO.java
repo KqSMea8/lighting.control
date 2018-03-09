@@ -29,12 +29,14 @@ public interface TimingDAO extends Mapper<Timing> {
     int updateDeleteById(@Param("id") Long id, @Param("isDelete") Byte isDelete);
 
 
-    @Select({"<script>" + "select * from timing where "
-            + "node_content_run_time &gt;='00:00:00' AND node_content_run_time &lt;=DATE_FORMAT(NOW(),'%T') "
+    @Select({"<script>" + "select * from timing where is_delete=#{isDelete} and "
+            + "<if test=\" projId != null \">" + " proj_id=#{projId} and " + "</if>"
+            + "node_content_run_time &gt;='00:00:00' AND node_content_run_time &lt;='23:59:59' "
             + "AND week_list like CONCAT(CONCAT('%',#{week}),'%') "
-            + "or month_list like CONCAT(CONCAT('%',#{dataNow}),'%') order by node_content_run_time "
+            + "or month_list like CONCAT(CONCAT('%',#{dataNow}),'%') order by node_content_run_time"
             + "</script>"})
-    List<Timing> selectLastOne(@Param("week") String week, @Param("dataNow") String dataNow);
+    List<Timing> selectLastOne(@Param("week") String week, @Param("dataNow") String dataNow,
+            @Param("isDelete") Byte isDelete, @Param("projId") Integer projId);
 
 
     @Select({"select * from timing where id=#{id}"})

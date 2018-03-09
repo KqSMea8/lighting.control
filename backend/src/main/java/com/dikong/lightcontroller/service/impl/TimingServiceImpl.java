@@ -446,7 +446,7 @@ public class TimingServiceImpl implements TimingService {
     public ReturnInfo holidayTask() {
         String weekNowDate = TimeWeekUtils.getWeekNowDate();
         String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-        List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
+        List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay,Timing.DEL_NO,null);
         List<CmdSendDto> allRegis = new ArrayList<>();
         timingList.forEach(item -> {
             List<CmdSendDto> regisId =

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.PageNation;
 import com.dikong.lightcontroller.common.ReturnInfo;
@@ -112,7 +112,7 @@ public class SysVarServiceImpl implements SysVarService {
     @Override
     public ReturnInfo deleteSysVar(Long varId, Integer sysVarType) {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        sysVarDAO.delete(varId, sysVarType,projId);
+        sysVarDAO.delete(varId, sysVarType, projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -241,9 +241,17 @@ public class SysVarServiceImpl implements SysVarService {
                 // projId);
 
                 // 马上执行最近的时间点,
-                String weekNowDate = TimeWeekUtils.getWeekNowDate();
-                String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-                List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay);
+                int amount = 0;
+                List<Timing> timingList = null;
+                for (; amount < 7; amount++) {
+                    String weekNowDate = TimeWeekUtils.getLastWeek(amount);
+                    String yearMonthDay = TimeWeekUtils.getLastYMD(amount);
+                    timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay, Timing.DEL_NO,
+                            projId);
+                    if (!CollectionUtils.isEmpty(timingList)) {
+                        return;
+                    }
+                }
                 LOG.info("马上执行最近时间点:{}", JSON.toJSONString(timingList));
                 if (!CollectionUtils.isEmpty(timingList)) {
                     Map<Long, Timing> groupTime = new HashMap<>();

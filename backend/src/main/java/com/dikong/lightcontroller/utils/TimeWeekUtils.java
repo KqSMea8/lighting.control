@@ -103,6 +103,16 @@ public class TimeWeekUtils {
         return weekDays[w];
     }
 
+    public static String getLastWeek(int amount){
+        Date dt = new Date();
+        String[] weekDays = {"7", "1", "2", "3", "4", "5", "6"};
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        int w = cal.get(Calendar.DAY_OF_WEEK) - (amount+1);
+        if (w < 0)
+            w = 0;
+        return weekDays[w];
+    }
     /**
      * 获取当天时期
      * @return
@@ -111,6 +121,17 @@ public class TimeWeekUtils {
         Date dt = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return dateFormat.format(dt);
+    }
+
+
+    public static String getLastYMD(int amount){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        Date date=new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_MONTH, -amount);
+        date = calendar.getTime();
+        return sdf.format(date);
     }
 
     private static Calendar getCalendar(String nowtime) throws ParseException {
@@ -130,5 +151,14 @@ public class TimeWeekUtils {
         int day = cal.get(Calendar.DAY_OF_WEEK);// 获得当前日期是一个星期的第几天
         cal.add(Calendar.DATE, cal.getFirstDayOfWeek() - day);// 根据日历的规则，给当前日期减去星期几与一个星期第一天的差值
         return cal;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(getLastWeek(0));
+        System.out.println(getLastWeek(1));
+        System.out.println(getLastWeek(2));
+        System.out.println(getLastYMD(0));
+        System.out.println(getLastYMD(1));
+        System.out.println(getLastYMD(2));
     }
 }

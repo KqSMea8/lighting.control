@@ -324,6 +324,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
+    @Transactional
     public ReturnInfo<List<DeviceOnlineList>> onlineRefresh(BasePage basePage) {
         int projId = AuthCurrentUser.getCurrentProjectId();
         PageHelper.startPage(basePage.getPageNo(), basePage.getPageSize());
@@ -341,6 +342,10 @@ public class DeviceServiceImpl implements DeviceService {
             String cmd = result.get(i);
             if (cmd != null){
                 deviceOnlineList.setOnlineStatus(Device.ONLINE);
+                Device device = new Device();
+                device.setId(deviceOnlineList.getDeviceId());
+                device.setStatus(Device.ONLINE);
+                deviceDAO.updateByPrimaryKeySelective(device);
             }
             deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
         }
