@@ -191,6 +191,7 @@ public class UserServiceImpl implements UserService {
             }
             user.setUserId(oldUser.getUserId());
             user.setIsDelete(Constant.USER.NOTDELETE);
+            user.setPassword(MD5Util.getMD5Str(user.getPassword()));
             userDao.updateByPrimaryKeySelective(user);
             return ReturnInfo.create(CodeEnum.SUCCESS);
         }

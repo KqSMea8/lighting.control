@@ -355,7 +355,19 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     public ReturnInfo oneMonitor(Integer monitorId) {
         OneMonitorInfo oneMonitorInfo = new OneMonitorInfo();
         EquipmentMonitor monitor = monitorDao.selectByPrimaryKey(monitorId);
-        oneMonitorInfo.setEquipmentMonitor(monitor);
+        oneMonitorInfo.setMonitorId(monitor.getMonitorId());
+        oneMonitorInfo.setMonitorType(monitor.getMonitorType());
+        oneMonitorInfo.setCaption(monitor.getCaption());
+        oneMonitorInfo.setSourceId(monitor.getSourceId());
+        oneMonitorInfo.setSourceType(monitor.getSourceType());
+        oneMonitorInfo.setCurrentValue(monitor.getCurrentValue());
+        oneMonitorInfo.setValueType(monitor.getValueType());
+        oneMonitorInfo.setUnit(monitor.getUnit());
+        oneMonitorInfo.setFactor(monitor.getFactor());
+        oneMonitorInfo.setMax(monitor.getMax());
+        oneMonitorInfo.setMax(monitor.getMax());
+        oneMonitorInfo.setPanelId(monitor.getPanelId());
+        oneMonitorInfo.setProjectId(monitor.getProjectId());
         if (monitor.getSourceType().equals(EquipmentMonitor.DEVICE_TYPE)) {
             Register register = registerDao.selectRegisById((long) monitor.getSourceId());
             oneMonitorInfo.setVarName(register.getVarName());
