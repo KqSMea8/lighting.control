@@ -134,8 +134,10 @@ public class TimingServiceImpl implements TimingService {
             Cnarea2016 cnarea = null;
             if (null != ordinaryNodeAdd.getCityId()) {
                 cnarea = cnareaDAO.selectCnarea(ordinaryNodeAdd.getCityId());
+                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getCityId()));
             } else {
                 cnarea = cnareaDAO.selectCnarea(ordinaryNodeAdd.getProvinceId());
+                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getProvinceId()));
             }
             if( cnarea == null){
               throw new NullException("");
@@ -147,14 +149,6 @@ public class TimingServiceImpl implements TimingService {
                 startTime = TimeCalculate.getSunsetTime(cnarea.getLng(), cnarea.getLat());
             }
             timing.setNodeContentRunTime(startTime);
-            // provinceId这个值必须有
-            Long provinceId = ordinaryNodeAdd.getProvinceId();
-            Long cityId = ordinaryNodeAdd.getCityId();
-            String contentCity = String.valueOf(provinceId);
-            if (null != cityId) {
-                contentCity = contentCity + "_" + String.valueOf(cityId);
-            }
-            timing.setNodeContentCity(contentCity);
         } else {
             timing.setNodeContentRunTime(ordinaryNodeAdd.getStartTime());
         }
@@ -202,8 +196,10 @@ public class TimingServiceImpl implements TimingService {
             Cnarea2016 cnarea = null;
             if (null != timeSpecifiedNodeAdd.getCityId()) {
                 cnarea = cnareaDAO.selectCnarea(timeSpecifiedNodeAdd.getCityId());
+                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getCityId()));
             } else {
                 cnarea = cnareaDAO.selectCnarea(timeSpecifiedNodeAdd.getProvinceId());
+                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getProvinceId()));
             }
             if( cnarea == null){
               throw new NullException("");
@@ -215,14 +211,6 @@ public class TimingServiceImpl implements TimingService {
                 startTime = TimeCalculate.getSunsetTime(cnarea.getLng(), cnarea.getLat());
             }
             timing.setNodeContentRunTime(startTime);
-            // provinceId这个值必须有
-            Long provinceId = timeSpecifiedNodeAdd.getProvinceId();
-            Long cityId = timeSpecifiedNodeAdd.getCityId();
-            String contentCity = String.valueOf(provinceId);
-            if (null != cityId) {
-                contentCity = contentCity + "_" + String.valueOf(cityId);
-            }
-            timing.setNodeContentCity(contentCity);
         } else {
             timing.setNodeContentRunTime(timeSpecifiedNodeAdd.getStartTime());
         }
