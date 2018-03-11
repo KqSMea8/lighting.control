@@ -102,19 +102,24 @@ public class DtuServiceImpl implements DtuService {
     @Transactional
     public ReturnInfo addDtu(Dtu dtu) {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        int existDeviceCode = dtuDAO.selectExistDeviceCode(dtu.getDeviceCode());
-        if (existDeviceCode > 0) {
-            return ReturnInfo.create(BussinessCode.DTU_CODE_EXIST.getCode(),
-                    BussinessCode.DTU_CODE_EXIST.getMsg());
+        try{
+            int existDeviceCode = dtuDAO.selectExistDeviceCode(dtu.getDeviceCode());
+            if (existDeviceCode > 0) {
+                return ReturnInfo.create(BussinessCode.DTU_CODE_EXIST.getCode(),
+                        BussinessCode.DTU_CODE_EXIST.getMsg());
+            }
+            Jedis jedis = new JedisProxy(jedisPool).createProxy();
+            Long dtuDevice = jedis.incr(String.valueOf(projId));
+            dtu.setDevice("DTU" + dtuDevice);
+            dtu.setProjId(projId);
+            dtuDAO.insertDtu(dtu);
+            // 发送dtu信息
+            dtuCollectionApi.createDevice(
+                    new DeviceApi(dtu.getDeviceCode(), dtu.getBeatContent(), dtu.getBeatTime()));
+        }cache(Exception e){
+          jedis.decr(String.valueOf(projId));
+          throw e;
         }
-        Jedis jedis = new JedisProxy(jedisPool).createProxy();
-        Long dtuDevice = jedis.incr(String.valueOf(projId));
-        dtu.setDevice("DTU" + dtuDevice);
-        dtu.setProjId(projId);
-        dtuDAO.insertDtu(dtu);
-        // 发送dtu信息
-        dtuCollectionApi.createDevice(
-                new DeviceApi(dtu.getDeviceCode(), dtu.getBeatContent(), dtu.getBeatTime()));
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
