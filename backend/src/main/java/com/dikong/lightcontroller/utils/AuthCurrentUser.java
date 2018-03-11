@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.utils;
 
 import java.util.Objects;
 
+import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.dto.LoginRes;
 
 public class AuthCurrentUser {
@@ -35,6 +36,10 @@ public class AuthCurrentUser {
     }
 
     public static boolean isManager() {
-        return get().isManager();
+        if (get().getManagerType() == Constant.USER.SUPER_MANAGER) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

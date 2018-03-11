@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.ChangePwdReq;
 import com.dikong.lightcontroller.dto.LoginReqDto;
 import com.dikong.lightcontroller.dto.UserListReq;
 import com.dikong.lightcontroller.entity.User;
@@ -34,5 +35,7 @@ public interface UserService {
 
     public ReturnInfo enterProject(String token, Integer projectId);
 
-    public ReturnInfo changePwd(User user);
+    public ReturnInfo changeUserInfo(User user);
+
+    public ReturnInfo changeUserPwd(ChangePwdReq changePwdReq);
 }

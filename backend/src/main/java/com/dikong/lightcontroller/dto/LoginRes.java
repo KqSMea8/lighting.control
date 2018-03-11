@@ -18,7 +18,7 @@ public class LoginRes {
     private List<Menu> menus;
     private List<Resource> resources;
     private Integer currentProjectId;
-    private boolean isManager = false;// 是否为管理员标识
+    private int managerType;// 0->超级管理员 1->设备可控 2->可配置 3->设备可控、可配置
 
     public LoginRes() {
         super();
@@ -80,12 +80,12 @@ public class LoginRes {
         this.currentProjectId = currentProjectId;
     }
 
-    public boolean isManager() {
-        return isManager;
+    public int getManagerType() {
+        return managerType;
     }
 
-    public void setManager(boolean isManager) {
-        this.isManager = isManager;
+    public void setManagerType(int managerType) {
+        this.managerType = managerType;
     }
 
     @Override

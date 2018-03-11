@@ -1,7 +1,5 @@
 package com.dikong.lightcontroller.controller;
 
-import io.swagger.annotations.Api;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -18,12 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.ChangePwdReq;
 import com.dikong.lightcontroller.dto.LoginReqDto;
 import com.dikong.lightcontroller.dto.UserListReq;
 import com.dikong.lightcontroller.entity.User;
 import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.UserService;
 import com.github.pagehelper.util.StringUtil;
+
+import io.swagger.annotations.Api;
 
 @Api(value = "UserController", description = "用户管理")
 @RestController
@@ -51,8 +52,13 @@ public class UserController {
     }
 
     @PutMapping("/change/info")
-    public ReturnInfo changePwd(@RequestBody User user) {
-        return userService.changePwd(user);
+    public ReturnInfo changeUserInfo(@RequestBody User user) {
+        return userService.changeUserInfo(user);
+    }
+
+    @PutMapping("/change/pwd")
+    public ReturnInfo changeUserPwd(@RequestBody ChangePwdReq changePwdReq) {
+        return userService.changeUserPwd(changePwdReq);
     }
 
     @RequestMapping("/list")

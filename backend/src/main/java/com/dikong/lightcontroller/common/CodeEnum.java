@@ -19,7 +19,8 @@ public enum CodeEnum {
     DATA_INVALID(-12, "存在不合法数据"),
     SAME_LOAN(-13, "存在正在流程中的相同身份证号码的贷款"),
     NOTHING_DELETE(-14, "删除暂存信息失败,未找到匹配内容"),
-    USER_EXIST(-15, "用户已存在");
+    USER_EXIST(-15, "用户已存在"),
+    OLD_PWD_ERROR(-16, "旧密码错误");
 
     private int code;
 

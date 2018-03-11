@@ -26,6 +26,8 @@ import com.dikong.lightcontroller.dao.RoleMenuDao;
 import com.dikong.lightcontroller.dao.UserDao;
 import com.dikong.lightcontroller.dao.UserProjectDao;
 import com.dikong.lightcontroller.dao.UserRoleDao;
+import com.dikong.lightcontroller.dto.ChangePwdReq;
+import com.dikong.lightcontroller.dto.EnterProjectRes;
 import com.dikong.lightcontroller.dto.LoginReqDto;
 import com.dikong.lightcontroller.dto.LoginRes;
 import com.dikong.lightcontroller.dto.UserListReq;
@@ -108,10 +110,10 @@ public class UserServiceImpl implements UserService {
             return ReturnInfo.create(CodeEnum.NOCOMPETENCE);
         }
         List<Role> roles = roleDao.roleList(roleIds);
-        boolean isManager = false;
+        int managerType = Constant.USER.PROJECT_MANAGER_CONTROL;
         for (Role role : roles) {
             if (role.getRoleId() == Constant.ROLE.SUPER_MANAGER_ID) {
-                isManager = true;
+                managerType = Constant.USER.SUPER_MANAGER;
             }
         }
         List<Integer> menuIds = null;
@@ -131,11 +133,11 @@ public class UserServiceImpl implements UserService {
         }
         userInfo.setPassword("");
         loginRes = new LoginRes(token, userInfo, menus, resources);
-        loginRes.setManager(isManager);
+        loginRes.setManagerType(managerType);
         LoginRes loginUserInfo = new LoginRes(token, userInfo, menus, resources);
         loginUserInfo.setRoles(roles);
         loginUserInfo.setCurrentProjectId(0);
-        loginUserInfo.setManager(isManager);
+        loginUserInfo.setManagerType(managerType);
         jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(loginUserInfo));
         jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()), token);
         LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
@@ -292,21 +294,34 @@ public class UserServiceImpl implements UserService {
         }
         LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
         currentUserInfo.setCurrentProjectId(projectId);
+        EnterProjectRes projectRes = new EnterProjectRes();
         jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
         if (AuthCurrentUser.isManager()) {
             List<Menu> menus = menuDao.selectAll();
-            return ReturnInfo.createReturnSuccessOne(menus);
+            projectRes.setManagerType(Constant.USER.PROJECT_SUPER_MANAGER);
+            projectRes.setMenus(menus);
+            return ReturnInfo.createReturnSuccessOne(projectRes);
         }
         List<Integer> manageTypeIds =
                 userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
+        if (manageTypeIds.size() >= 2) {
+            projectRes.setManagerType(Constant.USER.PROJECT_SUPER_MANAGER);
+        }
+        if (manageTypeIds.size() == 1) {
+            projectRes.setManagerType(manageTypeIds.get(0));
+        }
+        List<Menu> menus = new ArrayList<Menu>();
+        if (manageTypeIds.size() == 0) {
+            projectRes.setMenus(menus);
+            return ReturnInfo.createReturnSuccessOne(projectRes);
+        }
+
         List<Integer> menuIds = manageTypeMenuDao.menuIds(manageTypeIds);
-        List<Menu> menus = null;
         if (!CollectionUtils.isEmpty(menuIds)) {
             menus = menuDao.menuList(menuIds);
-        } else {
-            menus = new ArrayList<Menu>();
         }
-        return ReturnInfo.createReturnSuccessOne(menus);
+        projectRes.setMenus(menus);
+        return ReturnInfo.createReturnSuccessOne(projectRes);
 
     }
 
@@ -319,11 +334,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ReturnInfo changePwd(User user) {
+    public ReturnInfo changeUserInfo(User user) {
         user.setIsDelete(null);
         user.setUserStatus(null);
         user.setUserId(AuthCurrentUser.getUserId());
         user.setPassword(MD5Util.getMD5Str(user.getPassword()));
+        user.setUpdateBy(AuthCurrentUser.getUserId());
+        userDao.updateByPrimaryKeySelective(user);
+        return ReturnInfo.createReturnSuccessOne(null);
+    }
+
+    @Override
+    public ReturnInfo changeUserPwd(ChangePwdReq changePwdReq) {
+        User user = userDao.selectByPrimaryKey(AuthCurrentUser.getUserId());
+        if (!user.getPassword().equals(MD5Util.getMD5Str(changePwdReq.getOldPwd()))) {
+            return ReturnInfo.create(CodeEnum.OLD_PWD_ERROR);
+        }
+        user.setPassword(MD5Util.getMD5Str(changePwdReq.getNewPwd()));
+        user.setUpdateBy(AuthCurrentUser.getUserId());
         userDao.updateByPrimaryKeySelective(user);
         return ReturnInfo.createReturnSuccessOne(null);
     }

@@ -24,6 +24,10 @@ public interface Constant {
     interface USER {
         int NOTDELETE = 1;// 未删除
         int ISDELETE = 2;// 已删除
+        int SUPER_MANAGER = 0;
+        int PROJECT_MANAGER_CONTROL = 1;
+        int PROJECT_MANAGER_CONFIG = 2;
+        int PROJECT_SUPER_MANAGER = 3;
     }
 
     interface CMD {
