@@ -105,6 +105,7 @@ public class TimingServiceImpl implements TimingService {
 
     @SuppressWarnings("all")
     @Override
+    @Transactional
     public ReturnInfo addOrdinaryNode(TimeOrdinaryNodeAdd ordinaryNodeAdd) {
         Long runId = ordinaryNodeAdd.getRunVar();
         if (runId != null) {
@@ -135,6 +136,9 @@ public class TimingServiceImpl implements TimingService {
                 cnarea = cnareaDAO.selectCnarea(ordinaryNodeAdd.getCityId());
             } else {
                 cnarea = cnareaDAO.selectCnarea(ordinaryNodeAdd.getProvinceId());
+            }
+            if( cnarea == null){
+              throw new NullException("");
             }
             String startTime = null;
             if (Timing.DAWN_TIME.equals(ordinaryNodeAdd.getStartTimeType())) {
@@ -170,6 +174,7 @@ public class TimingServiceImpl implements TimingService {
 
     @SuppressWarnings("all")
     @Override
+    @Transactional
     public ReturnInfo addSpecifiedNode(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd) {
         Long runId = timeSpecifiedNodeAdd.getRunVar();
         if (runId != null) {
@@ -199,6 +204,9 @@ public class TimingServiceImpl implements TimingService {
                 cnarea = cnareaDAO.selectCnarea(timeSpecifiedNodeAdd.getCityId());
             } else {
                 cnarea = cnareaDAO.selectCnarea(timeSpecifiedNodeAdd.getProvinceId());
+            }
+            if( cnarea == null){
+              throw new NullException("");
             }
             String startTime = null;
             if (Timing.DAWN_TIME.equals(timeSpecifiedNodeAdd.getStartTimeType())) {
