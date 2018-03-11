@@ -105,6 +105,7 @@ public class TimingServiceImpl implements TimingService {
 
     @SuppressWarnings("all")
     @Override
+    @Transactional
     public ReturnInfo addOrdinaryNode(TimeOrdinaryNodeAdd ordinaryNodeAdd) {
         Long runId = ordinaryNodeAdd.getRunVar();
         if (runId != null) {
@@ -133,8 +134,13 @@ public class TimingServiceImpl implements TimingService {
             Cnarea2016 cnarea = null;
             if (null != ordinaryNodeAdd.getCityId()) {
                 cnarea = cnareaDAO.selectCnarea(ordinaryNodeAdd.getCityId());
+                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getCityId()));
             } else {
                 cnarea = cnareaDAO.selectCnarea(ordinaryNodeAdd.getProvinceId());
+                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getProvinceId()));
+            }
+            if( cnarea == null){
+              throw new NullException("");
             }
             String startTime = null;
             if (Timing.DAWN_TIME.equals(ordinaryNodeAdd.getStartTimeType())) {
@@ -143,14 +149,6 @@ public class TimingServiceImpl implements TimingService {
                 startTime = TimeCalculate.getSunsetTime(cnarea.getLng(), cnarea.getLat());
             }
             timing.setNodeContentRunTime(startTime);
-            // provinceId这个值必须有
-            Long provinceId = ordinaryNodeAdd.getProvinceId();
-            Long cityId = ordinaryNodeAdd.getCityId();
-            String contentCity = String.valueOf(provinceId);
-            if (null != cityId) {
-                contentCity = contentCity + "_" + String.valueOf(cityId);
-            }
-            timing.setNodeContentCity(contentCity);
         } else {
             timing.setNodeContentRunTime(ordinaryNodeAdd.getStartTime());
         }
@@ -170,6 +168,7 @@ public class TimingServiceImpl implements TimingService {
 
     @SuppressWarnings("all")
     @Override
+    @Transactional
     public ReturnInfo addSpecifiedNode(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd) {
         Long runId = timeSpecifiedNodeAdd.getRunVar();
         if (runId != null) {
@@ -197,8 +196,13 @@ public class TimingServiceImpl implements TimingService {
             Cnarea2016 cnarea = null;
             if (null != timeSpecifiedNodeAdd.getCityId()) {
                 cnarea = cnareaDAO.selectCnarea(timeSpecifiedNodeAdd.getCityId());
+                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getCityId()));
             } else {
                 cnarea = cnareaDAO.selectCnarea(timeSpecifiedNodeAdd.getProvinceId());
+                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getProvinceId()));
+            }
+            if( cnarea == null){
+              throw new NullException("");
             }
             String startTime = null;
             if (Timing.DAWN_TIME.equals(timeSpecifiedNodeAdd.getStartTimeType())) {
@@ -207,14 +211,6 @@ public class TimingServiceImpl implements TimingService {
                 startTime = TimeCalculate.getSunsetTime(cnarea.getLng(), cnarea.getLat());
             }
             timing.setNodeContentRunTime(startTime);
-            // provinceId这个值必须有
-            Long provinceId = timeSpecifiedNodeAdd.getProvinceId();
-            Long cityId = timeSpecifiedNodeAdd.getCityId();
-            String contentCity = String.valueOf(provinceId);
-            if (null != cityId) {
-                contentCity = contentCity + "_" + String.valueOf(cityId);
-            }
-            timing.setNodeContentCity(contentCity);
         } else {
             timing.setNodeContentRunTime(timeSpecifiedNodeAdd.getStartTime());
         }
