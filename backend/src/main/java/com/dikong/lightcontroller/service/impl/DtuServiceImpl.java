@@ -101,6 +101,7 @@ public class DtuServiceImpl implements DtuService {
     @Override
     @Transactional
     public ReturnInfo addDtu(Dtu dtu) {
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
         int projId = AuthCurrentUser.getCurrentProjectId();
         try{
             int existDeviceCode = dtuDAO.selectExistDeviceCode(dtu.getDeviceCode());
@@ -108,7 +109,6 @@ public class DtuServiceImpl implements DtuService {
                 return ReturnInfo.create(BussinessCode.DTU_CODE_EXIST.getCode(),
                         BussinessCode.DTU_CODE_EXIST.getMsg());
             }
-            Jedis jedis = new JedisProxy(jedisPool).createProxy();
             Long dtuDevice = jedis.incr(String.valueOf(projId));
             dtu.setDevice("DTU" + dtuDevice);
             dtu.setProjId(projId);
@@ -116,9 +116,9 @@ public class DtuServiceImpl implements DtuService {
             // 发送dtu信息
             dtuCollectionApi.createDevice(
                     new DeviceApi(dtu.getDeviceCode(), dtu.getBeatContent(), dtu.getBeatTime()));
-        }cache(Exception e){
-          jedis.decr(String.valueOf(projId));
-          throw e;
+        }catch (Exception e){
+            jedis.decr(String.valueOf(projId));
+            throw e;
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }

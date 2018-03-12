@@ -168,6 +168,7 @@ public class SysVarServiceImpl implements SysVarService {
             }
         } else {
             RegisterList register = new RegisterList(varListSearch.getId());
+            register.setRegisType(varListSearch.getRegisType());
             List<RegisterTime> registers = registerDAO.selectRegisterById(register);
             registers.sort(RegisterTime::compareRegisAddr);
             if (!CollectionUtils.isEmpty(registers)) {

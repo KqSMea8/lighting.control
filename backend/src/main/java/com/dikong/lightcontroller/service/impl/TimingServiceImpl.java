@@ -139,9 +139,6 @@ public class TimingServiceImpl implements TimingService {
                 cnarea = cnareaDAO.selectCnarea(ordinaryNodeAdd.getProvinceId());
                 timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getProvinceId()));
             }
-            if( cnarea == null){
-              throw new NullException("");
-            }
             String startTime = null;
             if (Timing.DAWN_TIME.equals(ordinaryNodeAdd.getStartTimeType())) {
                 startTime = TimeCalculate.getDawnTime(cnarea.getLng(), cnarea.getLat());
@@ -196,13 +193,10 @@ public class TimingServiceImpl implements TimingService {
             Cnarea2016 cnarea = null;
             if (null != timeSpecifiedNodeAdd.getCityId()) {
                 cnarea = cnareaDAO.selectCnarea(timeSpecifiedNodeAdd.getCityId());
-                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getCityId()));
+                timing.setNodeContentCity(String.valueOf(timeSpecifiedNodeAdd.getCityId()));
             } else {
                 cnarea = cnareaDAO.selectCnarea(timeSpecifiedNodeAdd.getProvinceId());
-                timing.setNodeContentCity(String.valueOf(ordinaryNodeAdd.getProvinceId()));
-            }
-            if( cnarea == null){
-              throw new NullException("");
+                timing.setNodeContentCity(String.valueOf(timeSpecifiedNodeAdd.getProvinceId()));
             }
             String startTime = null;
             if (Timing.DAWN_TIME.equals(timeSpecifiedNodeAdd.getStartTimeType())) {

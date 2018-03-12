@@ -16,11 +16,22 @@ public class VarListSearch extends BasePage{
 
     private long id;
 
+    //变量类型
+    private String regisType;
+
     public long getId() {
         return id;
     }
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getRegisType() {
+        return regisType;
+    }
+
+    public void setRegisType(String regisType) {
+        this.regisType = regisType;
     }
 }
