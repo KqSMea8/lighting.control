@@ -22,6 +22,7 @@ import com.dikong.lightcontroller.entity.ManagerTypeUri;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.SpringContextUtil;
+import com.dikong.lightcontroller.utils.UriUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -55,7 +56,7 @@ public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
             return true;
         }
         for (BackUri backUri : backUris) {
-            if (backUri.getBackUri().equals(uri)) {
+            if (UriUtil.uriCheck(uri, backUri.getBackUri())) {
                 for (ManagerTypeUri managerTypeUri : managerTypeUris) {
                     if (backUri.getId() == managerTypeUri.getBackUriId() && managerTypeUri
                             .getManagerTypeId() == currentUserInfo.getManagerType()) {
