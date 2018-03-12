@@ -30,7 +30,8 @@ public interface Constant {
         int PROJECT_MANAGER_CONFIG = 2;
         int PROJECT_SUPER_MANAGER = 3;
         int NOT_AUTH = 4;
-        String AUTH_LIST = "auth.list";
+        String AUTH_LIST = "need.auth.uri.list";
+        String TYPE_AUTH_REALT = "type.aut.uri.relationship";
     }
 
     interface CMD {
