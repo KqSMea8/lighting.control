@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.dikong.lightcontroller.dao.SysVarDAO;
+import com.dikong.lightcontroller.entity.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,6 +243,28 @@ public class TimingServiceImpl implements TimingService {
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
+    @Override
+    public ReturnInfo deleteNodeByGroupId(Long groupId) {
+        Example example = new Example(Timing.class);
+        example.createCriteria().andEqualTo("runType",Timing.GROUP_TYPE);
+        List<Timing> timings = timingDAO.selectByExample(example);
+        if (!CollectionUtils.isEmpty(timings)){
+            timings.forEach(item->deleteNode(item.getId()));
+        }
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo deleteNodeByDeviceId(Long deviceId) {
+        Example example = new Example(Timing.class);
+        example.createCriteria().andEqualTo("runType",Timing.DEVICE_TYPE);
+        List<Timing> timings = timingDAO.selectByExample(example);
+        if (!CollectionUtils.isEmpty(timings)){
+            timings.forEach(item->deleteNode(item.getId()));
+        }
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
     @SuppressWarnings("all")
     @Override
     public ReturnInfo<List<TimingList>> listNodeType(TimingListSearch timingListSearch) {
@@ -381,7 +404,7 @@ public class TimingServiceImpl implements TimingService {
     public ReturnInfo boardList() {
         List<BoardList> boardLists = new ArrayList<>();
         int projId = AuthCurrentUser.getCurrentProjectId();
-        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId);
+        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId, Device.DEL_NO);
         if (!CollectionUtils.isEmpty(deviceBoardLists)) {
             for (DeviceBoardList deviceBoardList : deviceBoardLists) {
                 BoardList boardList = new BoardList();

@@ -30,6 +30,8 @@ public interface DeviceService {
 
     ReturnInfo deleteDevice(Long id);
 
+    ReturnInfo deleteDeviceByDtuId(Long dtuId);
+
     ReturnInfo addDevice(DeviceAdd deviceAdd);
 
     ReturnInfo updateDevice(DeviceAdd deviceAdd);

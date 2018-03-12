@@ -26,6 +26,8 @@ public interface GroupService {
 
     ReturnInfo deleteGroup(Long id);
 
+    ReturnInfo deleteGroupByDeviceId(Long deviceId);
+
     ReturnInfo<List<GroupDeviceList>> deviceList(Long id);
 
     ReturnInfo deleteGroupDevice(List<Long> middId);

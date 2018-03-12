@@ -32,6 +32,10 @@ public interface TimingService {
 
     ReturnInfo deleteNode(Long id);
 
+    ReturnInfo deleteNodeByGroupId(Long groupId);
+
+    ReturnInfo deleteNodeByDeviceId(Long deviceId);
+
     ReturnInfo<List<TimingList>> listNodeType(TimingListSearch timingListSearch);
 
     ReturnInfo addHolidayNode(String[] holidayTimes);

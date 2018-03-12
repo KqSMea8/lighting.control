@@ -28,5 +28,7 @@ public interface RegisterService {
 
     ReturnInfo deleteRegister(Long id);
 
+    ReturnInfo deleteRegisterByDeviceId(Long deviceId);
+
     ReturnInfo<List<SysVarList>> regisValue(VarListSearch varListSearch);
 }

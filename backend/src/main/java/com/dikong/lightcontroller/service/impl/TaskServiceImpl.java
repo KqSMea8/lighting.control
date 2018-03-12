@@ -154,7 +154,6 @@ public class TaskServiceImpl implements TaskService {
         String callBack = deviceCallBackUrl + "/" + id;
         QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,
                 DEFAULT_DEVICE_JOB_GROUP, DEFAULT_TRIGGER_GROUP, DEFAULT_DESCRIPTION, callBack);
-        LOG.info("添加设置状态命令成功,返回值为{}", JSON.toJSONString(task));
         return ReturnInfo.createReturnSuccessOne(task);
     }
 
