@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import redis.clients.jedis.Jedis;
@@ -98,7 +99,7 @@ public class CmdServiceImpl implements CmdService {
 
     @Override
     public CmdRes<List<String>> readMuchVar(List<Register> varIds) {
-        if (null == varIds) {
+        if (CollectionUtils.isEmpty(varIds)) {
             return new CmdRes<List<String>>(false, null);
         }
 

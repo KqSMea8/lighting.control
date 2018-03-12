@@ -89,4 +89,12 @@ public interface RegisterDAO {
 
     @Delete({"delete from register where id=#{id}"})
     int deleteRegister(@Param("id") Long id);
+
+
+    @Select({"select id from register where device_id=#{deviceId}"})
+    List<Long> selectByDeviceId(@Param("deviceId")Long deviceId);
+
+
+    @Delete({"delete from register where device_id=#{deviceId}"})
+    int deleteByDeviceId(@Param("deviceId") Long deviceId);
 }

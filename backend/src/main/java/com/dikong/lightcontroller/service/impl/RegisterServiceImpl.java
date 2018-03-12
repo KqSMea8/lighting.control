@@ -89,6 +89,13 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     @Override
+    public ReturnInfo deleteRegisterByDeviceId(Long deviceId) {
+        List<Long> idS = registerDAO.selectByDeviceId(deviceId);
+        registerDAO.deleteByDeviceId(deviceId);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
     public ReturnInfo<List<SysVarList>> regisValue(VarListSearch varListSearch) {
         List<SysVarList> sysVarLists = new ArrayList<>();
         PageHelper.startPage(varListSearch.getPageNo(), varListSearch.getPageSize());

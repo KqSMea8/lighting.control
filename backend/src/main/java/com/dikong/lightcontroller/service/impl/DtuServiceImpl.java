@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import com.dikong.lightcontroller.service.DeviceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * <p>
@@ -60,6 +62,10 @@ public class DtuServiceImpl implements DtuService {
     private JedisPool jedisPool;
 
     private DtuCollectionApi dtuCollectionApi;
+
+
+    @Autowired
+    private DeviceService deviceService;
 
 
     private DtuServiceImpl() throws IOException {
@@ -95,6 +101,7 @@ public class DtuServiceImpl implements DtuService {
         Dtu dtu = dtuDAO.selectDtuById(id);
         dtuCollectionApi.deleteDevice(dtu.getDeviceCode());
         dtuDAO.updateIsDelete(id, Dtu.DEL_YES);
+        deviceService.deleteDeviceByDtuId(id);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -104,18 +111,27 @@ public class DtuServiceImpl implements DtuService {
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
         int projId = AuthCurrentUser.getCurrentProjectId();
         try{
-            int existDeviceCode = dtuDAO.selectExistDeviceCode(dtu.getDeviceCode());
-            if (existDeviceCode > 0) {
+            Dtu existDtu = dtuDAO.selectExistDeviceCode(dtu.getDeviceCode());
+            if (null != existDtu && existDtu.getIsDelete().equals(Dtu.DEL_NO)) {
                 return ReturnInfo.create(BussinessCode.DTU_CODE_EXIST.getCode(),
                         BussinessCode.DTU_CODE_EXIST.getMsg());
             }
-            Long dtuDevice = jedis.incr(String.valueOf(projId));
-            dtu.setDevice("DTU" + dtuDevice);
             dtu.setProjId(projId);
-            dtuDAO.insertDtu(dtu);
-            // 发送dtu信息
-            dtuCollectionApi.createDevice(
-                    new DeviceApi(dtu.getDeviceCode(), dtu.getBeatContent(), dtu.getBeatTime()));
+            if (existDtu == null){
+                Long dtuDevice = jedis.incr(String.valueOf(projId));
+                dtu.setDevice("DTU" + dtuDevice);
+                dtuDAO.insertDtu(dtu);
+                // 发送dtu信息
+                dtuCollectionApi.createDevice(
+                        new DeviceApi(dtu.getDeviceCode(), dtu.getBeatContent(), dtu.getBeatTime()));
+            }else {
+                Example example = new Example(Dtu.class);
+                dtu.setIsDelete(Dtu.DEL_NO);
+                example.createCriteria().andEqualTo("deviceCode",dtu.getDeviceCode());
+                dtuDAO.updateByExampleSelective(dtu,example);
+                dtuCollectionApi.modifyDevice(
+                        new DeviceApi(dtu.getDeviceCode(), dtu.getBeatContent(), dtu.getBeatTime()));
+            }
         }catch (Exception e){
             jedis.decr(String.valueOf(projId));
             throw e;

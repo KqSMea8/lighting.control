@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
@@ -64,8 +65,8 @@ public interface DeviceDAO extends Mapper<Device> {
     List<DeviceDtu> selectByDeviceId(@Param("ids") List<Long> ids);
 
 
-    @Select({"SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId}"})
-    List<DeviceBoardList> selectNotIn(@Param("projId") Integer projId);
+    @Select({"SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId} AND d.is_delete=#{isDelete}"})
+    List<DeviceBoardList> selectNotIn(@Param("projId") Integer projId,@Param("isDelete")Byte isDelete);
 
     @Select({"SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId} and d.dtu_id=#{dtuId}"})
     List<DeviceBoardList> selectByProjIdAndDutId(@Param("projId") Integer projId,
@@ -88,4 +89,11 @@ public interface DeviceDAO extends Mapper<Device> {
             + "</script>"})
     List<DeviceOnlineList> selectOnlineStatus(@Param("projId") Integer projId,
             @Param("deviceIsDelet") Byte deviceIsDelet, @Param("dtuIsDelet") Byte dtuIsDelet);
+
+
+    @Delete({"delete from device where dtu_id=${dtuId}"})
+    int deleteByDtuId(@Param("dtuId")Long dtuId);
+
+    @Update({"update device set is_delete=#{isDelete} where dtu_id=#{dtuId}"})
+    int updateDeleteByDtuId(@Param("dtuId") Long id, @Param("isDelete") Byte isDelete);
 }

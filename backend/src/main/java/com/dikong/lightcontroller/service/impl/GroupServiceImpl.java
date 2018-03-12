@@ -26,6 +26,7 @@ import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.GroupService;
 import com.dikong.lightcontroller.service.SysVarService;
+import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.vo.GroupDeviceList;
 import com.dikong.lightcontroller.vo.GroupList;
@@ -60,6 +61,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Autowired
     private SysVarService sysVarService;
+
+    @Autowired
+    private TimingService timingService;
 
     @Override
     public ReturnInfo<List<Group>> list(GroupList groupList) {
@@ -105,6 +109,16 @@ public class GroupServiceImpl implements GroupService {
         groupDeviceMiddleDAO.deleteByGroupId(id);
 
         sysVarService.deleteSysVar(id, BaseSysVar.GROUP);
+        timingService.deleteNodeByGroupId(id);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo deleteGroupByDeviceId(Long deviceId) {
+        List<Long> groupIds = groupDeviceMiddleDAO.selectAllByDeviceId(deviceId);
+        if (!CollectionUtils.isEmpty(groupIds)) {
+            groupIds.forEach(item -> groupDeviceMiddleDAO.deleteByGroupId(item));
+        }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

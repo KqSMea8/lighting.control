@@ -57,4 +57,7 @@ public interface GroupDeviceMiddleDAO {
             + "</trim>" + "where id=#{middle.id}" + "</script>"})
     int updateGroupDevice(@Param("middle") GroupDeviceMiddle groupDeviceMiddle);
 
+
+    @Select({"select group_id from group_device_middle where device_id=#{deviceId}"})
+    List<Long> selectAllByDeviceId(@Param("deviceId") Long deviceId);
 }

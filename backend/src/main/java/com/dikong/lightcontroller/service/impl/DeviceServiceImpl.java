@@ -37,8 +37,10 @@ import com.dikong.lightcontroller.entity.Dtu;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.DeviceService;
+import com.dikong.lightcontroller.service.GroupService;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.service.TaskService;
+import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.FileUtils;
 import com.dikong.lightcontroller.vo.DeviceAdd;
@@ -84,6 +86,12 @@ public class DeviceServiceImpl implements DeviceService {
     @Autowired
     private CmdService cmdService;
 
+    @Autowired
+    private GroupService groupService;
+
+    @Autowired
+    private TimingService timingService;
+
     /**
      * 只有16个不需要分页
      * 
@@ -114,6 +122,19 @@ public class DeviceServiceImpl implements DeviceService {
             taskService.removeDeviceTask(device.getTaskName());
         }
         deviceDAO.updateDeleteById(id, Device.DEL_YES);
+        groupService.deleteGroupByDeviceId(id);
+        timingService.deleteNodeByDeviceId(id);
+        registerService.deleteRegisterByDeviceId(id);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    @Transactional
+    public ReturnInfo deleteDeviceByDtuId(Long dtuId) {
+        List<Device> deviceList = deviceDAO.selectAllByDtuId(dtuId, Device.DEL_NO);
+        if (!CollectionUtils.isEmpty(deviceList)) {
+            deviceList.forEach(item -> deleteDevice(item.getId()));
+        }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -254,7 +275,7 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public ReturnInfo<List<DeviceBoardList>> selectAllSelectDevice() {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId);
+        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId, Device.DEL_NO);
         if (!CollectionUtils.isEmpty(deviceBoardLists)) {
             deviceBoardLists.forEach(item -> {
                 String deviceLocaltion =
@@ -313,14 +334,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public ReturnInfo<List<DeviceOnlineList>> online(BasePage basePage) {
-        int projId = AuthCurrentUser.getCurrentProjectId();
-        PageHelper.startPage(basePage.getPageNo(), basePage.getPageSize());
-        List<DeviceOnlineList> deviceOnlineLists =
-                deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
-        for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
-            deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
-        }
-        return ReturnInfo.createReturnSucces(deviceOnlineLists);
+        return onlineRefresh(basePage);
     }
 
     @Override
@@ -333,18 +347,26 @@ public class DeviceServiceImpl implements DeviceService {
         List<Register> registerList = new ArrayList<>();
         deviceOnlineLists.forEach(item -> {
             Register register = registerDAO.selectIdAndTypeByDeviceId(item.getDeviceId());
-            registerList.add(register);
+            if (null != register) {
+                registerList.add(register);
+            }
         });
-        List<String> result = cmdService.readMuchVar(registerList).getData();
+        if (CollectionUtils.isEmpty(registerList)) {
+            return ReturnInfo.createReturnSucces(deviceOnlineLists);
+        }
+        CmdRes<List<String>> listCmdRes = cmdService.readMuchVar(registerList);
+        List<String> result = listCmdRes.getData();
         int i = 0;
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
-            String cmd = result.get(i);
-            if (cmd != null) {
-                deviceOnlineList.setOnlineStatus(Device.ONLINE);
-                Device device = new Device();
-                device.setId(deviceOnlineList.getDeviceId());
-                device.setStatus(Device.ONLINE);
-                deviceDAO.updateByPrimaryKeySelective(device);
+            if (listCmdRes.isSuccess()) {
+                String cmd = result.get(i);
+                if (cmd != null) {
+                    deviceOnlineList.setOnlineStatus(Device.ONLINE);
+                    Device device = new Device();
+                    device.setId(deviceOnlineList.getDeviceId());
+                    device.setStatus(Device.ONLINE);
+                    deviceDAO.updateByPrimaryKeySelective(device);
+                }
             }
             deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
         }
