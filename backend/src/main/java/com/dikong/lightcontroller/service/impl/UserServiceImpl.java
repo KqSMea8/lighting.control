@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
+
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
@@ -42,10 +46,6 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -305,10 +305,16 @@ public class UserServiceImpl implements UserService {
         List<Integer> manageTypeIds =
                 userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
         if (manageTypeIds.size() >= 2) {
+            currentUserInfo.setManagerType(Constant.USER.PROJECT_SUPER_MANAGER);
             projectRes.setManagerType(Constant.USER.PROJECT_SUPER_MANAGER);
         }
         if (manageTypeIds.size() == 1) {
+            currentUserInfo.setManagerType(manageTypeIds.get(0));
             projectRes.setManagerType(manageTypeIds.get(0));
+        }
+        if (manageTypeIds.size() == 0) {
+            currentUserInfo.setManagerType(Constant.USER.NOT_AUTH);
+            projectRes.setManagerType(Constant.USER.NOT_AUTH);
         }
         List<Menu> menus = new ArrayList<Menu>();
         if (manageTypeIds.size() == 0) {

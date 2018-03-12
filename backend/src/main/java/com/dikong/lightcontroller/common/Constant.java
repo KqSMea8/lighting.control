@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.common;
 
+
 /**
  * @author huangwenjun
  * @Datetime 2018年1月23日
@@ -28,6 +29,8 @@ public interface Constant {
         int PROJECT_MANAGER_CONTROL = 1;
         int PROJECT_MANAGER_CONFIG = 2;
         int PROJECT_SUPER_MANAGER = 3;
+        int NOT_AUTH = 4;
+        String AUTH_LIST = "auth.list";
     }
 
     interface CMD {
