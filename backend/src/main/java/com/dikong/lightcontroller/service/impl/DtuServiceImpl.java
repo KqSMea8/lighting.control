@@ -126,6 +126,7 @@ public class DtuServiceImpl implements DtuService {
                         new DeviceApi(dtu.getDeviceCode(), dtu.getBeatContent(), dtu.getBeatTime()));
             }else {
                 Example example = new Example(Dtu.class);
+                dtu.setDevice(null);
                 dtu.setIsDelete(Dtu.DEL_NO);
                 example.createCriteria().andEqualTo("deviceCode",dtu.getDeviceCode());
                 dtuDAO.updateByExampleSelective(dtu,example);

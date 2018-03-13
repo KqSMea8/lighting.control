@@ -332,7 +332,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     public ReturnInfo sourceList(Integer dtuId) {
         List<BoardList> boardLists = new ArrayList<>();
         int projId = AuthCurrentUser.getCurrentProjectId();
-        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectByProjIdAndDutId(projId, dtuId);
+        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectByProjIdAndDutId(projId, dtuId,Device.DEL_NO);
         if (!CollectionUtils.isEmpty(deviceBoardLists)) {
             for (DeviceBoardList deviceBoardList : deviceBoardLists) {
                 BoardList boardList = new BoardList();

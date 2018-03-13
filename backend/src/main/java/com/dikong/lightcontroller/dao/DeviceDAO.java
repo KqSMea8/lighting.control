@@ -68,9 +68,9 @@ public interface DeviceDAO extends Mapper<Device> {
     @Select({"SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId} AND d.is_delete=#{isDelete}"})
     List<DeviceBoardList> selectNotIn(@Param("projId") Integer projId,@Param("isDelete")Byte isDelete);
 
-    @Select({"SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId} and d.dtu_id=#{dtuId}"})
+    @Select({"SELECT d.id,dt.device AS `dtu_name`,d.name AS `device_name`,d.code AS `device_code`,d.external_id from device d LEFT JOIN dtu dt ON d.dtu_id=dt.id where dt.proj_id=#{projId} and d.dtu_id=#{dtuId} AND d.is_delete=#{isDelete}"})
     List<DeviceBoardList> selectByProjIdAndDutId(@Param("projId") Integer projId,
-            @Param("dtuId") Integer dtuId);
+            @Param("dtuId") Integer dtuId,@Param("isDelete")Byte isDelete);
 
     @Select({"select status from device where id=#{id}"})
     Integer selectConntionStatus(@Param("id") Long id);
