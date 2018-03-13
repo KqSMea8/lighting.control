@@ -33,6 +33,8 @@ public interface SysVarService {
 
     ReturnInfo updateSysVar(BaseSysVar sysVar);
 
+    ReturnInfo updateSysVarByDeleteProj(BaseSysVar sysVar);
+
     ReturnInfo<List<SysVarList>> selectAllVar(VarListSearch varListSearch);
 
     List<CmdSendDto> seachAllRegisId(Timing timing, String value);

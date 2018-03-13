@@ -142,6 +142,19 @@ public class SysVarServiceImpl implements SysVarService {
     }
 
     @Override
+    public ReturnInfo updateSysVarByDeleteProj(BaseSysVar sysVar) {
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        Long sysVarId = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
+        if (sysVarId == null){
+            return null;
+        }
+        sysVar.setId(sysVarId);
+        sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getId());
+        processSequence(projId, sysVar.getVarValue());
+        return null;
+    }
+
+    @Override
     public ReturnInfo<List<SysVarList>> selectAllVar(VarListSearch varListSearch) {
         List<SysVarList> sysVarLists = new ArrayList<>();
         PageHelper.startPage(varListSearch.getPageNo(), varListSearch.getPageSize());

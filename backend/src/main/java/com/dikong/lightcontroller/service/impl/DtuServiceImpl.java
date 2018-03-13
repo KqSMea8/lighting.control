@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.dikong.lightcontroller.common.BussinessCode;
@@ -102,6 +103,15 @@ public class DtuServiceImpl implements DtuService {
         dtuCollectionApi.deleteDevice(dtu.getDeviceCode());
         dtuDAO.updateIsDelete(id, Dtu.DEL_YES);
         deviceService.deleteDeviceByDtuId(id);
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override public ReturnInfo deleteAllDtu() {
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        List<Dtu> dtus = dtuDAO.selectAllDtuId(projId,Dtu.DEL_NO);
+        if (!CollectionUtils.isEmpty(dtus)){
+            dtus.forEach(dtu->deleteDtu(dtu.getId()));
+        }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

@@ -48,4 +48,7 @@ public interface SysVarDAO {
     @Select({"select * from sys_var where proj_id=#{projId} AND sys_var_type=#{sysVarType}"})
     List<SysVar> selectAllByProjIdAndType(@Param("projId") Integer projId,
             @Param("sysVarType") Integer sysVarType);
+
+    @Select({"select id from sys_var where sys_var_type=#{sysVarType} AND proj_id=#{projId} limit 1"})
+    Long selectSequence(@Param("projId")Integer projId,@Param("sysVarType")Integer sysVarType);
 }
