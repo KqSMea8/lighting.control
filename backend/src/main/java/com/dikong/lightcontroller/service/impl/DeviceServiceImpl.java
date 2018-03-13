@@ -316,8 +316,8 @@ public class DeviceServiceImpl implements DeviceService {
             update.setUseTimes(device.getUseTimes() == null ? 0
                     : device.getUseTimes()
                             + calLastedTime(device.getLastOfflineTime(), new Date()));
-            if (device.getConnectCount() == null) {
-                device.setConnectCount(1);
+            if (device.getConnectCount() == null || device.getConnectCount() == 0) {
+                update.setConnectCount(1);
             }
         } else {
             if (Device.ONLINE.equals(device.getStatus())) {
@@ -329,15 +329,15 @@ public class DeviceServiceImpl implements DeviceService {
                 update.setStatus(Device.OFFLINE);
                 update.setLastOnlineTime(new Date());
             }
-            if (device.getDisconnectCount() == null) {
-                device.setDisconnectCount(1);
+            if (device.getDisconnectCount() == 0 || device.getDisconnectCount() == null) {
+                update.setDisconnectCount(1);
             }
         }
         if (null != update.getUseTimes()) {
             update.setId(deviceId);
             deviceDAO.updateByPrimaryKeySelective(update);
         }
-        return ReturnInfo.create(CodeEnum.SUCCESS);
+        return ReturnInfo.create(update);
     }
 
     @Override
@@ -352,37 +352,48 @@ public class DeviceServiceImpl implements DeviceService {
         PageHelper.startPage(basePage.getPageNo(), basePage.getPageSize());
         List<DeviceOnlineList> deviceOnlineLists =
                 deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
-        List<Register> registerList = new ArrayList<>();
-        deviceOnlineLists.forEach(item -> {
-            Register register = registerDAO.selectIdAndTypeByDeviceId(item.getDeviceId());
-            if (null != register) {
-                registerList.add(register);
-            }
-        });
-        if (CollectionUtils.isEmpty(registerList)) {
-            return ReturnInfo.createReturnSucces(deviceOnlineLists);
-        }
-        CmdRes<List<String>> listCmdRes = cmdService.readMuchVar(registerList);
-        LOG.info("读取返回值:{}", listCmdRes);
-        List<String> result = listCmdRes.getData();
-        int i = 0;
+        // List<Register> registerList = new ArrayList<>();
+        // deviceOnlineLists.forEach(item -> {
+        // Register register = registerDAO.selectIdAndTypeByDeviceId(item.getDeviceId());
+        // if (null != register) {
+        // registerList.add(register);
+        // }
+        // });
+        // if (CollectionUtils.isEmpty(registerList)) {
+        // return ReturnInfo.createReturnSucces(deviceOnlineLists);
+        // }
+        // CmdRes<List<String>> listCmdRes = cmdService.readMuchVar(registerList);
+        // LOG.info("读取返回值:{}", listCmdRes);
+        // List<String> result = listCmdRes.getData();
+        // int i = 0;
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
-            String cmd = result.get(i);
-            if (listCmdRes.isSuccess() && cmd != null) {
-                Device device = new Device();
-                deviceOnlineList.setOnlineStatus(Device.ONLINE);
-                device.setStatus(Device.ONLINE);
-                device.setId(deviceOnlineList.getDeviceId());
-                deviceDAO.updateByPrimaryKeySelective(device);
-            } else {
-                Device device = new Device();
-                device.setStatus(Device.OFFLINE);
-                deviceOnlineList.setOnlineStatus(Device.OFFLINE);
-                device.setId(deviceOnlineList.getDeviceId());
-                deviceDAO.updateByPrimaryKeySelective(device);
+            ReturnInfo returnInfo = conncationInfo(deviceOnlineList.getDeviceId());
+            Device update = (Device) returnInfo.getData();
+            if (update != null && update.getUseTimes() != null) {
+                deviceOnlineList.setUseTimes(update.getUseTimes() + " S");
+            } else if (update != null && update.getConnectCount() != null) {
+                deviceOnlineList.setConnectCount(update.getConnectCount());
+            } else if (update != null && update.getDisconnectCount() != null) {
+                deviceOnlineList.setDisconnectCount(update.getDisconnectCount());
+            } else if (update != null && update.getStatus() != null) {
+                deviceOnlineList.setOnlineStatus(update.getStatus());
             }
-            deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
-            i++;
+            // String cmd = result.get(i);
+            // if (listCmdRes.isSuccess() && cmd != null) {
+            // Device device = new Device();
+            // deviceOnlineList.setOnlineStatus(Device.ONLINE);
+            // device.setStatus(Device.ONLINE);
+            // device.setId(deviceOnlineList.getDeviceId());
+            // deviceDAO.updateByPrimaryKeySelective(device);
+            // } else {
+            // Device device = new Device();
+            // device.setStatus(Device.OFFLINE);
+            // deviceOnlineList.setOnlineStatus(Device.OFFLINE);
+            // device.setId(deviceOnlineList.getDeviceId());
+            // deviceDAO.updateByPrimaryKeySelective(device);
+            // }
+            // deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
+            // i++;
         }
         return ReturnInfo.createReturnSucces(deviceOnlineLists);
     }
