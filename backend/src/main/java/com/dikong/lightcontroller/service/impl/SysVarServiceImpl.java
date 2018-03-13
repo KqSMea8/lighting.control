@@ -94,6 +94,8 @@ public class SysVarServiceImpl implements SysVarService {
     @Autowired
     private DtuDAO dtuDAO;
 
+
+
     @Override
     public ReturnInfo addSysVarWherNotExist(BaseSysVar sysVar) {
         Integer exisSysVar = sysVarDAO.selectExisSysVar(sysVar.getProjId(), sysVar.getSysVarType());
@@ -127,6 +129,7 @@ public class SysVarServiceImpl implements SysVarService {
         int projId = AuthCurrentUser.getCurrentProjectId();
         if (BaseSysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
             sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
+
             processSequence(projId, sysVar.getVarValue());
         } else if (BaseSysVar.GROUP.equals(sysVar.getSysVarType())) {
             sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
