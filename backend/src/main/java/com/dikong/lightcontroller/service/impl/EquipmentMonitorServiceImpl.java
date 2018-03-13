@@ -415,10 +415,40 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     }
 
     @Override
-    public ReturnInfo delByTiming() {
+    public ReturnInfo delByTiming(Long varId) {
         EquipmentMonitor record = new EquipmentMonitor();
         record.setSourceType(EquipmentMonitor.FREQUENCE_TYPE);
-        record.setSourceId(AuthCurrentUser.getCurrentProjectId());
+        record.setSourceId(varId.intValue());
+        monitorDao.updateByPrimaryKeySelective(record);
+        return ReturnInfo.createReturnSuccessOne(null);
+    }
+
+    @Override
+    public ReturnInfo updateByTiming(Long varId, int value) {
+        EquipmentMonitor record = new EquipmentMonitor();
+        record.setSourceType(EquipmentMonitor.FREQUENCE_TYPE);
+        record.setSourceId(varId.intValue());
+        record.setCurrentValue(new BigDecimal(value));
+        monitorDao.updateByPrimaryKeySelective(record);
+        return ReturnInfo.createReturnSuccessOne(null);
+    }
+
+    @Override
+    public ReturnInfo updateByVarId(Long varId, int value) {
+        EquipmentMonitor record = new EquipmentMonitor();
+        record.setSourceType(EquipmentMonitor.DEVICE_TYPE);
+        record.setCurrentValue(new BigDecimal(value));
+        record.setSourceId(varId.intValue());
+        monitorDao.updateByPrimaryKeySelective(record);
+        return ReturnInfo.createReturnSuccessOne(null);
+    }
+
+    @Override
+    public ReturnInfo updateByGroupId(Long groupId, int value) {
+        EquipmentMonitor record = new EquipmentMonitor();
+        record.setSourceType(EquipmentMonitor.GROUP_TYPE);
+        record.setCurrentValue(new BigDecimal(value));
+        record.setSourceId(groupId.intValue());
         monitorDao.updateByPrimaryKeySelective(record);
         return ReturnInfo.createReturnSuccessOne(null);
     }
