@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.service;
 
+import java.util.List;
+
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 
@@ -25,4 +27,10 @@ public interface EquipmentMonitorService {
     public ReturnInfo sourceList();
 
     public ReturnInfo sourceList(Integer dtuId);
+
+    public ReturnInfo delByVarIds(List<Long> varIds);
+
+    public ReturnInfo delByGroupId(Long groupId);
+
+    public ReturnInfo delByTiming();
 }

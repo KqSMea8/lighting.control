@@ -20,7 +20,7 @@ public class EquipmentMonitor {
      */
     private String caption;
     /**
-     * 监控对象(串口设备/群组/时序)id
+     * 监控对象(串口设备变量id/群组/时序)id
      */
     private Integer sourceId;
     /**

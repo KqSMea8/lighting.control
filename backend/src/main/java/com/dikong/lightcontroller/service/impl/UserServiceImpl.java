@@ -295,11 +295,11 @@ public class UserServiceImpl implements UserService {
         LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
         currentUserInfo.setCurrentProjectId(projectId);
         EnterProjectRes projectRes = new EnterProjectRes();
-        jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
         if (AuthCurrentUser.isManager()) {
             List<Menu> menus = menuDao.selectAll();
             projectRes.setManagerType(Constant.USER.PROJECT_SUPER_MANAGER);
             projectRes.setMenus(menus);
+            jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
             return ReturnInfo.createReturnSuccessOne(projectRes);
         }
         List<Integer> manageTypeIds =
@@ -316,6 +316,7 @@ public class UserServiceImpl implements UserService {
             currentUserInfo.setManagerType(Constant.USER.NOT_AUTH);
             projectRes.setManagerType(Constant.USER.NOT_AUTH);
         }
+        jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
         List<Menu> menus = new ArrayList<Menu>();
         if (manageTypeIds.size() == 0) {
             projectRes.setMenus(menus);

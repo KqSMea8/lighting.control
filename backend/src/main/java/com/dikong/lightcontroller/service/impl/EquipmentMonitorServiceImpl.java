@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import tk.mybatis.mapper.entity.Example;
+
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
@@ -37,8 +39,6 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 import com.dikong.lightcontroller.vo.BoardList;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
-
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -93,9 +93,8 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 if (!value.isSuccess()) {
                     value.setData("0");
                 }
-                equipmentMonitor.setCurrentValue(
-                        new BigDecimal(String.valueOf(new BigDecimal(value.getData())
-                                .multiply(equipmentMonitor.getFactor()).doubleValue())));
+                equipmentMonitor.setCurrentValue(new BigDecimal(String.valueOf(new BigDecimal(value
+                        .getData()).multiply(equipmentMonitor.getFactor()).doubleValue())));
             }
         } else {
             equipmentMonitor.setCurrentValue(new BigDecimal(SwitchEnum.CLOSE.getCode()));
@@ -164,8 +163,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
             for (EquipmentMonitor temp : monitors) {
                 if (temp.getSourceType() == 1) {
                     CmdRes<String> result = cmdService.readOneSwitch(temp.getSourceId());
-                    temp.setCurrentValue(new BigDecimal(result.getData()));
-                    monitorDao.updateByPrimaryKeySelective(temp);
+                    if (result.isSuccess()) {
+                        temp.setCurrentValue(new BigDecimal(result.getData()));
+                        monitorDao.updateByPrimaryKeySelective(temp);
+                    }
                 }
                 resultMonitors.add(temp);
             }
@@ -273,7 +274,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     public ReturnInfo sourceList() {
         List<BoardList> boardLists = new ArrayList<>();
         int projId = AuthCurrentUser.getCurrentProjectId();
-        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId,Device.DEL_NO);
+        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectNotIn(projId, Device.DEL_NO);
         if (!CollectionUtils.isEmpty(deviceBoardLists)) {
             for (DeviceBoardList deviceBoardList : deviceBoardLists) {
                 BoardList boardList = new BoardList();
@@ -281,10 +282,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDeviceIdOrGroupId(deviceBoardList.getId());
                 boardList.setDtuOrSysName(deviceBoardList.getDtuName());
                 boardList.setDeviceOrGroupName(deviceBoardList.getDeviceName());
-                boardList.setDeviceCodeOrGroup(
-                        Integer.parseInt(deviceBoardList.getDeviceCode()) + "");
-                boardList.setDeviceLocation(
-                        boardList.getDtuOrSysName() + ":ID" + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceCodeOrGroup(Integer.parseInt(deviceBoardList.getDeviceCode())
+                        + "");
+                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":ID"
+                        + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.DEVICE_TYPE);
                 boardLists.add(boardList);
             }
@@ -298,8 +299,8 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDtuOrSysName("SYS");
                 boardList.setDeviceOrGroupName(group.getGroupName());
                 boardList.setDeviceCodeOrGroup("Group" + group.getGroupCode());
-                boardList.setDeviceLocation(
-                        boardList.getDtuOrSysName() + ":" + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":"
+                        + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.GROUP_TYPE);
                 boardLists.add(boardList);
             }
@@ -332,7 +333,8 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     public ReturnInfo sourceList(Integer dtuId) {
         List<BoardList> boardLists = new ArrayList<>();
         int projId = AuthCurrentUser.getCurrentProjectId();
-        List<DeviceBoardList> deviceBoardLists = deviceDAO.selectByProjIdAndDutId(projId, dtuId,Device.DEL_NO);
+        List<DeviceBoardList> deviceBoardLists =
+                deviceDAO.selectByProjIdAndDutId(projId, dtuId, Device.DEL_NO);
         if (!CollectionUtils.isEmpty(deviceBoardLists)) {
             for (DeviceBoardList deviceBoardList : deviceBoardLists) {
                 BoardList boardList = new BoardList();
@@ -340,10 +342,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDeviceIdOrGroupId(deviceBoardList.getId());
                 boardList.setDtuOrSysName(deviceBoardList.getDtuName());
                 boardList.setDeviceOrGroupName(deviceBoardList.getDeviceName());
-                boardList.setDeviceCodeOrGroup(
-                        Integer.parseInt(deviceBoardList.getDeviceCode()) + "");
-                boardList.setDeviceLocation(
-                        boardList.getDtuOrSysName() + ":ID" + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceCodeOrGroup(Integer.parseInt(deviceBoardList.getDeviceCode())
+                        + "");
+                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":ID"
+                        + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.DEVICE_TYPE);
                 boardLists.add(boardList);
             }
@@ -388,4 +390,31 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         }
         return ReturnInfo.createReturnSuccessOne(oneMonitorInfo);
     }
+
+    @Override
+    public ReturnInfo delByVarIds(List<Long> varIds) {
+        EquipmentMonitor record = new EquipmentMonitor();
+        record.setSourceType(EquipmentMonitor.GROUP_TYPE);
+        monitorDao.updateByPrimaryKeySelective(record);
+        return ReturnInfo.createReturnSuccessOne(null);
+    }
+
+    @Override
+    public ReturnInfo delByGroupId(Long groupId) {
+        EquipmentMonitor record = new EquipmentMonitor();
+        record.setSourceType(EquipmentMonitor.GROUP_TYPE);
+        record.setSourceId(groupId.intValue());
+        monitorDao.updateByPrimaryKeySelective(record);
+        return ReturnInfo.createReturnSuccessOne(null);
+    }
+
+    @Override
+    public ReturnInfo delByTiming() {
+        EquipmentMonitor record = new EquipmentMonitor();
+        record.setSourceType(EquipmentMonitor.FREQUENCE_TYPE);
+        record.setSourceId(AuthCurrentUser.getCurrentProjectId());
+        monitorDao.updateByPrimaryKeySelective(record);
+        return ReturnInfo.createReturnSuccessOne(null);
+    }
+
 }
