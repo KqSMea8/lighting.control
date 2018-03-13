@@ -363,6 +363,7 @@ public class DeviceServiceImpl implements DeviceService {
             return ReturnInfo.createReturnSucces(deviceOnlineLists);
         }
         CmdRes<List<String>> listCmdRes = cmdService.readMuchVar(registerList);
+        LOG.info("读取返回值:{}", listCmdRes);
         List<String> result = listCmdRes.getData();
         int i = 0;
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
@@ -381,6 +382,7 @@ public class DeviceServiceImpl implements DeviceService {
                 deviceDAO.updateByPrimaryKeySelective(device);
             }
             deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
+            i++;
         }
         return ReturnInfo.createReturnSucces(deviceOnlineLists);
     }
