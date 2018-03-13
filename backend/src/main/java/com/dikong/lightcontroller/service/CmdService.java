@@ -21,7 +21,7 @@ public interface CmdService {
 
     public CmdRes<String> writeSwitch(long varId, SwitchEnum switchEnum);
 
-    public boolean writeSwitch(List<CmdSendDto> allRegis);
+    public int[] writeSwitch(List<CmdSendDto> allRegis);
 
     public CmdRes<String> readOneAnalog(long varId);
 

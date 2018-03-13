@@ -15,9 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.dao.CmdRecordDao;
@@ -39,6 +36,9 @@ import com.dikong.lightcontroller.utils.RedisLockUtils;
 import com.dikong.lightcontroller.utils.cmd.CmdMsgUtils;
 import com.dikong.lightcontroller.utils.cmd.ReadWriteEnum;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
  * @author huangwenjun
@@ -122,10 +122,10 @@ public class CmdServiceImpl implements CmdService {
             Integer firstAddr = Integer.valueOf(varIds.get(i - 1).getRegisAddr());
             Integer secondAddr = Integer.valueOf(varIds.get(i).getRegisAddr());
             if ((firstAddr + 1) == secondAddr
-                    && (Register.BV.equals(varIds.get(i - 1).getRegisType()) || Register.BI
-                            .equals(varIds.get(i - 1).getRegisType()))
-                    && (Register.BV.equals(varIds.get(i).getRegisType()) || Register.BI
-                            .equals(varIds.get(i).getRegisType()))) {
+                    && (Register.BV.equals(varIds.get(i - 1).getRegisType())
+                            || Register.BI.equals(varIds.get(i - 1).getRegisType()))
+                    && (Register.BV.equals(varIds.get(i).getRegisType())
+                            || Register.BI.equals(varIds.get(i).getRegisType()))) {
                 // 开关连续
                 tempB.add(varIds.get(i - 1));
                 if (size != (i + 1)) {
@@ -134,10 +134,10 @@ public class CmdServiceImpl implements CmdService {
                     i += 1;
                 }
             } else if ((firstAddr + 1) == secondAddr
-                    && (Register.AV.equals(varIds.get(i - 1).getRegisType()) || Register.AI
-                            .equals(varIds.get(i - 1).getRegisType()))
-                    && (Register.AV.equals(varIds.get(i).getRegisType()) || Register.AI
-                            .equals(varIds.get(i).getRegisType()))) {
+                    && (Register.AV.equals(varIds.get(i - 1).getRegisType())
+                            || Register.AI.equals(varIds.get(i - 1).getRegisType()))
+                    && (Register.AV.equals(varIds.get(i).getRegisType())
+                            || Register.AI.equals(varIds.get(i).getRegisType()))) {
                 // 模拟连续
                 tempA.add(varIds.get(i - 1));
                 if (size != (i + 1)) {
@@ -224,10 +224,8 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<String>(false, "dtu null");
         }
         // 查询一个变量当前值，默认为1
-        String sendMsg =
-                CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
-                        register.getRegisType(), Integer.valueOf(register.getRegisAddr()),
-                        switchEnum);
+        String sendMsg = CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
+                register.getRegisType(), Integer.valueOf(register.getRegisAddr()), switchEnum);
         CmdRecord cmdRecord = new CmdRecord();
         cmdRecord.setDeviceCode(dtu.getDeviceCode());
         cmdRecord.setDevCode(device.getCode());
@@ -256,9 +254,8 @@ public class CmdServiceImpl implements CmdService {
             if (flag == Constant.CMD.LOCK_TIME_OUT) {
                 return new CmdRes<String>(false, null);
             }
-            response =
-                    OkhttpUtils.postFrom(envioroment.getProperty(serviceIpKey) + "/device/command",
-                            req, null);
+            response = OkhttpUtils
+                    .postFrom(envioroment.getProperty(serviceIpKey) + "/device/command", req, null);
             if (!RedisLockUtils.releaseDistributedLock(jedis, dtu.getDeviceCode(), requestId)) {
                 LOG.info("解锁失败！dutCode:" + dtu.getDeviceCode() + " requestId：" + requestId);
             }
@@ -292,14 +289,21 @@ public class CmdServiceImpl implements CmdService {
     }
 
     @Override
-    public boolean writeSwitch(List<CmdSendDto> allRegis) {
+    public int[] writeSwitch(List<CmdSendDto> allRegis) {
+        int[] sendResult = new int[2];
         if (null == allRegis) {
-            return false;
+            return sendResult;
         }
         for (CmdSendDto regis : allRegis) {
-            writeSwitch(regis.getRegisId(), SwitchEnum.getByCode(regis.getSwitchValue()));
+            CmdRes<String> cmdRes =
+                    writeSwitch(regis.getRegisId(), SwitchEnum.getByCode(regis.getSwitchValue()));
+            if (cmdRes.isSuccess()) {
+                sendResult[0]++;
+            } else {
+                sendResult[1]++;
+            }
         }
-        return true;
+        return sendResult;
     }
 
     @Override
@@ -382,9 +386,8 @@ public class CmdServiceImpl implements CmdService {
             e.printStackTrace();
         }
         // 查询一个变量当前值，默认为1
-        CmdRes<String> result =
-                reqUtil(dtu, device.getCode(), readWriteEnum, register.getRegisType(),
-                        register.getRegisAddr(), varNum);
+        CmdRes<String> result = reqUtil(dtu, device.getCode(), readWriteEnum,
+                register.getRegisType(), register.getRegisAddr(), varNum);
         if (!RedisLockUtils.releaseDistributedLock(jedis, dtu.getDeviceCode(), requestId)) {
             LOG.info("解锁失败！dutCode:" + dtu.getDeviceCode() + " requestId：" + requestId);
         }
@@ -393,9 +396,8 @@ public class CmdServiceImpl implements CmdService {
 
     private CmdRes<String> reqUtil(Dtu dtu, String devAddr, ReadWriteEnum readWriteEnum,
             String varType, String varAddr, int varNum) {
-        String sendMsg =
-                CmdMsgUtils.assembleSendCmd(devAddr, readWriteEnum, varType,
-                        Integer.valueOf(varAddr), varNum);
+        String sendMsg = CmdMsgUtils.assembleSendCmd(devAddr, readWriteEnum, varType,
+                Integer.valueOf(varAddr), varNum);
         // TODO 命令执行记录
         CmdRecord cmdRecord = new CmdRecord();
         cmdRecord.setDeviceCode(dtu.getDeviceCode());
@@ -410,9 +412,8 @@ public class CmdServiceImpl implements CmdService {
         req.put("cmd", sendMsg);
         LOG.info("发送信息：" + JSON.toJSONString(req));
         try {
-            response =
-                    OkhttpUtils.postFrom(envioroment.getProperty(serviceIpKey) + "/device/command",
-                            req, null);
+            response = OkhttpUtils
+                    .postFrom(envioroment.getProperty(serviceIpKey) + "/device/command", req, null);
         } catch (IOException e) {
             String info = "发送命令异常" + e.toString();
             LOG.error(info);
@@ -422,9 +423,8 @@ public class CmdServiceImpl implements CmdService {
             return new CmdRes<String>(false, "发送命令异常");
         }
         LOG.info("命令发送响应：" + response);
-        if (StringUtils.isEmpty(response)
-                || StringUtils.isEmpty(response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()),
-                        ""))) {
+        if (StringUtils.isEmpty(response) || StringUtils
+                .isEmpty(response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()), ""))) {
             String info = "返回值为空或处理之后为空:" + response;
             cmdRecord.setResult(info);
             cmdRecordDao.insert(cmdRecord);

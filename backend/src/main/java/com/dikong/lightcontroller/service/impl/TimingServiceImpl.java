@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dikong.lightcontroller.entity.SysVar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,9 +244,12 @@ public class TimingServiceImpl implements TimingService {
         timing.setIsDelete(Timing.DEL_NO);
         int count = timingDAO.selectCount(timing);
         if (count == 1) {
+            SysVar sysVar = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
+            if (null != sysVar){
+                equipmentMonitorService.delByTiming(sysVar.getVarId());
+            }
             sysVarDAO.delete(BaseSysVar.SEQUENCE_VAR_ID, BaseSysVar.SEQUENCE, projId);
             //删除监控关联的时序
-            equipmentMonitorService.delByTiming();
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }

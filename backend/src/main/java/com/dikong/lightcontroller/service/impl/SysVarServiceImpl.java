@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
@@ -30,6 +31,7 @@ import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.CmdService;
+import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.HistoryService;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.service.SysVarService;
@@ -95,6 +97,10 @@ public class SysVarServiceImpl implements SysVarService {
     private DtuDAO dtuDAO;
 
 
+    @Autowired
+    private EquipmentMonitorService equipmentMonitorService;
+
+
 
     @Override
     public ReturnInfo addSysVarWherNotExist(BaseSysVar sysVar) {
@@ -126,32 +132,49 @@ public class SysVarServiceImpl implements SysVarService {
     @Override
     @Transactional
     public ReturnInfo updateSysVar(BaseSysVar sysVar) {
+        int[] processResult = null;
         int projId = AuthCurrentUser.getCurrentProjectId();
         if (BaseSysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
             sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
-
+            equipmentMonitorService.updateByTiming(sysVar.getVarId(),
+                    Integer.valueOf(sysVar.getVarValue()));
             processSequence(projId, sysVar.getVarValue());
+            SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getVarId(), projId,
+                    sysVar.getSysVarType());
+            sysVar.setId(var.getId());
         } else if (BaseSysVar.GROUP.equals(sysVar.getSysVarType())) {
-            sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
-            processGroup(sysVar.getVarId(), sysVar.getVarValue());
+            equipmentMonitorService.updateByGroupId(sysVar.getVarId(),
+                    Integer.valueOf(sysVar.getVarValue()));
+            processResult = processGroup(sysVar.getVarId(), sysVar.getVarValue());
+            SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getVarId(), projId,
+                    sysVar.getSysVarType());
+            sysVar.setId(var.getId());
+            if (processResult != null && processResult[0] > 0) {
+                sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
+            }
         } else {
             // 变量类型,值直接修改变量
-            registerService.updateRegisterValue(sysVar.getVarId(), sysVar.getVarValue());
-            processRegis(sysVar.getVarId(), sysVar.getVarValue());
+            equipmentMonitorService.updateByVarId(sysVar.getVarId(),
+                    Integer.valueOf(sysVar.getVarValue()));
+            processResult = processRegis(sysVar.getVarId(), sysVar.getVarValue());
+            if (processResult != null && processResult[0] > 0) {
+                registerService.updateRegisterValue(sysVar.getVarId(), sysVar.getVarValue());
+            }
         }
         // 判断是否需要记录历史表
+
         historyService.updateHistory(sysVar);
-        return ReturnInfo.create(CodeEnum.SUCCESS);
+        return ReturnInfo.create(processResult);
     }
 
     @Override
     public ReturnInfo updateSysVarByDeleteProj(BaseSysVar sysVar) {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        Long id = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
-        if (id == null) {
+        SysVar sysVar1 = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
+        if (sysVar1 == null) {
             return null;
         }
-        sysVar.setId(id);
+        sysVar.setId(sysVar1.getId());
         sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
         processSequence(projId, sysVar.getVarValue());
         return null;
@@ -222,6 +245,9 @@ public class SysVarServiceImpl implements SysVarService {
             List<String> taskNames = new ArrayList<>();
             try {
                 for (Timing item : timings) {
+                    if (!StringUtils.isEmpty(item.getTaskName())) {
+                        continue;
+                    }
                     ReturnInfo<String> addTimingTask = null;
                     if (Timing.ORDINARY_NODE.equals(item.getNodeType())) {
                         String weekList = item.getWeekList();
@@ -375,7 +401,7 @@ public class SysVarServiceImpl implements SysVarService {
      * @param groupId 群组id
      * @param value 变量值
      */
-    private void processGroup(long groupId, String value) {
+    public int[] processGroup(long groupId, String value) {
         List<CmdSendDto> cmdSendDtoList = new ArrayList<>();
         List<Long> regisIds = groupDeviceMiddleDAO.selectAllRegisId(groupId);
         if (!CollectionUtils.isEmpty(regisIds)) {
@@ -387,16 +413,16 @@ public class SysVarServiceImpl implements SysVarService {
                 }
             });
         }
-        cmdService.writeSwitch(cmdSendDtoList);
+        return cmdService.writeSwitch(cmdSendDtoList);
     }
 
-    private void processRegis(long regisId, String value) {
+    public int[] processRegis(long regisId, String value) {
         List<CmdSendDto> cmdSendDtoList = new ArrayList<>();
         if (BaseSysVar.CLOSE_SYS_VALUE.equals(value)) {
             cmdSendDtoList.add(new CmdSendDto(regisId, SwitchEnum.CLOSE.getCode()));
         } else {
             cmdSendDtoList.add(new CmdSendDto(regisId, SwitchEnum.OPEN.getCode()));
         }
-        cmdService.writeSwitch(cmdSendDtoList);
+        return cmdService.writeSwitch(cmdSendDtoList);
     }
 }

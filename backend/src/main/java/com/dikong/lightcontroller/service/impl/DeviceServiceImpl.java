@@ -368,13 +368,15 @@ public class DeviceServiceImpl implements DeviceService {
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
             if (listCmdRes.isSuccess()) {
                 String cmd = result.get(i);
+                Device device = new Device();
                 if (cmd != null) {
                     deviceOnlineList.setOnlineStatus(Device.ONLINE);
-                    Device device = new Device();
-                    device.setId(deviceOnlineList.getDeviceId());
                     device.setStatus(Device.ONLINE);
-                    deviceDAO.updateByPrimaryKeySelective(device);
+                } else {
+                    device.setStatus(Device.OFFLINE);
                 }
+                device.setId(deviceOnlineList.getDeviceId());
+                deviceDAO.updateByPrimaryKeySelective(device);
             }
             deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
         }

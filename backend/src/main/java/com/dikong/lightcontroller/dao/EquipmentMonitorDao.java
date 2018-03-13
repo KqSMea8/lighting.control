@@ -19,8 +19,8 @@ public interface EquipmentMonitorDao extends Mapper<EquipmentMonitor>,
         InsertListMapper<EquipmentMonitor> {
     @Select("<script>"
             + " UPDATE equipment_monitor SET is_delete = 2 WHERE "
-            + "  source_id in "
+            + " source_type = #{sourceType} AND source_id in "
             + " <foreach collection=\"varIds\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\" >"
             + " #{item} </foreach> " + "</script>")
-    public List<Menu> delByVarIds(@Param("varIds") List<Long> varIds);
+    public List<Menu> delByVarIds(@Param("varIds") List<Long> varIds,@Param("sourceType")Integer sourceType);
 }

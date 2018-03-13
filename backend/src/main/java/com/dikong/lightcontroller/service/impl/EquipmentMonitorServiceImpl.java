@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -26,11 +27,11 @@ import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.entity.Group;
-import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
+import com.dikong.lightcontroller.service.HistoryService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
@@ -72,6 +73,9 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
 
     @Autowired
     private SysVarDAO sysVarDAO;
+
+    @Autowired
+    private HistoryService historyService;
 
     @Override
     public ReturnInfo add(EquipmentMonitor equipmentMonitor) {
@@ -176,6 +180,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     }
 
     @Override
+    @Transactional
     public ReturnInfo changeStatus(Integer monitorId, String value) {
         EquipmentMonitor monitor = monitorDao.selectByPrimaryKey(monitorId);
         if (monitor.getValueType().equals(Register.AI)
@@ -191,28 +196,40 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
             int sourceType = monitor.getSourceType();// 1->单个设备 2->群组 3->时序
             switch (sourceType) {
                 case 1:
-                    sendCmd(monitorId, (long) sourceId, Integer.valueOf(value), sendResult);
-                    registerDao.updateRegisValueById(String.valueOf(value), (long) sourceId);
+                    // sendCmd(monitorId, (long) sourceId, Integer.valueOf(value), sendResult);
+                    // registerDao.updateRegisValueById(String.valueOf(value), (long) sourceId);
+
+                    BaseSysVar register = new BaseSysVar();
+                    register.setVarId((long) sourceId);
+                    register.setVarValue(value);
+                    ReturnInfo registerReturin = sysVarService.updateSysVar(register);
+                    sendResult = (int[]) registerReturin.getData();
                     break;
                 case 2:
                     // 根据groupId查询其下所有设备和变量信息
                     // 修改变量为value值
                     // 发送命令
-                    List<GroupDeviceMiddle> middles =
-                            groupDeviceMiddleDao.selectByGroupId((long) sourceId);
-                    for (GroupDeviceMiddle middle : middles) {
-                        sendCmd(monitorId, middle.getRegisId(), Integer.valueOf(value), sendResult);
-                    }
-                    int projId = AuthCurrentUser.getCurrentProjectId();
-                    sysVarDAO.updateSysVar(String.valueOf(value), (long) sourceId, projId);
+                    // List<GroupDeviceMiddle> middles =
+                    // groupDeviceMiddleDao.selectByGroupId((long) sourceId);
+                    // for (GroupDeviceMiddle middle : middles) {
+                    // sendCmd(monitorId, middle.getRegisId(), Integer.valueOf(value), sendResult);
+                    // }
+
+                    BaseSysVar group = new BaseSysVar();
+                    group.setSysVarType(BaseSysVar.GROUP);
+                    group.setVarId((long) sourceId);
+                    group.setVarValue(value);
+                    ReturnInfo returnInfo = sysVarService.updateSysVar(group);
+                    sendResult = (int[]) returnInfo.getData();
                     break;
                 case 3:
                     // 查询时序信息和ID
                     BaseSysVar baseSysVar = new BaseSysVar();
-                    baseSysVar.setId(new Long(sourceId));
+                    baseSysVar.setVarId(new Long(sourceId));
                     baseSysVar.setSysVarType(BaseSysVar.SEQUENCE);
                     baseSysVar.setVarValue(value);
                     sysVarService.updateSysVar(baseSysVar);
+                    sendResult[0]++;
                     // Timing timing = timingDao.selectByLastNodeName(sourceId, (byte) 1);
                     // if (timing.getRunType() == 1) {// 群组
                     // long groupId = timing.getRunVar();// 群组id
@@ -401,9 +418,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
 
     @Override
     public ReturnInfo delByVarIds(List<Long> varIds) {
-        EquipmentMonitor record = new EquipmentMonitor();
-        record.setSourceType(EquipmentMonitor.GROUP_TYPE);
-        monitorDao.updateByPrimaryKeySelective(record);
+        monitorDao.delByVarIds(varIds, EquipmentMonitor.DEVICE_TYPE);
         return ReturnInfo.createReturnSuccessOne(null);
     }
 
@@ -412,7 +427,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         EquipmentMonitor record = new EquipmentMonitor();
         record.setSourceType(EquipmentMonitor.GROUP_TYPE);
         record.setSourceId(groupId.intValue());
-        monitorDao.updateByPrimaryKeySelective(record);
+        Example example = new Example(EquipmentMonitor.class);
+        example.createCriteria().andEqualTo("sourceType", EquipmentMonitor.GROUP_TYPE)
+                .andEqualTo("sourceId", groupId);
+        monitorDao.updateByExampleSelective(record, example);
         return ReturnInfo.createReturnSuccessOne(null);
     }
 
@@ -421,7 +439,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         EquipmentMonitor record = new EquipmentMonitor();
         record.setSourceType(EquipmentMonitor.FREQUENCE_TYPE);
         record.setSourceId(varId.intValue());
-        monitorDao.updateByPrimaryKeySelective(record);
+        Example example = new Example(EquipmentMonitor.class);
+        example.createCriteria().andEqualTo("sourceType", EquipmentMonitor.FREQUENCE_TYPE)
+                .andEqualTo("sourceId", varId);
+        monitorDao.updateByExampleSelective(record, example);
         return ReturnInfo.createReturnSuccessOne(null);
     }
 
@@ -431,7 +452,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         record.setSourceType(EquipmentMonitor.FREQUENCE_TYPE);
         record.setSourceId(varId.intValue());
         record.setCurrentValue(new BigDecimal(value));
-        monitorDao.updateByPrimaryKeySelective(record);
+        Example example = new Example(EquipmentMonitor.class);
+        example.createCriteria().andEqualTo("sourceType", EquipmentMonitor.FREQUENCE_TYPE)
+                .andEqualTo("sourceId", varId);
+        monitorDao.updateByExampleSelective(record, example);
         return ReturnInfo.createReturnSuccessOne(null);
     }
 
@@ -441,7 +465,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         record.setSourceType(EquipmentMonitor.DEVICE_TYPE);
         record.setCurrentValue(new BigDecimal(value));
         record.setSourceId(varId.intValue());
-        monitorDao.updateByPrimaryKeySelective(record);
+        Example example = new Example(EquipmentMonitor.class);
+        example.createCriteria().andEqualTo("sourceType", EquipmentMonitor.DEVICE_TYPE)
+                .andEqualTo("sourceId", varId);
+        monitorDao.updateByExampleSelective(record, example);
         return ReturnInfo.createReturnSuccessOne(null);
     }
 
@@ -451,7 +478,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         record.setSourceType(EquipmentMonitor.GROUP_TYPE);
         record.setCurrentValue(new BigDecimal(value));
         record.setSourceId(groupId.intValue());
-        monitorDao.updateByPrimaryKeySelective(record);
+        Example example = new Example(EquipmentMonitor.class);
+        example.createCriteria().andEqualTo("sourceType", EquipmentMonitor.GROUP_TYPE)
+                .andEqualTo("sourceId", groupId);
+        monitorDao.updateByExampleSelective(record, example);
         return ReturnInfo.createReturnSuccessOne(null);
     }
 

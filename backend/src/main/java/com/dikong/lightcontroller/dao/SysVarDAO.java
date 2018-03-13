@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.dao;
 
 import java.util.List;
 
+import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -49,6 +50,9 @@ public interface SysVarDAO {
     List<SysVar> selectAllByProjIdAndType(@Param("projId") Integer projId,
             @Param("sysVarType") Integer sysVarType);
 
-    @Select({"select id from sys_var where sys_var_type=#{sysVarType} AND proj_id=#{projId} limit 1"})
-    Long selectSequence(@Param("projId")Integer projId,@Param("sysVarType")Integer sysVarType);
+    @Select({"select * from sys_var where sys_var_type=#{sysVarType} AND proj_id=#{projId} limit 1"})
+    SysVar selectSequence(@Param("projId")Integer projId,@Param("sysVarType")Integer sysVarType);
+
+    @Select({"select * from sys_var where sys_var_type=#{sysVarType} AND proj_id=#{projId} AND var_id=#{varId}"})
+    SysVar selectByVarIdAndProjId(@Param("varId")Long varId,@Param("projId")Integer projId,@Param("sysVarType")Integer sysVarType);
 }
