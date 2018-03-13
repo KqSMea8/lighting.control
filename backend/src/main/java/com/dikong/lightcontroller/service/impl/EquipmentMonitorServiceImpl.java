@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import tk.mybatis.mapper.entity.Example;
+
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
@@ -37,8 +39,6 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 import com.dikong.lightcontroller.vo.BoardList;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
-
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -96,9 +96,8 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 if (!value.isSuccess()) {
                     value.setData("0");
                 }
-                equipmentMonitor.setCurrentValue(
-                        new BigDecimal(String.valueOf(new BigDecimal(value.getData())
-                                .multiply(equipmentMonitor.getFactor()).doubleValue())));
+                equipmentMonitor.setCurrentValue(new BigDecimal(String.valueOf(new BigDecimal(value
+                        .getData()).multiply(equipmentMonitor.getFactor()).doubleValue())));
             }
         } else {
             equipmentMonitor.setCurrentValue(new BigDecimal(SwitchEnum.CLOSE.getCode()));
@@ -307,10 +306,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDeviceIdOrGroupId(deviceBoardList.getId());
                 boardList.setDtuOrSysName(deviceBoardList.getDtuName());
                 boardList.setDeviceOrGroupName(deviceBoardList.getDeviceName());
-                boardList.setDeviceCodeOrGroup(
-                        Integer.parseInt(deviceBoardList.getDeviceCode()) + "");
-                boardList.setDeviceLocation(
-                        boardList.getDtuOrSysName() + ":ID" + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceCodeOrGroup(Integer.parseInt(deviceBoardList.getDeviceCode())
+                        + "");
+                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":ID"
+                        + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.DEVICE_TYPE);
                 boardLists.add(boardList);
             }
@@ -324,8 +323,8 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDtuOrSysName("SYS");
                 boardList.setDeviceOrGroupName(group.getGroupName());
                 boardList.setDeviceCodeOrGroup("Group" + group.getGroupCode());
-                boardList.setDeviceLocation(
-                        boardList.getDtuOrSysName() + ":" + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":"
+                        + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.GROUP_TYPE);
                 boardLists.add(boardList);
             }
@@ -367,10 +366,10 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                 boardList.setDeviceIdOrGroupId(deviceBoardList.getId());
                 boardList.setDtuOrSysName(deviceBoardList.getDtuName());
                 boardList.setDeviceOrGroupName(deviceBoardList.getDeviceName());
-                boardList.setDeviceCodeOrGroup(
-                        Integer.parseInt(deviceBoardList.getDeviceCode()) + "");
-                boardList.setDeviceLocation(
-                        boardList.getDtuOrSysName() + ":ID" + boardList.getDeviceCodeOrGroup());
+                boardList.setDeviceCodeOrGroup(Integer.parseInt(deviceBoardList.getDeviceCode())
+                        + "");
+                boardList.setDeviceLocation(boardList.getDtuOrSysName() + ":ID"
+                        + boardList.getDeviceCodeOrGroup());
                 boardList.setItemType(EquipmentMonitor.DEVICE_TYPE);
                 boardLists.add(boardList);
             }
@@ -407,7 +406,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
             List<SysVar> sysVars =
                     sysVarDAO.selectAllByProjIdAndType(AuthCurrentUser.getCurrentProjectId(), 1);
             for (SysVar sysVar : sysVars) {
-                if (sysVar.getId().equals(Long.valueOf(monitor.getSourceId()))) {
+                if (sysVar.getVarId().equals(Long.valueOf(monitor.getSourceId()))) {
                     oneMonitorInfo.setSourceName(sysVar.getVarName());
                     break;
                 }
