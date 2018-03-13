@@ -207,10 +207,22 @@ public class CmdServiceImpl implements CmdService {
     public CmdRes<String> writeSwitch(long varId, SwitchEnum switchEnum) {
         // 根据 long varId,查询变量信息
         Register register = registerDao.selectRegisById(varId);
+        if (register == null) {
+            LOG.info("register null");
+            return new CmdRes<String>(false, "register null");
+        }
         // 根据devId查询串口设备编码
         Device device = deviceDAO.selectDeviceById(register.getDeviceId());
+        if (device == null) {
+            LOG.info("device null");
+            return new CmdRes<String>(false, "device null");
+        }
         // 查询DTU信息
         Dtu dtu = dtuDao.selectDtuById(device.getDtuId());
+        if (dtu == null) {
+            LOG.info("dtu null");
+            return new CmdRes<String>(false, "dtu null");
+        }
         // 查询一个变量当前值，默认为1
         String sendMsg =
                 CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
@@ -334,10 +346,22 @@ public class CmdServiceImpl implements CmdService {
     private CmdRes<String> reqUtil(long varId, ReadWriteEnum readWriteEnum, int varNum) {
         // 根据 long varId,查询变量信息
         Register register = registerDao.selectRegisById(varId);
+        if (register == null) {
+            LOG.info("register null");
+            return new CmdRes<String>(false, "register null");
+        }
         // 根据devId查询串口设备编码
         Device device = deviceDAO.selectDeviceById(register.getDeviceId());
+        if (device == null) {
+            LOG.info("device null");
+            return new CmdRes<String>(false, "device null");
+        }
         // 查询DTU信息
         Dtu dtu = dtuDao.selectDtuById(device.getDtuId());
+        if (dtu == null) {
+            LOG.info("dtu null");
+            return new CmdRes<String>(false, "dtu null");
+        }
         String requestId = UUID.randomUUID().toString();
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
         try {
