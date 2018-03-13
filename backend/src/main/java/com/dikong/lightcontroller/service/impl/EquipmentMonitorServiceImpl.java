@@ -31,7 +31,6 @@ import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.SysVar;
-import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.SysVarService;
@@ -192,6 +191,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
             switch (sourceType) {
                 case 1:
                     sendCmd(monitorId, (long) sourceId, Integer.valueOf(value), sendResult);
+                    registerDao.updateRegisValueById(String.valueOf(value), (long) sourceId);
                     break;
                 case 2:
                     // 根据groupId查询其下所有设备和变量信息
@@ -202,27 +202,33 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                     for (GroupDeviceMiddle middle : middles) {
                         sendCmd(monitorId, middle.getRegisId(), Integer.valueOf(value), sendResult);
                     }
+                    sysVarDAO.updateSysVar(String.valueOf(value), (long) sourceId);
                     break;
                 case 3:
                     // 查询时序信息和ID
-                    Timing timing = timingDao.selectByLastNodeName(sourceId, (byte) 1);
-                    if (timing.getRunType() == 1) {// 群组
-                        long groupId = timing.getRunVar();// 群组id
-                        List<GroupDeviceMiddle> middles2 =
-                                groupDeviceMiddleDao.selectByGroupId(groupId);
-                        for (GroupDeviceMiddle middle : middles2) {
-                            sendCmd(monitorId, middle.getRegisId(), Integer.valueOf(value),
-                                    sendResult);
-                        }
-                    } else {// 设备
-                        long varId = timing.getRunId();// 变量id
-                        sendCmd(monitorId, varId, Integer.valueOf(value), sendResult);
-                    }
-                    BaseSysVar sysVar = new BaseSysVar();
-                    sysVar.setId((long) sourceId);
-                    sysVar.setSysVarType(2);
-                    sysVar.setVarValue(value);
-                    sysVarService.updateSysVar(sysVar);
+                    BaseSysVar baseSysVar = new BaseSysVar();
+                    baseSysVar.setId(new Long(sourceId));
+                    baseSysVar.setSysVarType(BaseSysVar.SEQUENCE);
+                    baseSysVar.setVarValue(value);
+                    sysVarService.updateSysVar(baseSysVar);
+                    // Timing timing = timingDao.selectByLastNodeName(sourceId, (byte) 1);
+                    // if (timing.getRunType() == 1) {// 群组
+                    // long groupId = timing.getRunVar();// 群组id
+                    // List<GroupDeviceMiddle> middles2 =
+                    // groupDeviceMiddleDao.selectByGroupId(groupId);
+                    // for (GroupDeviceMiddle middle : middles2) {
+                    // sendCmd(monitorId, middle.getRegisId(), Integer.valueOf(value),
+                    // sendResult);
+                    // }
+                    // } else {// 设备
+                    // long varId = timing.getRunId();// 变量id
+                    // sendCmd(monitorId, varId, Integer.valueOf(value), sendResult);
+                    // }
+                    // BaseSysVar sysVar = new BaseSysVar();
+                    // sysVar.setId((long) sourceId);
+                    // sysVar.setSysVarType(2);
+                    // sysVar.setVarValue(value);
+                    // sysVarService.updateSysVar(sysVar);
                     break;
 
                 default:
@@ -310,7 +316,7 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
             for (SysVar sysVar : sysVars) {
                 BoardList boardList = new BoardList();
                 boardList.setExternalId(sysVar.getVarName());
-                boardList.setDeviceIdOrGroupId((long) sysVar.getProjId());
+                boardList.setDeviceIdOrGroupId((long) sysVar.getVarId());
                 boardList.setDtuOrSysName("SYS");
                 boardList.setDeviceOrGroupName(sysVar.getVarName());
                 boardList.setDeviceCodeOrGroup(sysVar.getVarName());
