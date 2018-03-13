@@ -24,6 +24,7 @@ import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.Register;
+import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.GroupService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TimingService;
@@ -64,6 +65,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Autowired
     private TimingService timingService;
+
+    @Autowired
+    private EquipmentMonitorService equipmentMonitorService;
 
     @Override
     public ReturnInfo<List<Group>> list(GroupList groupList) {
@@ -110,6 +114,10 @@ public class GroupServiceImpl implements GroupService {
 
         sysVarService.deleteSysVar(id, BaseSysVar.GROUP);
         timingService.deleteNodeByGroupId(id);
+
+
+        equipmentMonitorService.delByGroupId(id);
+
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

@@ -92,6 +92,8 @@ public class DeviceServiceImpl implements DeviceService {
     @Autowired
     private TimingService timingService;
 
+
+
     /**
      * 只有16个不需要分页
      * 
@@ -314,6 +316,9 @@ public class DeviceServiceImpl implements DeviceService {
             update.setUseTimes(device.getUseTimes() == null ? 0
                     : device.getUseTimes()
                             + calLastedTime(device.getLastOfflineTime(), new Date()));
+            if (device.getConnectCount() == null) {
+                device.setConnectCount(1);
+            }
         } else {
             if (Device.ONLINE.equals(device.getStatus())) {
                 update.setConnectCount(
@@ -323,6 +328,9 @@ public class DeviceServiceImpl implements DeviceService {
                                 + calLastedTime(device.getLastOnlineTime(), new Date()));
                 update.setStatus(Device.OFFLINE);
                 update.setLastOnlineTime(new Date());
+            }
+            if (device.getDisconnectCount() == null) {
+                device.setDisconnectCount(1);
             }
         }
         if (null != update.getUseTimes()) {
