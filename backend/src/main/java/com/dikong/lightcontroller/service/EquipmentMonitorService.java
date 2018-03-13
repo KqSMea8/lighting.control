@@ -32,5 +32,11 @@ public interface EquipmentMonitorService {
 
     public ReturnInfo delByGroupId(Long groupId);
 
-    public ReturnInfo delByTiming();
+    public ReturnInfo delByTiming(Long varId);
+
+    public ReturnInfo updateByVarId(Long varId, int value);
+
+    public ReturnInfo updateByGroupId(Long groupId, int value);
+
+    public ReturnInfo updateByTiming(Long varId, int value);
 }
