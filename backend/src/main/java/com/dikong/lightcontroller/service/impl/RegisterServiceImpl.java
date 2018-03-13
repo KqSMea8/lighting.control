@@ -21,6 +21,7 @@ import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.service.CmdService;
+import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.RegisterService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.vo.RegisterList;
@@ -53,6 +54,10 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Autowired
     private SysVarDAO sysVarDAO;
+
+
+    @Autowired
+    private EquipmentMonitorService equipmentMonitorService;
 
     /**
      * 查询设备下的所有变量
@@ -90,8 +95,11 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public ReturnInfo deleteRegisterByDeviceId(Long deviceId) {
-        List<Long> idS = registerDAO.selectByDeviceId(deviceId);
         registerDAO.deleteByDeviceId(deviceId);
+        List<Long> regisId = registerDAO.selectByDeviceId(deviceId);
+        if (!CollectionUtils.isEmpty(regisId)) {
+            equipmentMonitorService.delByVarIds(regisId);
+        }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

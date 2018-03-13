@@ -103,6 +103,10 @@ public class DtuServiceImpl implements DtuService {
         dtuCollectionApi.deleteDevice(dtu.getDeviceCode());
         dtuDAO.updateIsDelete(id, Dtu.DEL_YES);
         deviceService.deleteDeviceByDtuId(id);
+
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        jedis.decr(String.valueOf(projId));
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

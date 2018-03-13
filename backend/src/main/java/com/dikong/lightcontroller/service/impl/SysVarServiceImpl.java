@@ -126,10 +126,10 @@ public class SysVarServiceImpl implements SysVarService {
     public ReturnInfo updateSysVar(BaseSysVar sysVar) {
         int projId = AuthCurrentUser.getCurrentProjectId();
         if (BaseSysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
-            sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getId());
+            sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
             processSequence(projId, sysVar.getVarValue());
         } else if (BaseSysVar.GROUP.equals(sysVar.getSysVarType())) {
-            sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getId());
+            sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
             processGroup(sysVar.getVarId(), sysVar.getVarValue());
         } else {
             // 变量类型,值直接修改变量
@@ -144,12 +144,12 @@ public class SysVarServiceImpl implements SysVarService {
     @Override
     public ReturnInfo updateSysVarByDeleteProj(BaseSysVar sysVar) {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        Long sysVarId = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
-        if (sysVarId == null){
+        Long id = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
+        if (id == null) {
             return null;
         }
-        sysVar.setId(sysVarId);
-        sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getId());
+        sysVar.setId(id);
+        sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
         processSequence(projId, sysVar.getVarValue());
         return null;
     }

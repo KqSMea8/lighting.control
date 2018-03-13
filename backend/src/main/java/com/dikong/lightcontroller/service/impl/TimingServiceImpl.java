@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dikong.lightcontroller.dao.SysVarDAO;
-import com.dikong.lightcontroller.entity.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,18 +22,21 @@ import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.GroupDAO;
 import com.dikong.lightcontroller.dao.HolidayDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
+import com.dikong.lightcontroller.dao.SysVarDAO;
 import com.dikong.lightcontroller.dao.TimingCronDAO;
 import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.CmdSendDto;
 import com.dikong.lightcontroller.dto.DeviceDtu;
 import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Cnarea2016;
+import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.Holiday;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.CmdService;
+import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.TimingService;
@@ -103,6 +104,10 @@ public class TimingServiceImpl implements TimingService {
 
     @Autowired
     private SysVarDAO sysVarDAO;
+
+
+    @Autowired
+    private EquipmentMonitorService equipmentMonitorService;
 
     @SuppressWarnings("all")
     @Override
@@ -237,8 +242,10 @@ public class TimingServiceImpl implements TimingService {
         timing.setProjId(projId);
         timing.setIsDelete(Timing.DEL_NO);
         int count = timingDAO.selectCount(timing);
-        if (count == 1){
-            sysVarDAO.delete(BaseSysVar.SEQUENCE_VAR_ID,BaseSysVar.SEQUENCE,projId);
+        if (count == 1) {
+            sysVarDAO.delete(BaseSysVar.SEQUENCE_VAR_ID, BaseSysVar.SEQUENCE, projId);
+            //删除监控关联的时序
+            equipmentMonitorService.delByTiming();
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -246,10 +253,10 @@ public class TimingServiceImpl implements TimingService {
     @Override
     public ReturnInfo deleteNodeByGroupId(Long groupId) {
         Example example = new Example(Timing.class);
-        example.createCriteria().andEqualTo("runType",Timing.GROUP_TYPE);
+        example.createCriteria().andEqualTo("runType", Timing.GROUP_TYPE);
         List<Timing> timings = timingDAO.selectByExample(example);
-        if (!CollectionUtils.isEmpty(timings)){
-            timings.forEach(item->deleteNode(item.getId()));
+        if (!CollectionUtils.isEmpty(timings)) {
+            timings.forEach(item -> deleteNode(item.getId()));
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -257,10 +264,10 @@ public class TimingServiceImpl implements TimingService {
     @Override
     public ReturnInfo deleteNodeByDeviceId(Long deviceId) {
         Example example = new Example(Timing.class);
-        example.createCriteria().andEqualTo("runType",Timing.DEVICE_TYPE);
+        example.createCriteria().andEqualTo("runType", Timing.DEVICE_TYPE);
         List<Timing> timings = timingDAO.selectByExample(example);
-        if (!CollectionUtils.isEmpty(timings)){
-            timings.forEach(item->deleteNode(item.getId()));
+        if (!CollectionUtils.isEmpty(timings)) {
+            timings.forEach(item -> deleteNode(item.getId()));
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -348,12 +355,12 @@ public class TimingServiceImpl implements TimingService {
     public ReturnInfo delHolidayNode(String time) {
         int projId = AuthCurrentUser.getCurrentProjectId();
         List<Holiday> holidays = holidayDAO.selectHoliday(time, projId);
-        if (CollectionUtils.isEmpty(holidays)){
+        if (CollectionUtils.isEmpty(holidays)) {
             for (Holiday holiday : holidays) {
                 taskService.removeHolidayTask(holiday.getStartTask());
             }
         }
-        holidayDAO.deleteHoliday(time,projId);
+        holidayDAO.deleteHoliday(time, projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -419,7 +426,7 @@ public class TimingServiceImpl implements TimingService {
                 boardLists.add(boardList);
             }
         }
-        List<Group> groups = groupDAO.selectByProjId(projId,Group.DEL_NO);
+        List<Group> groups = groupDAO.selectByProjId(projId, Group.DEL_NO);
         if (!CollectionUtils.isEmpty(groups)) {
             for (Group group : groups) {
                 BoardList boardList = new BoardList();
@@ -459,7 +466,8 @@ public class TimingServiceImpl implements TimingService {
     public ReturnInfo holidayTask() {
         String weekNowDate = TimeWeekUtils.getWeekNowDate();
         String yearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
-        List<Timing> timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay,Timing.DEL_NO,null);
+        List<Timing> timingList =
+                timingDAO.selectLastOne(weekNowDate, yearMonthDay, Timing.DEL_NO, null);
         List<CmdSendDto> allRegis = new ArrayList<>();
         timingList.forEach(item -> {
             List<CmdSendDto> regisId =
