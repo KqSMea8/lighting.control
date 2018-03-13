@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tk.mybatis.mapper.entity.Example;
-
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.ProjectDao;
@@ -16,9 +14,12 @@ import com.dikong.lightcontroller.dao.UserProjectDao;
 import com.dikong.lightcontroller.dto.ProjectListReq;
 import com.dikong.lightcontroller.entity.Project;
 import com.dikong.lightcontroller.entity.UserProject;
+import com.dikong.lightcontroller.service.DtuService;
 import com.dikong.lightcontroller.service.ProjectService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.github.pagehelper.PageHelper;
+
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -32,6 +33,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private UserProjectDao userProjectDao;
+
+
+    @Autowired
+    private DtuService dtuService;
 
     @Override
     public ReturnInfo<List<Project>> projectList(ProjectListReq projectListReq) {
@@ -78,6 +83,7 @@ public class ProjectServiceImpl implements ProjectService {
         Example example = new Example(UserProject.class);
         example.createCriteria().andEqualTo("projectId", projectId);
         userProjectDao.deleteByExample(example);
+        dtuService.deleteAllDtu();
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
