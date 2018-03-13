@@ -117,16 +117,15 @@ public class DtuServiceImpl implements DtuService {
                         BussinessCode.DTU_CODE_EXIST.getMsg());
             }
             dtu.setProjId(projId);
+            Long dtuDevice = jedis.incr(String.valueOf(projId));
+            dtu.setDevice("DTU" + dtuDevice);
             if (existDtu == null){
-                Long dtuDevice = jedis.incr(String.valueOf(projId));
-                dtu.setDevice("DTU" + dtuDevice);
                 dtuDAO.insertDtu(dtu);
                 // 发送dtu信息
                 dtuCollectionApi.createDevice(
                         new DeviceApi(dtu.getDeviceCode(), dtu.getBeatContent(), dtu.getBeatTime()));
             }else {
                 Example example = new Example(Dtu.class);
-                dtu.setDevice(null);
                 dtu.setIsDelete(Dtu.DEL_NO);
                 example.createCriteria().andEqualTo("deviceCode",dtu.getDeviceCode());
                 dtuDAO.updateByExampleSelective(dtu,example);
