@@ -31,7 +31,7 @@ public interface TimingDAO extends Mapper<Timing> {
 
     @Select({"<script>" + "select * from timing where is_delete=#{isDelete} and "
             + "<if test=\" projId != null \">" + " proj_id=#{projId} and " + "</if>"
-            + "node_content_run_time &gt;='00:00:00' AND node_content_run_time &lt;='23:59:59' "
+            + "node_content_run_time &gt;='00:00:00' AND node_content_run_time &lt;=DATE_FORMAT(NOW(),\"%T\") "
             + "AND week_list like CONCAT(CONCAT('%',#{week}),'%') "
             + "or month_list like CONCAT(CONCAT('%',#{dataNow}),'%') order by node_content_run_time"
             + "</script>"})
