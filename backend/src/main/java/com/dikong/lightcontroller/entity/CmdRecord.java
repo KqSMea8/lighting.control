@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.entity;
 
+import java.util.Date;
+
 /**
  * @author huangwenjun
  * @version 2018年1月27日 下午5:23:30
@@ -24,6 +26,7 @@ public class CmdRecord {
      */
     private String cmdInfo;
     private String result;
+    private Date createTime;
     private int createBy;
 
     public Long getRecordId() {
@@ -82,4 +85,11 @@ public class CmdRecord {
         this.createBy = createBy;
     }
 
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreate_time(Date createTime) {
+        this.createTime = createTime;
+    }
 }

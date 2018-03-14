@@ -19,8 +19,7 @@ import com.dikong.lightcontroller.service.SysVarService;
  *
  * @author lengrongfu
  * @create 2018年01月26日下午11:14
- * @see
- *      </P>
+ * @see </P>
  */
 @Component
 public class ScanNewTask {
