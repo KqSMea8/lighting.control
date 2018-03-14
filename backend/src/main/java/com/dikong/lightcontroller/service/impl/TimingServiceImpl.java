@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dikong.lightcontroller.entity.SysVar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +33,7 @@ import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.Holiday;
 import com.dikong.lightcontroller.entity.Register;
+import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.CmdService;
@@ -245,11 +245,11 @@ public class TimingServiceImpl implements TimingService {
         int count = timingDAO.selectCount(timing);
         if (count == 1) {
             SysVar sysVar = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
-            if (null != sysVar){
+            if (null != sysVar) {
                 equipmentMonitorService.delByTiming(sysVar.getVarId());
             }
             sysVarDAO.delete(BaseSysVar.SEQUENCE_VAR_ID, BaseSysVar.SEQUENCE, projId);
-            //删除监控关联的时序
+            // 删除监控关联的时序
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -516,6 +516,18 @@ public class TimingServiceImpl implements TimingService {
         }
         // 普通节点,直接运行
         cmdService.writeSwitch(commandSend.getVarIdS());
+
+        // 执行之后修改群组值和变量值
+        if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
+            // 修改群组值
+            sysVarDAO.updateSysVar(timing.getRunVarlue(), timing.getRunId(), projId);
+            // 修改监控中的群组
+            equipmentMonitorService.updateByGroupId(timing.getRunId(),
+                    Integer.valueOf(timing.getRunVarlue()));
+        } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
+            equipmentMonitorService.updateByVarId(timing.getRunVar(),
+                    Integer.valueOf(timing.getRunVarlue()));
+        }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

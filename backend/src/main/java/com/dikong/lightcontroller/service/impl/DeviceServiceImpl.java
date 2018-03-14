@@ -329,13 +329,20 @@ public class DeviceServiceImpl implements DeviceService {
                 update.setStatus(Device.OFFLINE);
                 update.setLastOnlineTime(new Date());
             }
-            if (device.getDisconnectCount() == 0 || device.getDisconnectCount() == null) {
+            if (device.getDisconnectCount() == null || device.getDisconnectCount() == 0) {
                 update.setDisconnectCount(1);
             }
         }
         if (null != update.getUseTimes()) {
             update.setId(deviceId);
             deviceDAO.updateByPrimaryKeySelective(update);
+        }
+        if (Device.OFFLINE.equals(update.getStatus())) {
+            registerDAO.updateCollectionByAddrAndProj(Device.OFFLINE,
+                    Register.DEFAULT_CONNCTION_ADDR, deviceId);
+        } else if (Device.ONLINE.equals(update.getStatus())) {
+            registerDAO.updateCollectionByAddrAndProj(Device.ONLINE,
+                    Register.DEFAULT_CONNCTION_ADDR, deviceId);
         }
         return ReturnInfo.create(update);
     }

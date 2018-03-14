@@ -314,11 +314,21 @@ public class SysVarServiceImpl implements SysVarService {
                     for (Map.Entry<Long, Timing> map : groupTime.entrySet()) {
                         List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
                         cmdService.writeSwitch(thenRunRegis);
+                        // 修改群组值
+                        sysVarDAO.updateSysVar(value, map.getValue().getRunId(), projId);
+                        //修改监控中的群组
+                        equipmentMonitorService.updateByGroupId(map.getValue().getRunId(),
+                                Integer.valueOf(value));
                     }
                     // 设备
                     for (Map.Entry<Long, Timing> map : deviceTime.entrySet()) {
                         List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
                         cmdService.writeSwitch(thenRunRegis);
+                        //修改监控中的变量
+                        thenRunRegis.forEach(item -> {
+                            equipmentMonitorService.updateByVarId(item.getRegisId(),
+                                    item.getSwitchValue());
+                        });
                     }
                 }
                 // if (todayIsHoliday > 0) {

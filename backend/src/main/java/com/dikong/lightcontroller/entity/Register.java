@@ -20,6 +20,8 @@ public class Register {
 
     public static final String DEFAULT_VALUE = "0";
 
+    public static final String DEFAULT_CONNCTION_ADDR = "10001";
+
     /**
      * 变量id
      */
@@ -129,7 +131,7 @@ public class Register {
         Register register = new Register();
         register.setVarName("CONNECT");
         register.setRegisName("CONNECT");
-        register.setRegisAddr("10001");
+        register.setRegisAddr(DEFAULT_CONNCTION_ADDR);
         register.setRegisType(BI);
         register.setRegisValue(regisValue);
         register.setDeviceId(deviceId);
