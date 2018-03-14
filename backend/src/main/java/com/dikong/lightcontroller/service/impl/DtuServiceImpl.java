@@ -89,7 +89,7 @@ public class DtuServiceImpl implements DtuService {
     public ReturnInfo<List<Dtu>> list(DtuList dtuList) {
         PageHelper.startPage(dtuList.getPageNo(), dtuList.getPageSize());
         int projId = AuthCurrentUser.getCurrentProjectId();
-        List<Dtu> dtus = dtuDAO.selectAllByPage(Dtu.DEL_NO, projId);
+        List<Dtu> dtus = dtuDAO.selectAllByPage(Dtu.DEL_NO, projId,dtuList.getDtuName());
         if (null == dtus) {
             dtus = new ArrayList<Dtu>();
         }

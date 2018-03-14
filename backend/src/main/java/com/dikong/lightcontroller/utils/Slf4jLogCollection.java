@@ -22,9 +22,10 @@ import strman.Strman;
  *
  * @author lengrongfu
  * @create 2018年02月01日下午4:54
- * @see </P>
+ * @see
+ *      </P>
  */
-public class Slf4jLogCollection extends feign.Logger{
+public class Slf4jLogCollection extends feign.Logger {
     private static ThreadLocal<String> threadLocal = new ThreadLocal<String>();
     private final Logger logger;
     private boolean enable;
@@ -61,47 +62,51 @@ public class Slf4jLogCollection extends feign.Logger{
     @SuppressWarnings("all")
     @Override
     protected void logRequest(String configKey, Level logLevel, Request request) {
-        if (enable) {
-            String uniqueId = UUID.randomUUID().toString();
-            String[] strings = uniqueId.split("-");
-            uniqueId = "";
-            for (String string : strings) {
-                if (null == uniqueId || uniqueId.length() == 0) {
-                    uniqueId = string;
-                    continue;
+        try {
+            if (enable) {
+                String uniqueId = UUID.randomUUID().toString();
+                String[] strings = uniqueId.split("-");
+                uniqueId = "";
+                for (String string : strings) {
+                    if (null == uniqueId || uniqueId.length() == 0) {
+                        uniqueId = string;
+                        continue;
+                    }
+                    uniqueId = Strman.append(uniqueId, "_", string);
                 }
-                uniqueId = Strman.append(uniqueId, "_", string);
-            }
-            threadLocal.set(uniqueId);
-            String prt = String.format(methodTag(configKey) + "---> %s %s HTTP/1.1",
-                    request.method(), request.url());
-            logger.info(Strman.append("[", uniqueId, "]", prt));
-            if (logLevel.ordinal() >= Level.HEADERS.ordinal()) {
-                int bodyLength = 0;
-                if (request.body() != null) {
-                    bodyLength = request.body().length;
-                    if (logLevel.ordinal() >= Level.FULL.ordinal()) {
-                        String bodyText = request.charset() != null
-                                                  ? new String(request.body(), request.charset())
-                                                  : null;
-                        prt = String.format(methodTag(configKey) + "%s",
-                                bodyText != null ? bodyText : "Binary data");
-                        logger.info(Strman.append("[", uniqueId, "]", prt));
+                threadLocal.set(uniqueId);
+                String prt = String.format(methodTag(configKey) + "---> %s %s HTTP/1.1",
+                        request.method(), request.url());
+                logger.info(Strman.append("[", uniqueId, "]", prt));
+                if (logLevel.ordinal() >= Level.HEADERS.ordinal()) {
+                    int bodyLength = 0;
+                    if (request.body() != null) {
+                        bodyLength = request.body().length;
+                        if (logLevel.ordinal() >= Level.FULL.ordinal()) {
+                            String bodyText = request.charset() != null
+                                    ? new String(request.body(), request.charset())
+                                    : null;
+                            prt = String.format(methodTag(configKey) + "%s",
+                                    bodyText != null ? bodyText : "Binary data");
+                            logger.info(Strman.append("[", uniqueId, "]", prt));
+                        }
                     }
                 }
             }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
     }
 
     @SuppressWarnings("all")
     @Override
     protected Response logAndRebufferResponse(String configKey, Level logLevel, Response response,
-                                                     long elapsedTime) throws IOException {
+            long elapsedTime) throws IOException {
         if (enable) {
             String uniqueId = threadLocal.get();
-            String reason = response.reason() != null && logLevel.compareTo(Level.NONE) > 0 ?
-                                    " " + response.reason() :
-                                    "";
+            String reason = response.reason() != null && logLevel.compareTo(Level.NONE) > 0
+                    ? " " + response.reason()
+                    : "";
             int status = response.status();
             String prt = "";
             if (logLevel.ordinal() >= Level.HEADERS.ordinal()) {

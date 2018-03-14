@@ -12,4 +12,14 @@ package com.dikong.lightcontroller.dto;
  *      </P>
  */
 public class DtuList extends BasePage {
+
+    private String dtuName;
+
+    public String getDtuName() {
+        return dtuName;
+    }
+
+    public void setDtuName(String dtuName) {
+        this.dtuName = dtuName;
+    }
 }

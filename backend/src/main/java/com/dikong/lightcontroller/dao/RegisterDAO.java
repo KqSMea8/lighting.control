@@ -79,6 +79,11 @@ public interface RegisterDAO {
     @Update({"update register set regis_value=#{regisValue} where id=#{id}"})
     int updateRegisValueById(@Param("regisValue") String regisValue, @Param("id") Long id);
 
+    @Update({
+            "update register set regis_value=#{regisValue} where regis_add=#{regAddr} AND device_id=#{deviceId}"})
+    int updateCollectionByAddrAndProj(@Param("regisValue") Integer regisValue,
+            @Param("regAddr") String regAddr, @Param("deviceId") Long deviceId);
+
     @Select({"select * from register where id=#{id}"})
     Register selectRegisById(@Param("id") Long id);
 
@@ -92,7 +97,7 @@ public interface RegisterDAO {
 
 
     @Select({"select id from register where device_id=#{deviceId}"})
-    List<Long> selectByDeviceId(@Param("deviceId")Long deviceId);
+    List<Long> selectByDeviceId(@Param("deviceId") Long deviceId);
 
 
     @Delete({"delete from register where device_id=#{deviceId}"})

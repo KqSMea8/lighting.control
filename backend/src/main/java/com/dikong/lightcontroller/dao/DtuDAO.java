@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import com.dikong.lightcontroller.entity.Dtu;
+
 import tk.mybatis.mapper.common.Mapper;
 
 /**
@@ -24,11 +25,14 @@ import tk.mybatis.mapper.common.Mapper;
  *      </P>
  */
 @Repository
-public interface DtuDAO extends Mapper<Dtu>{
+public interface DtuDAO extends Mapper<Dtu> {
 
 
-    @Select({"select * from dtu where is_delete = 1 AND proj_id=#{projId}"})
-    List<Dtu> selectAllByPage(@Param("isDelete")Byte isDelete,@Param("projId") Integer projId);
+    @Select({"<script>" + "select * from dtu where is_delete = 1 AND proj_id=#{projId}"
+            + "<if test=\" dtuName != null \">" + " AND device_name = #{dtuName} " + "</if>"
+            + "</script>"})
+    List<Dtu> selectAllByPage(@Param("isDelete") Byte isDelete, @Param("projId") Integer projId,
+            @Param("dtuName") String dtuName);
 
     @Delete({"update dtu set is_delete=#{isDelete} where id=#{id}"})
     int updateIsDelete(@Param("id") Long id, @Param("isDelete") Byte isDelete);
@@ -48,7 +52,8 @@ public interface DtuDAO extends Mapper<Dtu>{
 
 
     @Update({"update dtu set online_status=#{onlineStatus} where device_code=#{deviceCode}"})
-    int updateOnlineStatusByCode(@Param("deviceCode")String deviceCode,@Param("onlineStatus")Byte onlineStatus);
+    int updateOnlineStatusByCode(@Param("deviceCode") String deviceCode,
+            @Param("onlineStatus") Byte onlineStatus);
 
 
     @Select({"select device_code,beat_content,beat_time from dtu where is_delete=#{isDelete}"})
@@ -56,5 +61,5 @@ public interface DtuDAO extends Mapper<Dtu>{
 
 
     @Select({"select * from dtu where device_code=#{deviceCode}"})
-    Dtu selectExistDeviceCode(@Param("deviceCode")String deviceCode);
+    Dtu selectExistDeviceCode(@Param("deviceCode") String deviceCode);
 }
