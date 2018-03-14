@@ -31,13 +31,16 @@ public class CmdMsgUtils {
     public static String assembleSendCmd(String dtuAddr, ReadWriteEnum operationType,
             String varType, int addressInfo, String value) {
         String functionCode = "";
+        int[] addressinfos = new int[1];
+        addressinfos[0] = addressInfo;
         if (operationType == ReadWriteEnum.READ) {
-            functionCode = choiceReadFuncCode(varType);
+            functionCode = choiceReadFuncCode(varType, addressinfos);
         } else if (operationType == ReadWriteEnum.WRITE) {
-            functionCode = choiceWriteFuncCode(varType);
+            functionCode = choiceWriteFuncCode(varType, addressinfos);
         } else {
             return null;
         }
+        addressInfo = addressinfos[0];
         if (addressInfo > MAXVALUE) {
             return null;
         }
@@ -64,10 +67,10 @@ public class CmdMsgUtils {
         int byteNum = Integer.parseInt(recieveCmd.substring(4, 6), 16);
         int[] currentIndex = new int[1];
         for (int i = 0; i < byteNum * 2; i += 2) {
-            String binHighStr =
-                    Integer.toBinaryString(Integer.parseInt(recieveCmd.substring(i + 6, i + 7), 16));
-            String binLowStr =
-                    Integer.toBinaryString(Integer.parseInt(recieveCmd.substring(i + 7, i + 8), 16));
+            String binHighStr = Integer
+                    .toBinaryString(Integer.parseInt(recieveCmd.substring(i + 6, i + 7), 16));
+            String binLowStr = Integer
+                    .toBinaryString(Integer.parseInt(recieveCmd.substring(i + 7, i + 8), 16));
             String bin4CharLow = SimpleStringUtils.repair4Char(binLowStr);
             String bin4CharHigh = SimpleStringUtils.repair4Char(binHighStr);
             switchChange(bin4CharLow, currentIndex, length, switchInfo);
@@ -104,18 +107,18 @@ public class CmdMsgUtils {
         return values;
     }
 
-    private static String choiceReadFuncCode(String varType) {
+    private static String choiceReadFuncCode(String varType, int[] addressinfos) {
         switch (varType) {
             case "BV":
                 return "01";
             case "BI":
-
+                addressinfos[0] -= 10000;
                 return "02";
             case "AV":
-
+                addressinfos[0] -= 40000;
                 return "03";
             case "AI":
-
+                addressinfos[0] -= 30000;
                 return "04";
 
             default:
@@ -123,13 +126,13 @@ public class CmdMsgUtils {
         }
     }
 
-    private static String choiceWriteFuncCode(String varType) {
+    private static String choiceWriteFuncCode(String varType, int[] addressinfos) {
         switch (varType) {
             case "BV":
 
                 return "05";
             case "AV":
-
+                addressinfos[0] -= 40000;
                 return "06";
 
             default:
