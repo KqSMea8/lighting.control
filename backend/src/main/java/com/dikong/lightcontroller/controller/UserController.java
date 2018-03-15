@@ -53,7 +53,7 @@ public class UserController {
 
     @PutMapping("/change/info")
     public ReturnInfo changeUserInfo(@RequestBody User user) {
-        if (!StringUtil.isEmpty(user.getPassword()) || user.getPassword().length() < 6) {
+        if (!StringUtil.isEmpty(user.getPassword()) && user.getPassword().length() < 6) {
             return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         return userService.changeUserInfo(user);
@@ -61,7 +61,7 @@ public class UserController {
 
     @PutMapping("/change/pwd")
     public ReturnInfo changeUserPwd(@RequestBody ChangePwdReq changePwdReq) {
-        if (!StringUtil.isEmpty(changePwdReq.getNewPwd()) || changePwdReq.getNewPwd().length() < 6) {
+        if (!StringUtil.isEmpty(changePwdReq.getNewPwd()) && changePwdReq.getNewPwd().length() < 6) {
             return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         return userService.changeUserPwd(changePwdReq);
@@ -75,7 +75,7 @@ public class UserController {
     @PostMapping("/add")
     public ReturnInfo add(@RequestBody User user) {
         user.setUserId(null);
-        if (!StringUtil.isEmpty(user.getPassword()) || user.getPassword().length() < 6) {
+        if (!StringUtil.isEmpty(user.getPassword()) && user.getPassword().length() < 6) {
             return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         return userService.add(user);
@@ -88,7 +88,7 @@ public class UserController {
 
     @PostMapping("/update")
     public ReturnInfo update(@RequestBody User user) {
-        if (!StringUtil.isEmpty(user.getPassword()) || user.getPassword().length() < 6) {
+        if (!StringUtil.isEmpty(user.getPassword()) && user.getPassword().length() < 6) {
             return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         return userService.update(user);

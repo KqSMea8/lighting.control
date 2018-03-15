@@ -146,6 +146,7 @@ public class RegisterServiceImpl implements RegisterService {
             if (!CollectionUtils.isEmpty(registers)) {
                 int i = 0;
                 for (RegisterTime reg : registers) {
+
                     SysVarList varList = new SysVarList();
                     varList.setId(reg.getId());
                     varList.setVarNameView(reg.getVarName());

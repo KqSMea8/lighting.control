@@ -316,7 +316,7 @@ public class SysVarServiceImpl implements SysVarService {
                         cmdService.writeSwitch(thenRunRegis);
                         // 修改群组值
                         sysVarDAO.updateSysVar(value, map.getValue().getRunId(), projId);
-                        //修改监控中的群组
+                        // 修改监控中的群组
                         equipmentMonitorService.updateByGroupId(map.getValue().getRunId(),
                                 Integer.valueOf(value));
                     }
@@ -324,7 +324,7 @@ public class SysVarServiceImpl implements SysVarService {
                     for (Map.Entry<Long, Timing> map : deviceTime.entrySet()) {
                         List<CmdSendDto> thenRunRegis = seachAllRegisId(map.getValue(), value);
                         cmdService.writeSwitch(thenRunRegis);
-                        //修改监控中的变量
+                        // 修改监控中的变量
                         thenRunRegis.forEach(item -> {
                             equipmentMonitorService.updateByVarId(item.getRegisId(),
                                     item.getSwitchValue());
@@ -353,9 +353,17 @@ public class SysVarServiceImpl implements SysVarService {
                 allRegis.addAll(regisId);
                 taskService.removeTimingTask(item.getTaskName());
                 timingDAO.updateTaskNameByID(item.getId(), "");
+                if (Timing.GROUP_TYPE.equals(item.getRunType())) {
+                    // 修改群组值
+                    sysVarDAO.updateSysVar(value, item.getRunId(), projId);
+                    // 修改监控中的群组
+                    equipmentMonitorService.updateByGroupId(item.getRunId(),
+                            Integer.valueOf(value));
+                } else if (Timing.DEVICE_TYPE.equals(item.getRunType())) {
+                    equipmentMonitorService.updateByVarId(item.getRunVar(), Integer.valueOf(value));
+                }
             });
             cmdService.writeSwitch(allRegis);
-
         }
         return;
     }
