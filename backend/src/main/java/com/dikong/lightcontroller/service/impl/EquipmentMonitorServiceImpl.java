@@ -31,6 +31,7 @@ import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.SysVar;
+import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.HistoryService;
@@ -100,6 +101,15 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
                         .getData()).multiply(equipmentMonitor.getFactor()).doubleValue())));
             }
         } else {
+            int projId = AuthCurrentUser.getCurrentProjectId();
+            if (equipmentMonitor.getSourceType().equals(EquipmentMonitor.GROUP_TYPE)) {
+                sysVarDAO.selectByVarIdAndProjId(Long.valueOf(equipmentMonitor.getSourceId()),
+                        projId, BaseSysVar.GROUP);
+            } else if (equipmentMonitor.getSourceType().equals(EquipmentMonitor.FREQUENCE_TYPE)) {
+                sysVarDAO.selectByVarIdAndProjId(Long.valueOf(Timing.SPECIFIED_NODE), projId,
+                        BaseSysVar.SEQUENCE);
+
+            }
             equipmentMonitor.setCurrentValue(new BigDecimal(SwitchEnum.CLOSE.getCode()));
         }
         monitorDao.insertSelective(equipmentMonitor);
