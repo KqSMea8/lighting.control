@@ -38,4 +38,8 @@ public interface Constant {
         int LOCK_TIME_OUT = 5;
         int CLEAN_DAYS = 7;
     }
+
+    interface RESERT_CMD {
+        String KEY_PROFILE = "LIGHT_";
+    }
 }

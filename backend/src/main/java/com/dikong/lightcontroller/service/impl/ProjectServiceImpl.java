@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dikong.lightcontroller.common.CodeEnum;
+import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.ProjectDao;
 import com.dikong.lightcontroller.dao.UserProjectDao;
@@ -17,8 +18,11 @@ import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.DtuService;
 import com.dikong.lightcontroller.service.ProjectService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
+import com.dikong.lightcontroller.utils.JedisProxy;
 import com.github.pagehelper.PageHelper;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 import tk.mybatis.mapper.entity.Example;
 
 /**
@@ -37,6 +41,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private DtuService dtuService;
+
+    @Autowired
+    private JedisPool jedisPool;
 
     @Override
     public ReturnInfo<List<Project>> projectList(ProjectListReq projectListReq) {
@@ -84,6 +91,9 @@ public class ProjectServiceImpl implements ProjectService {
         example.createCriteria().andEqualTo("projectId", projectId);
         userProjectDao.deleteByExample(example);
         dtuService.deleteAllDtu();
+        // 删除之前存储的重发命令
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        jedis.del(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projectId));
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
