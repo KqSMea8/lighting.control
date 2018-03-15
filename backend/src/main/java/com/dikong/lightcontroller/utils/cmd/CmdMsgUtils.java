@@ -39,9 +39,9 @@ public class CmdMsgUtils {
         int[] addressinfos = new int[1];
         addressinfos[0] = addressInfo;
         if (operationType == ReadWriteEnum.READ) {
-            functionCode = choiceReadFuncCode(varType, addressinfos);
+            functionCode = choiceReadFuncCode(addressinfos);
         } else if (operationType == ReadWriteEnum.WRITE) {
-            functionCode = choiceWriteFuncCode(varType, addressinfos);
+            functionCode = choiceWriteFuncCode(addressinfos);
         } else {
             return null;
         }
@@ -112,36 +112,31 @@ public class CmdMsgUtils {
         return values;
     }
 
-    private static String choiceReadFuncCode(String varType, int[] addressinfos) {
-        switch (varType) {
-            case "BV":
-                return "01";
-            case "BI":
-                addressinfos[0] -= 10000;
-                return "02";
-            case "AV":
-                addressinfos[0] -= 40000;
-                return "03";
-            case "AI":
-                addressinfos[0] -= 30000;
-                return "04";
-
-            default:
-                return null;
+    private static String choiceReadFuncCode(int[] addressinfo) {
+        if (addressinfo[0] > 0 && addressinfo[0] <= 9999) {
+            return "01";
+        } else if (addressinfo[0] > 10000 && addressinfo[0] <= 19999) {
+            addressinfo[0] -= 10000;
+            return "02";
+        } else if (addressinfo[0] > 40000 && addressinfo[0] <= 49999) {
+            addressinfo[0] -= 40000;
+            return "03";
+        } else if (addressinfo[0] > 30000 && addressinfo[0] <= 39999) {
+            addressinfo[0] -= 30000;
+            return "04";
+        } else {
+            return null;
         }
     }
 
-    private static String choiceWriteFuncCode(String varType, int[] addressinfos) {
-        switch (varType) {
-            case "BV":
-
-                return "05";
-            case "AV":
-                addressinfos[0] -= 40000;
-                return "06";
-
-            default:
-                return null;
+    private static String choiceWriteFuncCode(int[] addressinfo) {
+        if (addressinfo[0] >= 0 && addressinfo[0] <= 9999) {
+            return "05";
+        } else if (addressinfo[0] > 40000 && addressinfo[0] <= 49999) {
+            addressinfo[0] -= 40000;
+            return "06";
+        } else {
+            return null;
         }
     }
 
