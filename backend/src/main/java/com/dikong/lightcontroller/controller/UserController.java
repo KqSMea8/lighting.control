@@ -40,7 +40,7 @@ public class UserController {
         if (StringUtil.isEmpty(loginReqDto.getUsername())
                 || StringUtil.isEmpty(loginReqDto.getPassword())
                 || loginReqDto.getPassword().length() < 6) {
-            return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
+            return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         return userService.login(loginReqDto);
     }
@@ -79,6 +79,9 @@ public class UserController {
 
     @PostMapping("/update")
     public ReturnInfo update(@RequestBody User user) {
+        if (!StringUtil.isEmpty(user.getPassword()) && user.getPassword().length() < 6) {
+            return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
+        }
         return userService.update(user);
     }
 

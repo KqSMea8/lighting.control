@@ -80,7 +80,7 @@ public interface RegisterDAO {
     int updateRegisValueById(@Param("regisValue") String regisValue, @Param("id") Long id);
 
     @Update({
-            "update register set regis_value=#{regisValue} where regis_add=#{regAddr} AND device_id=#{deviceId}"})
+            "update register set regis_value=#{regisValue} where regis_addr=#{regAddr} AND device_id=#{deviceId}"})
     int updateCollectionByAddrAndProj(@Param("regisValue") Integer regisValue,
             @Param("regAddr") String regAddr, @Param("deviceId") Long deviceId);
 

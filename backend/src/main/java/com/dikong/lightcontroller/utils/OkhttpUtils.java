@@ -53,34 +53,35 @@ public class OkhttpUtils {
         return response.body().string();
     }
 
-    public static String get(String url,Map<String,Object> hreads,Map<String,Object> params) throws IOException {
+    public static String get(String url, Map<String, Object> hreads, Map<String, Object> params)
+            throws IOException {
         final Request.Builder builder = new Request.Builder();
 
-        if(Objects.nonNull(hreads)){
-            //获取map集合中的所有键的Set集合
+        if (Objects.nonNull(hreads)) {
+            // 获取map集合中的所有键的Set集合
             Set<String> headKeySet = hreads.keySet();
-            //有了Set集合就可以获取其迭代器，取值
+            // 有了Set集合就可以获取其迭代器，取值
             Iterator<String> headsIt = headKeySet.iterator();
             while (headsIt.hasNext()) {
                 String key = headsIt.next();
                 String value = hreads.get(key).toString();
-                builder.header(key,value);
+                builder.header(key, value);
             }
         }
 
-        if(Objects.nonNull(params)){
-            //获取map集合中的所有键的Set集合
+        if (Objects.nonNull(params)) {
+            // 获取map集合中的所有键的Set集合
             Set<String> paramsKeySet = params.keySet();
-            //有了Set集合就可以获取其迭代器，取值
+            // 有了Set集合就可以获取其迭代器，取值
             Iterator<String> paramsIt = paramsKeySet.iterator();
 
-            url = Strman.append(url,"?");
+            url = Strman.append(url, "?");
             while (paramsIt.hasNext()) {
                 String key = paramsIt.next();
                 String value = params.get(key).toString();
-                url = Strman.append(url,key,"=",value,"&");
+                url = Strman.append(url, key, "=", value, "&");
             }
-            url = url.substring(0,url.length() - 1);
+            url = url.substring(0, url.length() - 1);
             builder.url(url);
         }
 
@@ -111,8 +112,8 @@ public class OkhttpUtils {
                     continue;
                 }
                 // System.out.println(m.getKey()+"\t"+m.getValue());
-                if(StringUtils.isNotBlank(m.getKey()) && StringUtils.isNotBlank(m.getValue())){
-                    formBody.add(m.getKey(),m.getValue());
+                if (StringUtils.isNotBlank(m.getKey()) && StringUtils.isNotBlank(m.getValue())) {
+                    formBody.add(m.getKey(), m.getValue());
                 }
             }
         }
@@ -122,9 +123,17 @@ public class OkhttpUtils {
             for (Map.Entry<String, String> m : headers.entrySet())
                 builder.addHeader(m.getKey(), m.getValue());
         }
-        Response response = client.newCall(builder.build()).execute();
-        if (response.code() == 200) {
-            return response.body().string();
+        Response response = null;
+        try {
+            response = client.newCall(builder.build()).execute();
+            if (null != response && response.code() == 200) {
+                String bodyResp = response.body().string();
+                return bodyResp;
+            }
+        } finally {
+            if (response != null) {
+                response.body().close();
+            }
         }
         return null;
     }

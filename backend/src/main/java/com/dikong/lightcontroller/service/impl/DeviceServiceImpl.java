@@ -319,6 +319,8 @@ public class DeviceServiceImpl implements DeviceService {
             if (device.getConnectCount() == null || device.getConnectCount() == 0) {
                 update.setConnectCount(1);
             }
+            registerDAO.updateCollectionByAddrAndProj(Device.OFFLINE,
+                    Register.DEFAULT_CONNCTION_ADDR, deviceId);
         } else {
             if (Device.ONLINE.equals(device.getStatus())) {
                 update.setConnectCount(
@@ -332,17 +334,12 @@ public class DeviceServiceImpl implements DeviceService {
             if (device.getDisconnectCount() == null || device.getDisconnectCount() == 0) {
                 update.setDisconnectCount(1);
             }
+            registerDAO.updateCollectionByAddrAndProj(Device.ONLINE,
+                    Register.DEFAULT_CONNCTION_ADDR, deviceId);
         }
         if (null != update.getUseTimes()) {
             update.setId(deviceId);
             deviceDAO.updateByPrimaryKeySelective(update);
-        }
-        if (Device.OFFLINE.equals(update.getStatus())) {
-            registerDAO.updateCollectionByAddrAndProj(Device.OFFLINE,
-                    Register.DEFAULT_CONNCTION_ADDR, deviceId);
-        } else if (Device.ONLINE.equals(update.getStatus())) {
-            registerDAO.updateCollectionByAddrAndProj(Device.ONLINE,
-                    Register.DEFAULT_CONNCTION_ADDR, deviceId);
         }
         return ReturnInfo.create(update);
     }
