@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
+import io.swagger.annotations.Api;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -23,8 +25,6 @@ import com.dikong.lightcontroller.entity.User;
 import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.UserService;
 import com.github.pagehelper.util.StringUtil;
-
-import io.swagger.annotations.Api;
 
 @Api(value = "UserController", description = "用户管理")
 @RestController
@@ -53,11 +53,17 @@ public class UserController {
 
     @PutMapping("/change/info")
     public ReturnInfo changeUserInfo(@RequestBody User user) {
+        if (!StringUtil.isEmpty(user.getPassword()) || user.getPassword().length() < 6) {
+            return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
+        }
         return userService.changeUserInfo(user);
     }
 
     @PutMapping("/change/pwd")
     public ReturnInfo changeUserPwd(@RequestBody ChangePwdReq changePwdReq) {
+        if (!StringUtil.isEmpty(changePwdReq.getNewPwd()) || changePwdReq.getNewPwd().length() < 6) {
+            return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
+        }
         return userService.changeUserPwd(changePwdReq);
     }
 
@@ -69,6 +75,9 @@ public class UserController {
     @PostMapping("/add")
     public ReturnInfo add(@RequestBody User user) {
         user.setUserId(null);
+        if (!StringUtil.isEmpty(user.getPassword()) || user.getPassword().length() < 6) {
+            return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
+        }
         return userService.add(user);
     }
 
@@ -79,7 +88,7 @@ public class UserController {
 
     @PostMapping("/update")
     public ReturnInfo update(@RequestBody User user) {
-        if (!StringUtil.isEmpty(user.getPassword()) && user.getPassword().length() < 6) {
+        if (!StringUtil.isEmpty(user.getPassword()) || user.getPassword().length() < 6) {
             return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         return userService.update(user);

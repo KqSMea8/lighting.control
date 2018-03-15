@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.util.StringUtils;
 
+import com.dikong.lightcontroller.entity.Register;
+
 /**
  * @author huangwenjun
  * @Datetime 2018年1月26日
@@ -30,6 +32,9 @@ public class CmdMsgUtils {
 
     public static String assembleSendCmd(String dtuAddr, ReadWriteEnum operationType,
             String varType, int addressInfo, String value) {
+        if (Register.DEFAULT_CONNCTION_ADDR.equals(addressInfo)) {
+            return null;
+        }
         String functionCode = "";
         int[] addressinfos = new int[1];
         addressinfos[0] = addressInfo;
@@ -67,10 +72,10 @@ public class CmdMsgUtils {
         int byteNum = Integer.parseInt(recieveCmd.substring(4, 6), 16);
         int[] currentIndex = new int[1];
         for (int i = 0; i < byteNum * 2; i += 2) {
-            String binHighStr = Integer
-                    .toBinaryString(Integer.parseInt(recieveCmd.substring(i + 6, i + 7), 16));
-            String binLowStr = Integer
-                    .toBinaryString(Integer.parseInt(recieveCmd.substring(i + 7, i + 8), 16));
+            String binHighStr =
+                    Integer.toBinaryString(Integer.parseInt(recieveCmd.substring(i + 6, i + 7), 16));
+            String binLowStr =
+                    Integer.toBinaryString(Integer.parseInt(recieveCmd.substring(i + 7, i + 8), 16));
             String bin4CharLow = SimpleStringUtils.repair4Char(binLowStr);
             String bin4CharHigh = SimpleStringUtils.repair4Char(binHighStr);
             switchChange(bin4CharLow, currentIndex, length, switchInfo);
