@@ -159,6 +159,9 @@ public class CmdServiceImpl implements CmdService {
             CmdRes<List<String>> listCmdRes = null;
             int tempSize = 0;
             if (tempA.size() == 0) {
+                if (Register.DEFAULT_CONNCTION_ADDR.equals(tempB.get(0).getRegisAddr())) {
+                    tempB.remove(0);
+                }
                 listCmdRes = readMuchSwitch(tempB.get(0).getId(), tempB.size());
                 tempSize = tempB.size();
                 LOG.info("查询多个开关量为{},返回值为{}", tempB, listCmdRes);
