@@ -71,8 +71,17 @@ public class CmdServiceImpl implements CmdService {
     @Override
     public CmdRes<String> readOneSwitch(long varId) {
         int varNum = 1;
-        CmdRes<String> reqResult = reqUtil(varId, ReadWriteEnum.READ, varNum);
+        CmdRes<String> reqResult = null;
+        for (int i = 0; i < Constant.CMD.RETRY_TIME; i++) {
+            reqResult = reqUtil(varId, ReadWriteEnum.READ, varNum);
+            if (reqResult.isSuccess()) {
+                break;
+            }
+        }
         if (!reqResult.isSuccess()) {
+            Jedis jedis = new JedisProxy(jedisPool).createProxy();
+            jedis.hset(reqResult.getData(), String.valueOf(varId),
+                    AuthCurrentUser.getCurrentProjectId());
             return new CmdRes<String>(false, reqResult.getData());
         }
         List<String> results = CmdMsgUtils.analysisSwitchCmd(reqResult.getData(), varNum);
@@ -395,6 +404,9 @@ public class CmdServiceImpl implements CmdService {
         CmdRes<String> result =
                 reqUtil(dtu, device.getCode(), readWriteEnum, register.getRegisType(),
                         register.getRegisAddr(), varNum);
+        if (!result.isSuccess()) {
+            result.setData(String.valueOf(device.getId()));
+        }
         if (!RedisLockUtils.releaseDistributedLock(jedis, dtu.getDeviceCode(), requestId)) {
             LOG.info("解锁失败！dutCode:" + dtu.getDeviceCode() + " requestId：" + requestId);
         }
