@@ -47,6 +47,8 @@ public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
         LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
         AuthCurrentUser.set(currentUserInfo);
 
+        jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(currentUserInfo));
+
         String uri = request.getRequestURI();
         List<BackUri> backUris = JSON.parseArray(jedis.get(Constant.USER.AUTH_LIST), BackUri.class);
         List<ManagerTypeUri> managerTypeUris =

@@ -7,6 +7,8 @@ package com.dikong.lightcontroller.dto;
 public class CmdRes<T> {
     private boolean success;
     private T data;
+    private String projetId;
+    private String deviceId;
 
 
     /**
@@ -44,7 +46,26 @@ public class CmdRes<T> {
         this.data = data;
     }
 
-    @Override public String toString() {
+    public String getProjetId() {
+        return projetId;
+    }
+
+    public void setProjetId(String projetId) {
+        this.projetId = projetId;
+    }
+
+
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    @Override
+    public String toString() {
         return "CmdRes{" + "success=" + success + ", data=" + data + '}';
     }
 }
