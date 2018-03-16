@@ -328,6 +328,8 @@ public class SysVarServiceImpl implements SysVarService {
                         thenRunRegis.forEach(item -> {
                             equipmentMonitorService.updateByVarId(item.getRegisId(),
                                     item.getSwitchValue());
+                            registerDAO.updateRegisValueById(String.valueOf(item.getSwitchValue()),
+                                    item.getRegisId());
                         });
                     }
                 }
