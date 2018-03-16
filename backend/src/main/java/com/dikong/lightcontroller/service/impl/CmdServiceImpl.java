@@ -71,20 +71,24 @@ public class CmdServiceImpl implements CmdService {
     @Override
     public CmdRes<String> readOneSwitch(long varId) {
         int varNum = 1;
+        List<String> results = null;
         CmdRes<String> reqResult = null;
         for (int i = 0; i < Constant.CMD.RETRY_TIME; i++) {
             reqResult = reqUtil(varId, ReadWriteEnum.READ, varNum);
-            if (reqResult.isSuccess()) {
-                break;
+            if (!reqResult.isSuccess()) {
+                return new CmdRes<String>(false, reqResult.getData());
+            }
+            try {
+                results = CmdMsgUtils.analysisSwitchCmd(reqResult.getData(), varNum);
+            } catch (Exception e) {
+                LOG.info("命令解析失败：" + reqResult.getData());
             }
         }
-        if (!reqResult.isSuccess()) {
+        if (results == null) {
             Jedis jedis = new JedisProxy(jedisPool).createProxy();
-            jedis.hset(reqResult.getData(), String.valueOf(varId),
-                    AuthCurrentUser.getCurrentProjectId());
-            return new CmdRes<String>(false, reqResult.getData());
+            jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
+                    String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
         }
-        List<String> results = CmdMsgUtils.analysisSwitchCmd(reqResult.getData(), varNum);
         if (results.size() > 0) {
             return new CmdRes<String>(true, results.get(0));
         }
@@ -172,7 +176,7 @@ public class CmdServiceImpl implements CmdService {
                     tempB.remove(0);
                     results.add(null);
                 }
-                if (tempB.size()  == 0){
+                if (tempB.size() == 0) {
                     continue;
                 }
                 listCmdRes = readMuchSwitch(tempB.get(0).getId(), tempB.size());
@@ -221,6 +225,17 @@ public class CmdServiceImpl implements CmdService {
      */
     @Override
     public CmdRes<String> writeSwitch(long varId, SwitchEnum switchEnum) {
+        CmdRes<String> result = new CmdRes<String>(false, "");
+        for (int i = 0; i < Constant.CMD.RETRY_TIME; i++) {
+            result = writeSwitchCommon(varId, switchEnum);
+            if (result.isSuccess()) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private CmdRes<String> writeSwitchCommon(long varId, SwitchEnum switchEnum) {
         // 根据 long varId,查询变量信息
         Register register = registerDao.selectRegisById(varId);
         if (register == null) {
@@ -330,11 +345,24 @@ public class CmdServiceImpl implements CmdService {
 
     @Override
     public CmdRes<String> readOneAnalog(long varId) {
-        CmdRes<String> reqResult = reqUtil(varId, ReadWriteEnum.READ, 1);
-        if (!reqResult.isSuccess()) {
-            return new CmdRes<String>(false, reqResult.getData());
+        CmdRes<String> reqResult = null;
+        List<String> results = null;
+        for (int i = 0; i < Constant.CMD.RETRY_TIME; i++) {
+            reqResult = reqUtil(varId, ReadWriteEnum.READ, 1);
+            if (!reqResult.isSuccess()) {
+                return new CmdRes<String>(false, reqResult.getData());
+            }
+            try {
+                results = CmdMsgUtils.analysisAnalogCmd(reqResult.getData());
+            } catch (Exception e) {
+                LOG.info("命令解析异常：" + reqResult.getData());
+            }
         }
-        List<String> results = CmdMsgUtils.analysisAnalogCmd(reqResult.getData());
+        if (results == null) {
+            Jedis jedis = new JedisProxy(jedisPool).createProxy();
+            jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
+                    String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
+        }
         if (results.size() > 0) {
             return new CmdRes<String>(true, results.get(0));
         }
@@ -408,11 +436,20 @@ public class CmdServiceImpl implements CmdService {
             e.printStackTrace();
         }
         // 查询一个变量当前值，默认为1
-        CmdRes<String> result =
-                reqUtil(dtu, device.getCode(), readWriteEnum, register.getRegisType(),
-                        register.getRegisAddr(), varNum);
+        CmdRes<String> result = null;
+        for (int i = 0; i < Constant.CMD.RETRY_TIME; i++) {
+            result =
+                    reqUtil(dtu, device.getCode(), readWriteEnum, register.getRegisType(),
+                            register.getRegisAddr(), varNum);
+            if (result.isSuccess()) {
+                break;
+            }
+        }
         if (!result.isSuccess()) {
-            result.setData(String.valueOf(device.getId()));
+            jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + dtu.getProjId(),
+                    String.valueOf(device.getId()), String.valueOf(varId));
+            result.setProjetId(String.valueOf(dtu.getProjId()));
+            result.setDeviceId(String.valueOf(device.getId()));
         }
         if (!RedisLockUtils.releaseDistributedLock(jedis, dtu.getDeviceCode(), requestId)) {
             LOG.info("解锁失败！dutCode:" + dtu.getDeviceCode() + " requestId：" + requestId);

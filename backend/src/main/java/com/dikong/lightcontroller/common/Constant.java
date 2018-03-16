@@ -37,7 +37,7 @@ public interface Constant {
     interface CMD {
         int LOCK_TIME_OUT = 5;
         int CLEAN_DAYS = 7;
-        int RETRY_TIME = 3;
+        int RETRY_TIME = 2;
     }
 
     interface RESERT_CMD {
