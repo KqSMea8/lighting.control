@@ -39,4 +39,8 @@ public interface Constant {
         int CLEAN_DAYS = 7;
         int RETRY_TIME = 3;
     }
+
+    interface RESERT_CMD {
+        String KEY_PROFILE = "LIGHT_";
+    }
 }

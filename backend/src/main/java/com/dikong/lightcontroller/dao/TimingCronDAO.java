@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.dao;
 
 import com.dikong.lightcontroller.entity.TimingCron;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -25,4 +26,7 @@ public interface TimingCronDAO extends Mapper<TimingCron>{
     @Select({"select * from timing_cron where timing_id=#{timingId}"})
     List<TimingCron> selectAllByTimingId(@Param("timingId")Long timingId);
 
+
+    @Delete({"delete from timing_cron where id=#{id}"})
+    int deleteDelCronById(@Param("id")Long id);
 }

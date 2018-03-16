@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.BussinessCode;
 import com.dikong.lightcontroller.common.CodeEnum;
+import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
@@ -43,11 +44,16 @@ import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.FileUtils;
+import com.dikong.lightcontroller.utils.JedisProxy;
+import com.dikong.lightcontroller.utils.cmd.SwitchEnum;
 import com.dikong.lightcontroller.vo.DeviceAdd;
 import com.dikong.lightcontroller.vo.DeviceBoardList;
 import com.dikong.lightcontroller.vo.DeviceList;
 import com.dikong.lightcontroller.vo.DeviceOnlineList;
 import com.github.pagehelper.PageHelper;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
  * <p>
@@ -93,6 +99,8 @@ public class DeviceServiceImpl implements DeviceService {
     private TimingService timingService;
 
 
+    @Autowired
+    private JedisPool jedisPool;
 
     /**
      * 只有16个不需要分页
@@ -290,6 +298,7 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     @Override
+    @Transactional
     public ReturnInfo conncationInfo(Long deviceId) {
         Register register = registerDAO.selectIdAndTypeByDeviceId(deviceId);
         if (null == register) {
@@ -313,14 +322,18 @@ public class DeviceServiceImpl implements DeviceService {
                 update.setStatus(Device.ONLINE);
                 update.setLastOfflineTime(new Date());
             }
+            // 计算在线时长
             update.setUseTimes(device.getUseTimes() == null ? 0
                     : device.getUseTimes()
                             + calLastedTime(device.getLastOfflineTime(), new Date()));
             if (device.getConnectCount() == null || device.getConnectCount() == 0) {
                 update.setConnectCount(1);
             }
-            registerDAO.updateCollectionByAddrAndProj(Device.OFFLINE,
+            // 更新变量中的在线状态
+            registerDAO.updateCollectionByAddrAndProj(Device.ONLINE,
                     Register.DEFAULT_CONNCTION_ADDR, deviceId);
+            // 重发命令
+            resertCmd(device);
         } else {
             if (Device.ONLINE.equals(device.getStatus())) {
                 update.setConnectCount(
@@ -334,7 +347,8 @@ public class DeviceServiceImpl implements DeviceService {
             if (device.getDisconnectCount() == null || device.getDisconnectCount() == 0) {
                 update.setDisconnectCount(1);
             }
-            registerDAO.updateCollectionByAddrAndProj(Device.ONLINE,
+            // 更新变量中的在线状态
+            registerDAO.updateCollectionByAddrAndProj(Device.OFFLINE,
                     Register.DEFAULT_CONNCTION_ADDR, deviceId);
         }
         if (null != update.getUseTimes()) {
@@ -342,6 +356,30 @@ public class DeviceServiceImpl implements DeviceService {
             deviceDAO.updateByPrimaryKeySelective(update);
         }
         return ReturnInfo.create(update);
+    }
+
+    // 每次在线之后就重发之前的命令
+    private void resertCmd(Device device) {
+        Dtu dtu = dtuDAO.selectDtuById(device.getDtuId());
+        Integer projId = dtu.getProjId();
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        String regisId = jedis.hget(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId),
+                String.valueOf(device.getId()));
+        if (!StringUtils.isEmpty(regisId)) {
+            Register register = registerDAO.selectRegisById(Long.valueOf(regisId));
+            CmdRes<String> stringCmdRes = null;
+            if (Register.BI.equals(register.getRegisType())
+                    || Register.BV.equals(register.getRegisType())) {
+                stringCmdRes = cmdService.writeSwitch(register.getId(),
+                        SwitchEnum.valueOf(register.getRegisValue()));
+            } else {
+                stringCmdRes = cmdService.writeAnalog(register.getId(),
+                        Integer.valueOf(register.getRegisValue()));
+            }
+            if (stringCmdRes.isSuccess()) {
+                jedis.hdel(String.valueOf(projId), String.valueOf(device.getId()));
+            }
+        }
     }
 
     @Override

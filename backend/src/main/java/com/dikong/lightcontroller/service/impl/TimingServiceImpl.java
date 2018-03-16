@@ -237,13 +237,14 @@ public class TimingServiceImpl implements TimingService {
         if (!CollectionUtils.isEmpty(timingCrons)) {
             for (TimingCron timingCron : timingCrons) {
                 taskService.removeTimingTask(timingCron.getTaskName());
+                timingCronDAO.deleteDelCronById(timingCron.getId());
             }
         }
         Timing timing = new Timing();
         timing.setProjId(projId);
         timing.setIsDelete(Timing.DEL_NO);
         int count = timingDAO.selectCount(timing);
-        if (count == 1) {
+        if (count == 0) {
             SysVar sysVar = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
             if (null != sysVar) {
                 equipmentMonitorService.delByTiming(sysVar.getVarId());
