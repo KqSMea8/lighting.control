@@ -366,6 +366,7 @@ public class DeviceServiceImpl implements DeviceService {
         String regisId = jedis.hget(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId),
                 String.valueOf(device.getId()));
         if (!StringUtils.isEmpty(regisId)) {
+            LOG.info("开始重发命令,变量id为:{}", regisId);
             Register register = registerDAO.selectRegisById(Long.valueOf(regisId));
             CmdRes<String> stringCmdRes = null;
             if (Register.BI.equals(register.getRegisType())
@@ -377,7 +378,9 @@ public class DeviceServiceImpl implements DeviceService {
                         Integer.valueOf(register.getRegisValue()));
             }
             if (stringCmdRes.isSuccess()) {
-                jedis.hdel(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId), String.valueOf(device.getId()));
+                LOG.info("重发成功,删除变量id{}", regisId);
+                jedis.hdel(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId),
+                        String.valueOf(device.getId()));
             }
         }
     }
