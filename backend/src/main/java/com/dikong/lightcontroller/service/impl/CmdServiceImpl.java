@@ -461,6 +461,7 @@ public class CmdServiceImpl implements CmdService {
         }
         String requestId = UUID.randomUUID().toString();
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        CmdRes<String> result = null;
         try {
             int flag;
             for (flag = 0; flag < Constant.CMD.LOCK_TIME_OUT; flag++) {
@@ -472,14 +473,16 @@ public class CmdServiceImpl implements CmdService {
                 }
             }
             if (flag == Constant.CMD.LOCK_TIME_OUT) {
-                return new CmdRes<String>(false, null);
+                result.setDeviceId(String.valueOf(device.getId()));
+                result.setProjetId(String.valueOf(dtu.getProjId()));
+                result.setSuccess(false);
+                return result;
             }
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         // 查询一个变量当前值，默认为1
-        CmdRes<String> result = null;
         for (int i = 0; i < Constant.CMD.RETRY_TIME; i++) {
             result = reqUtil(dtu, device.getCode(), readWriteEnum, register.getRegisType(),
                     register.getRegisAddr(), varNum);
