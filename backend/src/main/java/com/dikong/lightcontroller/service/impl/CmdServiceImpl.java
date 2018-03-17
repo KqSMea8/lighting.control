@@ -87,11 +87,6 @@ public class CmdServiceImpl implements CmdService {
                 break;
             }
         }
-        // if (results == null) {
-        // Jedis jedis = new JedisProxy(jedisPool).createProxy();
-        // jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
-        // String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
-        // }
         if (results != null && results.size() > 0) {
             return new CmdRes<String>(true, results.get(0));
         }
@@ -248,9 +243,11 @@ public class CmdServiceImpl implements CmdService {
         }
         // 三次都没有写成功
         if (result == null) {
-            Jedis jedis = new JedisProxy(jedisPool).createProxy();
-            jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + result.getProjetId(),
-                    String.valueOf(result.getDeviceId()), String.valueOf(varId));
+            if (result.getProjetId() != null && result.getDeviceId() != null) {
+                Jedis jedis = new JedisProxy(jedisPool).createProxy();
+                jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + result.getProjetId(),
+                        String.valueOf(result.getDeviceId()), String.valueOf(varId));
+            }
             return new CmdRes<String>(false, "三次写数据失败");
         }
         return result;
@@ -275,6 +272,9 @@ public class CmdServiceImpl implements CmdService {
             LOG.info("dtu null");
             return new CmdRes<String>(false, "dtu null");
         }
+        CmdRes<String> writeResult = new CmdRes<String>();
+        writeResult.setDeviceId(String.valueOf(device.getId()));
+        writeResult.setProjetId(String.valueOf(dtu.getId()));
         // 查询一个变量当前值，默认为1
         String sendMsg = CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
                 register.getRegisType(), Integer.valueOf(register.getRegisAddr()), switchEnum);
@@ -320,7 +320,8 @@ public class CmdServiceImpl implements CmdService {
             e.printStackTrace();
             cmdRecord.setResult(info);
             cmdRecordDao.insert(cmdRecord);
-            return new CmdRes<String>(false, "发送命令异常");
+            writeResult.setSuccess(false);
+            return writeResult;
         }
 
         LOG.info("命令发送响应：" + response);
@@ -328,19 +329,25 @@ public class CmdServiceImpl implements CmdService {
             String info = "返回值为空";
             cmdRecord.setResult(info);
             cmdRecordDao.insert(cmdRecord);
-            return new CmdRes<String>(false, info);
+            writeResult.setSuccess(false);
+            return writeResult;
         }
         SendCmdRes sendCmdRes = JSON.parseObject(response, SendCmdRes.class);
         if (sendCmdRes.getCode() == -1) {
             cmdRecord.setResult(sendCmdRes.getData());
             cmdRecordDao.insert(cmdRecord);
-            return new CmdRes<String>(false, sendCmdRes.getData());
+            writeResult.setSuccess(false);
+            return writeResult;
         }
         // 判断是否成功
         if (sendMsg.equals(sendCmdRes.getData().toLowerCase())) {
-            return new CmdRes<String>(true, sendCmdRes.getData());
+            writeResult.setSuccess(true);
+            writeResult.setData(sendCmdRes.getData());
+            return writeResult;
         }
-        return new CmdRes<String>(false, sendCmdRes.getData());
+        writeResult.setSuccess(false);
+        writeResult.setData(sendCmdRes.getData());
+        return writeResult;
     }
 
     @Override
@@ -376,11 +383,6 @@ public class CmdServiceImpl implements CmdService {
                 LOG.info("命令解析异常：" + reqResult.getData());
             }
         }
-        // if (results == null) {
-        // Jedis jedis = new JedisProxy(jedisPool).createProxy();
-        // jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
-        // String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
-        // }
         if (results != null && results.size() > 0) {
             return new CmdRes<String>(true, results.get(0));
         }
@@ -424,9 +426,11 @@ public class CmdServiceImpl implements CmdService {
         }
         // 三次都没有写成功
         if (reqResult == null) {
-            Jedis jedis = new JedisProxy(jedisPool).createProxy();
-            jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
-                    String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
+            if (reqResult.getDeviceId() != null && reqResult.getProjetId() != null) {
+                Jedis jedis = new JedisProxy(jedisPool).createProxy();
+                jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
+                        String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
+            }
             return new CmdRes<String>(false, "三次写数据失败");
         }
         if ("true".equals(reqResult.getData())) {
@@ -482,12 +486,6 @@ public class CmdServiceImpl implements CmdService {
             if (result.isSuccess()) {
                 break;
             }
-        }
-        if (!result.isSuccess()) {
-            jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + dtu.getProjId(),
-                    String.valueOf(device.getId()), String.valueOf(varId));
-            result.setProjetId(String.valueOf(dtu.getProjId()));
-            result.setDeviceId(String.valueOf(device.getId()));
         }
         if (!RedisLockUtils.releaseDistributedLock(jedis, dtu.getDeviceCode(), requestId)) {
             LOG.info("解锁失败！dutCode:" + dtu.getDeviceCode() + " requestId：" + requestId);
