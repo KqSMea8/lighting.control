@@ -237,17 +237,13 @@ public class CmdServiceImpl implements CmdService {
             result = writeSwitchCommon(varId, switchEnum);
             if (result.isSuccess()) {
                 break;
-            } else {
-                result = null;
             }
         }
         // 三次都没有写成功
-        if (result == null) {
-            if (result.getProjetId() != null && result.getDeviceId() != null) {
-                Jedis jedis = new JedisProxy(jedisPool).createProxy();
-                jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + result.getProjetId(),
-                        String.valueOf(result.getDeviceId()), String.valueOf(varId));
-            }
+        if (!result.isSuccess() && result.getProjetId() != null && result.getDeviceId() != null) {
+            Jedis jedis = new JedisProxy(jedisPool).createProxy();
+            jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + result.getProjetId(),
+                    String.valueOf(result.getDeviceId()), String.valueOf(varId));
             return new CmdRes<String>(false, "三次写数据失败");
         }
         return result;
@@ -420,17 +416,14 @@ public class CmdServiceImpl implements CmdService {
             reqResult = reqUtil(varId, ReadWriteEnum.WRITE, value);
             if (reqResult.isSuccess()) {
                 break;
-            } else {
-                reqResult = null;
             }
         }
         // 三次都没有写成功
-        if (reqResult == null) {
-            if (reqResult.getDeviceId() != null && reqResult.getProjetId() != null) {
-                Jedis jedis = new JedisProxy(jedisPool).createProxy();
-                jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
-                        String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
-            }
+        if (!reqResult.isSuccess() && reqResult.getDeviceId() != null
+                && reqResult.getProjetId() != null) {
+            Jedis jedis = new JedisProxy(jedisPool).createProxy();
+            jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
+                    String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
             return new CmdRes<String>(false, "三次写数据失败");
         }
         if ("true".equals(reqResult.getData())) {
