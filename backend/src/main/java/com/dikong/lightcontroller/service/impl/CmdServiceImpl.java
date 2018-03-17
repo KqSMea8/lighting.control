@@ -270,7 +270,7 @@ public class CmdServiceImpl implements CmdService {
         }
         CmdRes<String> writeResult = new CmdRes<String>();
         writeResult.setDeviceId(String.valueOf(device.getId()));
-        writeResult.setProjetId(String.valueOf(dtu.getId()));
+        writeResult.setProjetId(String.valueOf(dtu.getProjId()));
         // 查询一个变量当前值，默认为1
         String sendMsg = CmdMsgUtils.assembleSendCmd(device.getCode(), ReadWriteEnum.WRITE,
                 register.getRegisType(), Integer.valueOf(register.getRegisAddr()), switchEnum);
@@ -483,6 +483,8 @@ public class CmdServiceImpl implements CmdService {
         if (!RedisLockUtils.releaseDistributedLock(jedis, dtu.getDeviceCode(), requestId)) {
             LOG.info("解锁失败！dutCode:" + dtu.getDeviceCode() + " requestId：" + requestId);
         }
+        result.setDeviceId(String.valueOf(device.getId()));
+        result.setProjetId(String.valueOf(dtu.getProjId()));
         return result;
     }
 
