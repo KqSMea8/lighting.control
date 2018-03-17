@@ -371,13 +371,13 @@ public class DeviceServiceImpl implements DeviceService {
             if (Register.BI.equals(register.getRegisType())
                     || Register.BV.equals(register.getRegisType())) {
                 stringCmdRes = cmdService.writeSwitch(register.getId(),
-                        SwitchEnum.valueOf(register.getRegisValue()));
+                        SwitchEnum.getByCode(Integer.valueOf(register.getRegisValue())));
             } else {
                 stringCmdRes = cmdService.writeAnalog(register.getId(),
                         Integer.valueOf(register.getRegisValue()));
             }
             if (stringCmdRes.isSuccess()) {
-                jedis.hdel(String.valueOf(projId), String.valueOf(device.getId()));
+                jedis.hdel(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId), String.valueOf(device.getId()));
             }
         }
     }

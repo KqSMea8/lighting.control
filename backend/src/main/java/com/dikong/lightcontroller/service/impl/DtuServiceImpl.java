@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import com.dikong.lightcontroller.common.BussinessCode;
 import com.dikong.lightcontroller.common.CodeEnum;
+import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
@@ -192,16 +193,22 @@ public class DtuServiceImpl implements DtuService {
             jedis.hset(DTU_ONLINE, deviceCode, String.valueOf(line));
         } else if (new Integer(2).equals(line)) {
             dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.ONLINE);
+            jedis.hset(DTU_ONLINE, deviceCode, String.valueOf(line));
+            // 把dtu下的所有设备都那取出来去找重发命令
             Dtu dtu = dtuDAO.selectExistDeviceCode(deviceCode);
             List<Device> deviceList = deviceDAO.selectAllByDtuId(dtu.getId(), Device.DEL_NO);
             for (Device device : deviceList) {
-                try {
-                    deviceQueue.put(device.getId());
-                } catch (InterruptedException e) {
-                    LOG.error("放入查找设备中状态队列失败:",e);
+                String regisId = jedis.hget(Constant.RESERT_CMD.KEY_PROFILE + dtu.getProjId(),
+                        String.valueOf(device.getId()));
+                if (regisId != null && regisId.length() > 0) {
+                    try {
+                        deviceQueue.put(device.getId());
+                    } catch (InterruptedException e) {
+                        LOG.error("放入查找设备中状态队列失败:", e);
+                    }
                 }
             }
-            jedis.hset(DTU_ONLINE, deviceCode, String.valueOf(line));
+
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
