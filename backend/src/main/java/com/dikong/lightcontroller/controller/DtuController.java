@@ -57,6 +57,12 @@ public class DtuController {
         return dtuService.list(dtuList);
     }
 
+    @ApiOperation(value = "dtu　列表中不分页")
+    @PostMapping("/dtu/list/nopage")
+    public ReturnInfo<List<Dtu>> dtuListNoPage(@RequestBody DtuList dtuList) {
+        return dtuService.dtuListNoPage(dtuList);
+    }
+
     /**
      * dtu 删除
      * 

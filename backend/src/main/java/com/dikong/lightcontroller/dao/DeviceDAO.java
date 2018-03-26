@@ -31,18 +31,18 @@ import com.dikong.lightcontroller.vo.DeviceOnlineList;
 @Repository
 public interface DeviceDAO extends Mapper<Device> {
 
-    @Select({"select id,external_id,name,code,model from device where dtu_id=#{dtuId} AND is_delete=#{isDelete}"})
+    @Select({"select id,dtu_id,external_id,name,code,model from device where dtu_id=#{dtuId} AND is_delete=#{isDelete}"})
     List<Device> selectAllByDtuId(@Param("dtuId") Long dtuId, @Param("isDelete") Byte isDelete);
 
-    @Update({"update device set is_delete=#{isDelete} where id=#{id}"})
-    int updateDeleteById(@Param("id") Long id, @Param("isDelete") Byte isDelete);
+    @Update({"update device set is_delete=#{isDelete},update_by=#{updateBy} where id=#{id}"})
+    int updateDeleteById(@Param("id") Long id, @Param("isDelete") Byte isDelete,@Param("updateBy")Integer updateBy);
 
     @Select({"select count(0) from device where dtu_id=#{dtuId} AND code=#{code} AND is_delete=#{isDelete}"})
     int selectByDtuIdAndCode(@Param("dtuId") Long dtuId, @Param("code") String code,
             @Param("isDelete") Byte isDelete);
 
-    @Insert({"insert into device (dtu_id,external_id,name,code,model) "
-            + "values (#{add.dtuId},#{add.externalId},#{add.name},#{add.code},#{add.model})"})
+    @Insert({"insert into device (dtu_id,external_id,name,code,model,create_by) "
+            + "values (#{add.dtuId},#{add.externalId},#{add.name},#{add.code},#{add.model},#{add.createBy})"})
     @Options(useGeneratedKeys = true, keyProperty = "add.id")
     Long insertDevice(@Param("add") DeviceAdd deviceAdd);
 

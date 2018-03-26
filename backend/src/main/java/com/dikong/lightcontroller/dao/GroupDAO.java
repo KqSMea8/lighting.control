@@ -35,14 +35,14 @@ public interface GroupDAO extends Mapper<Group> {
             + "</script>"})
     List<Group> selectAllGroup(@Param("groupList") GroupList groupList);
 
-    @Insert({"insert into `group` (group_name,group_code,proj_id) "
-            + "values (#{group.groupName},#{group.groupCode},#{group.projId})"})
+    @Insert({"insert into `group` (group_name,group_code,proj_id,create_by) "
+            + "values (#{group.groupName},#{group.groupCode},#{group.projId},#{group.createBy})"})
     @Options(useGeneratedKeys = true, keyProperty = "group.id")
     int addGroup(@Param("group") Group group);
 
 
-    @Update({"update `group` set is_delete=#{isDelete} where id=#{id}"})
-    int updateIsDelete(@Param("id") Long id, @Param("isDelete") Byte isDelete);
+    @Update({"update `group` set is_delete=#{isDelete},update_by=#{updateBy} where id=#{id}"})
+    int updateIsDelete(@Param("id") Long id,@Param("updateBy")Integer updateBy, @Param("isDelete") Byte isDelete);
 
     @Select({
             "select group_code from `group` where is_delete = #{isDelete} AND proj_id = #{projId} order by group_code desc limit 1"})

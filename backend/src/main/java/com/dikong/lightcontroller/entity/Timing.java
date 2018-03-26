@@ -1,5 +1,6 @@
 package com.dikong.lightcontroller.entity;
 
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 /**
@@ -41,6 +42,7 @@ public class Timing {
     // 未删除
     public static final Byte DEL_NO = 1;
     @Id
+    @GeneratedValue(generator = "JDBC")
     private Long id;
     /**
      * 节点名称
@@ -115,6 +117,15 @@ public class Timing {
      * 任务名称
      */
     private String taskName;
+
+    /**
+     * 创建人
+     */
+    private Integer createBy;
+    /**
+     * 更新人
+     */
+    private Integer updateBy;
 
     public Long getId() {
         return id;
@@ -250,5 +261,21 @@ public class Timing {
 
     public void setTaskName(String taskName) {
         this.taskName = taskName;
+    }
+
+    public Integer getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(Integer createBy) {
+        this.createBy = createBy;
+    }
+
+    public Integer getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(Integer updateBy) {
+        this.updateBy = updateBy;
     }
 }

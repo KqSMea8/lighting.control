@@ -5,7 +5,7 @@ package com.dikong.lightcontroller.utils.cmd;
  * @Datetime 2018年1月26日
  */
 public enum SwitchEnum {
-        OPEN(1, "ff00"), CLOSE(0, "0000");
+    OPEN(1, "ff00"), CLOSE(0, "0000");
 
     private int code;
     private String value;
@@ -34,6 +34,15 @@ public enum SwitchEnum {
     public static SwitchEnum getByCode(int code) {
         for (SwitchEnum temp : SwitchEnum.values()) {
             if (temp.getCode() == code) {
+                return temp;
+            }
+        }
+        return null;
+    }
+
+    public static SwitchEnum getByValue(String value) {
+        for (SwitchEnum temp : SwitchEnum.values()) {
+            if (temp.getValue().equals(value)) {
                 return temp;
             }
         }

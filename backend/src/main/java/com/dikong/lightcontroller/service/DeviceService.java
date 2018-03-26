@@ -44,6 +44,8 @@ public interface DeviceService {
 
     ReturnInfo conncationInfo(Long id);
 
+    void resertCmd(Device device);
+
     ReturnInfo<List<DeviceOnlineList>> online(BasePage basePage);
 
     ReturnInfo<List<DeviceOnlineList>> onlineRefresh(BasePage basePage);

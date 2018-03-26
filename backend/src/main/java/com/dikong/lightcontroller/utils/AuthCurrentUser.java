@@ -24,6 +24,10 @@ public class AuthCurrentUser {
         return get().getCurrentProjectId();
     }
 
+    public static void setCurrentProjectId(int projId) {
+        get().setCurrentProjectId(projId);
+    }
+
     public static int getUserId() {
         LoginRes userInfo = get();
         if (userInfo == null) {

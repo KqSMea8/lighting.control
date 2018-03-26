@@ -85,6 +85,15 @@ public class Device {
      */
     private String taskName;
 
+    /**
+     * 创建人
+     */
+    private Integer createBy;
+    /**
+     * 更新人
+     */
+    private Integer updateBy;
+
     public Long getId() {
         return id;
     }
@@ -203,5 +212,21 @@ public class Device {
 
     public void setTaskName(String taskName) {
         this.taskName = taskName;
+    }
+
+    public Integer getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(Integer createBy) {
+        this.createBy = createBy;
+    }
+
+    public Integer getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(Integer updateBy) {
+        this.updateBy = updateBy;
     }
 }

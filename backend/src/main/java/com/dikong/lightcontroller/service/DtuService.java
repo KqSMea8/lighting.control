@@ -21,6 +21,8 @@ public interface DtuService {
 
     ReturnInfo<List<Dtu>> list(DtuList dtuList);
 
+    ReturnInfo<List<Dtu>> dtuListNoPage(DtuList dtuList);
+
     ReturnInfo deleteDtu(Long id);
 
     ReturnInfo deleteAllDtu();

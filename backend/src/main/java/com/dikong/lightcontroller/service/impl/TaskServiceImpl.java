@@ -194,6 +194,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public ReturnInfo removeTimingTask(String taskName) {
         boolean delTask = removeTask(taskName, DEFAULT_JOB_GROUP);
+        if (delTask) {
+            timingCronDAO.deleteDelCronByTaskName(taskName);
+        }
         return ReturnInfo.createReturnSuccessOne(delTask);
     }
 
@@ -234,6 +237,8 @@ public class TaskServiceImpl implements TaskService {
         List<String> names = new ArrayList<>();
         names.add(taskName);
         jobKeyGroups.put(jobGroup, names);
-        return taskServiceApi.delTask(jobKeyGroups);
+        boolean delTask = taskServiceApi.delTask(jobKeyGroups);
+        LOG.info("删除定时任务结果:{}", delTask);
+        return delTask;
     }
 }

@@ -131,10 +131,10 @@ public class DeviceServiceImpl implements DeviceService {
         if (null != device && !StringUtils.isEmpty(device.getTaskName())) {
             taskService.removeDeviceTask(device.getTaskName());
         }
-        deviceDAO.updateDeleteById(id, Device.DEL_YES);
-        groupService.deleteGroupByDeviceId(id);
+        deviceDAO.updateDeleteById(id, Device.DEL_YES,AuthCurrentUser.getUserId());
+//        groupService.deleteGroupByDeviceId(id);
         timingService.deleteNodeByDeviceId(id);
-        registerService.deleteRegisterByDeviceId(id);
+//        registerService.deleteRegisterByDeviceId(id);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -158,6 +158,7 @@ public class DeviceServiceImpl implements DeviceService {
             return ReturnInfo.create(BussinessCode.DEVICE_EXIST.getCode(),
                     BussinessCode.DEVICE_EXIST.getMsg());
         }
+        deviceAdd.setCreateBy(AuthCurrentUser.getUserId());
         deviceDAO.insertDevice(deviceAdd);
         // 增加任务
         ReturnInfo returnInfo = taskService.addDeviceTask(deviceAdd.getId());
@@ -178,6 +179,7 @@ public class DeviceServiceImpl implements DeviceService {
         device.setExternalId(deviceAdd.getExternalId());
         device.setName(deviceAdd.getName());
         device.setCode(deviceAdd.getCode());
+        device.setUpdateBy(AuthCurrentUser.getUserId());
         deviceDAO.updateByPrimaryKeySelective(device);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -359,30 +361,35 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     // 每次在线之后就重发之前的命令
-    private void resertCmd(Device device) {
+    @Override
+    @Transactional
+    public void resertCmd(Device device) {
         Dtu dtu = dtuDAO.selectDtuById(device.getDtuId());
         Integer projId = dtu.getProjId();
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
-        String regisId = jedis.hget(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId),
-                String.valueOf(device.getId()));
-        if (!StringUtils.isEmpty(regisId)) {
-            LOG.info("开始重发命令,变量id为:{}", regisId);
-            Register register = registerDAO.selectRegisById(Long.valueOf(regisId));
-            CmdRes<String> stringCmdRes = null;
-            if (Register.BI.equals(register.getRegisType())
-                    || Register.BV.equals(register.getRegisType())) {
-                stringCmdRes = cmdService.writeSwitch(register.getId(),
-                        SwitchEnum.getByCode(Integer.valueOf(register.getRegisValue())));
-            } else {
-                stringCmdRes = cmdService.writeAnalog(register.getId(),
-                        Integer.valueOf(register.getRegisValue()));
-            }
-            if (stringCmdRes.isSuccess()) {
-                LOG.info("重发成功,删除变量id{}", regisId);
-                jedis.hdel(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId),
-                        String.valueOf(device.getId()));
+        Map<String, String> regisIdAndValues =
+                jedis.hgetAll(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId));
+        if (!StringUtils.isEmpty(regisIdAndValues)) {
+            for (Map.Entry<String, String> map : regisIdAndValues.entrySet()) {
+                LOG.info("开始重发命令,变量id为:{},值为:{}", map.getKey(), map.getValue());
+                Register register = registerDAO.selectRegisById(Long.valueOf(map.getKey()));
+                CmdRes<String> stringCmdRes = null;
+                if (Register.BI.equals(register.getRegisType())
+                        || Register.BV.equals(register.getRegisType())) {
+                    stringCmdRes = cmdService.writeSwitch(register.getId(),
+                            SwitchEnum.getByValue(map.getValue()));
+                } else {
+                    stringCmdRes = cmdService.writeAnalog(register.getId(),
+                            Integer.valueOf(map.getValue()));
+                }
+                if (stringCmdRes.isSuccess()) {
+                    LOG.info("重发成功,删除变量id:{}", map.getKey());
+                    jedis.hdel(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId),
+                            String.valueOf(Long.valueOf(map.getKey())));
+                }
             }
         }
+        return;
     }
 
     @Override
@@ -397,20 +404,6 @@ public class DeviceServiceImpl implements DeviceService {
         PageHelper.startPage(basePage.getPageNo(), basePage.getPageSize());
         List<DeviceOnlineList> deviceOnlineLists =
                 deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
-        // List<Register> registerList = new ArrayList<>();
-        // deviceOnlineLists.forEach(item -> {
-        // Register register = registerDAO.selectIdAndTypeByDeviceId(item.getDeviceId());
-        // if (null != register) {
-        // registerList.add(register);
-        // }
-        // });
-        // if (CollectionUtils.isEmpty(registerList)) {
-        // return ReturnInfo.createReturnSucces(deviceOnlineLists);
-        // }
-        // CmdRes<List<String>> listCmdRes = cmdService.readMuchVar(registerList);
-        // LOG.info("读取返回值:{}", listCmdRes);
-        // List<String> result = listCmdRes.getData();
-        // int i = 0;
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
             ReturnInfo returnInfo = conncationInfo(deviceOnlineList.getDeviceId());
             Device update = (Device) returnInfo.getData();
@@ -423,22 +416,6 @@ public class DeviceServiceImpl implements DeviceService {
             } else if (update != null && update.getStatus() != null) {
                 deviceOnlineList.setOnlineStatus(update.getStatus());
             }
-            // String cmd = result.get(i);
-            // if (listCmdRes.isSuccess() && cmd != null) {
-            // Device device = new Device();
-            // deviceOnlineList.setOnlineStatus(Device.ONLINE);
-            // device.setStatus(Device.ONLINE);
-            // device.setId(deviceOnlineList.getDeviceId());
-            // deviceDAO.updateByPrimaryKeySelective(device);
-            // } else {
-            // Device device = new Device();
-            // device.setStatus(Device.OFFLINE);
-            // deviceOnlineList.setOnlineStatus(Device.OFFLINE);
-            // device.setId(deviceOnlineList.getDeviceId());
-            // deviceDAO.updateByPrimaryKeySelective(device);
-            // }
-            // deviceOnlineList.setUseTimes(deviceOnlineList.getUseTimes() + " S");
-            // i++;
         }
         return ReturnInfo.createReturnSucces(deviceOnlineLists);
     }

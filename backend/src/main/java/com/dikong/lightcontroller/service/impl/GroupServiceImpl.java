@@ -96,6 +96,7 @@ public class GroupServiceImpl implements GroupService {
         lastGroupCode += 1;
         group.setGroupCode(String.valueOf(lastGroupCode));
         group.setProjId(projId);
+        group.setCreateBy(AuthCurrentUser.getUserId());
         groupDAO.addGroup(group);
         BaseSysVar sysVar = new BaseSysVar();
         sysVar.setSysVarType(BaseSysVar.GROUP);
@@ -109,7 +110,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ReturnInfo deleteGroup(Long id) {
-        groupDAO.updateIsDelete(id, Group.DEL_YES);
+        groupDAO.updateIsDelete(id,AuthCurrentUser.getUserId(), Group.DEL_YES);
         groupDeviceMiddleDAO.deleteByGroupId(id);
 
         sysVarService.deleteSysVar(id, BaseSysVar.GROUP);
@@ -133,6 +134,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ReturnInfo<List<GroupDeviceList>> deviceList(Long id) {
+
         List<GroupDeviceMiddle> groupDeviceMiddles = groupDeviceMiddleDAO.selectByGroupId(id);
         Set<Long> deviceIds = new HashSet<>();
         Set<Long> regisIds = new HashSet<>();

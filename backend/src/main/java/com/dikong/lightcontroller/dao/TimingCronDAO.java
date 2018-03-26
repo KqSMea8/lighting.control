@@ -29,4 +29,7 @@ public interface TimingCronDAO extends Mapper<TimingCron>{
 
     @Delete({"delete from timing_cron where id=#{id}"})
     int deleteDelCronById(@Param("id")Long id);
+
+    @Delete({"delete from timing_cron where task_name=#{taskName}"})
+    int deleteDelCronByTaskName(@Param("taskName")String taskName);
 }

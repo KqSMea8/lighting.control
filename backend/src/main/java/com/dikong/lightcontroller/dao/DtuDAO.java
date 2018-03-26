@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.dao;
 
 import java.util.List;
 
+import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
@@ -34,11 +35,11 @@ public interface DtuDAO extends Mapper<Dtu> {
     List<Dtu> selectAllByPage(@Param("isDelete") Byte isDelete, @Param("projId") Integer projId,
             @Param("dtuName") String dtuName);
 
-    @Delete({"update dtu set is_delete=#{isDelete} where id=#{id}"})
-    int updateIsDelete(@Param("id") Long id, @Param("isDelete") Byte isDelete);
+    @Delete({"update dtu set is_delete=#{isDelete},update_by=#{updateBy} where id=#{id}"})
+    int updateIsDelete(@Param("id") Long id, @Param("isDelete") Byte isDelete,@Param("updateBy")Integer updateBy);
 
-    @Insert({"insert into dtu (device,device_name,device_code,beat_content,beat_time,proj_id) "
-            + "values (#{dtu.device},#{dtu.deviceName},#{dtu.deviceCode},#{dtu.beatContent},#{dtu.beatTime},#{dtu.projId})"})
+    @Insert({"insert into dtu (device,device_name,device_code,beat_content,beat_time,proj_id,create_by) "
+            + "values (#{dtu.device},#{dtu.deviceName},#{dtu.deviceCode},#{dtu.beatContent},#{dtu.beatTime},#{dtu.projId},#{dtu.createBy})"})
     int insertDtu(@Param("dtu") Dtu dtu);
 
     @Select({"select device from dtu where id=#{id}"})

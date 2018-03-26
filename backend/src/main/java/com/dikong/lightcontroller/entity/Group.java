@@ -36,6 +36,15 @@ public class Group {
 
     private Byte isDelete;
 
+    /**
+     * 创建人
+     */
+    private Integer createBy;
+    /**
+     * 更新人
+     */
+    private Integer updateBy;
+
     public Long getId() {
         return id;
     }
@@ -74,5 +83,21 @@ public class Group {
 
     public void setIsDelete(Byte isDelete) {
         this.isDelete = isDelete;
+    }
+
+    public Integer getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(Integer createBy) {
+        this.createBy = createBy;
+    }
+
+    public Integer getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(Integer updateBy) {
+        this.updateBy = updateBy;
     }
 }

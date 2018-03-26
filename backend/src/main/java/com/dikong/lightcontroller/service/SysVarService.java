@@ -33,6 +33,8 @@ public interface SysVarService {
 
     ReturnInfo updateSysVar(BaseSysVar sysVar);
 
+    void startTimingTask(Timing item, String value, Integer projId, List<String> taskNames);
+
     ReturnInfo updateSysVarByDeleteProj(BaseSysVar sysVar);
 
     ReturnInfo<List<SysVarList>> selectAllVar(VarListSearch varListSearch);

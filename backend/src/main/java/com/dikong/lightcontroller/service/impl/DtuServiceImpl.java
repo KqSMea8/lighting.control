@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import com.dikong.lightcontroller.common.BussinessCode;
 import com.dikong.lightcontroller.common.CodeEnum;
-import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
@@ -106,13 +105,22 @@ public class DtuServiceImpl implements DtuService {
     }
 
     @Override
+    public ReturnInfo<List<Dtu>> dtuListNoPage(DtuList dtuList) {
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        List<Dtu> dtus = dtuDAO.selectAllByPage(Dtu.DEL_NO, projId, dtuList.getDtuName());
+        if (null == dtus) {
+            dtus = new ArrayList<Dtu>();
+        }
+        return ReturnInfo.createReturnSuccessOne(dtus);
+    }
+
+    @Override
     @Transactional
     public ReturnInfo deleteDtu(Long id) {
         Dtu dtu = dtuDAO.selectDtuById(id);
         dtuCollectionApi.deleteDevice(dtu.getDeviceCode());
-        dtuDAO.updateIsDelete(id, Dtu.DEL_YES);
+        dtuDAO.updateIsDelete(id, Dtu.DEL_YES,AuthCurrentUser.getUserId());
         deviceService.deleteDeviceByDtuId(id);
-
         int projId = AuthCurrentUser.getCurrentProjectId();
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
         jedis.decr(String.valueOf(projId));
@@ -144,6 +152,7 @@ public class DtuServiceImpl implements DtuService {
             Long dtuDevice = jedis.incr(String.valueOf(projId));
             dtu.setDevice("DTU" + dtuDevice);
             if (existDtu == null) {
+                dtu.setCreateBy(AuthCurrentUser.getUserId());
                 dtuDAO.insertDtu(dtu);
                 // 发送dtu信息
                 dtuCollectionApi.createDevice(new DeviceApi(dtu.getDeviceCode(),
@@ -152,6 +161,7 @@ public class DtuServiceImpl implements DtuService {
                 Example example = new Example(Dtu.class);
                 dtu.setIsDelete(Dtu.DEL_NO);
                 example.createCriteria().andEqualTo("deviceCode", dtu.getDeviceCode());
+                dtu.setCreateBy(AuthCurrentUser.getUserId());
                 dtuDAO.updateByExampleSelective(dtu, example);
                 dtuCollectionApi.modifyDevice(new DeviceApi(dtu.getDeviceCode(),
                         dtu.getBeatContent(), dtu.getBeatTime()));
@@ -174,6 +184,7 @@ public class DtuServiceImpl implements DtuService {
     @Override
     @Transactional
     public ReturnInfo updateDtu(Dtu dtu) {
+        dtu.setUpdateBy(AuthCurrentUser.getUserId());
         dtuDAO.updateByPrimaryKeySelective(dtu);
         // 发送dtu信息
         dtuCollectionApi.modifyDevice(
@@ -198,17 +209,8 @@ public class DtuServiceImpl implements DtuService {
             Dtu dtu = dtuDAO.selectExistDeviceCode(deviceCode);
             List<Device> deviceList = deviceDAO.selectAllByDtuId(dtu.getId(), Device.DEL_NO);
             for (Device device : deviceList) {
-                String regisId = jedis.hget(Constant.RESERT_CMD.KEY_PROFILE + dtu.getProjId(),
-                        String.valueOf(device.getId()));
-                if (regisId != null && regisId.length() > 0) {
-                    try {
-                        deviceQueue.put(device.getId());
-                    } catch (InterruptedException e) {
-                        LOG.error("放入查找设备中状态队列失败:", e);
-                    }
-                }
+                deviceService.resertCmd(device);
             }
-
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }

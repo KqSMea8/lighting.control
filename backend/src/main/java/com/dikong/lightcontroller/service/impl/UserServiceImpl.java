@@ -13,10 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import tk.mybatis.mapper.entity.Example;
-
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
@@ -46,6 +42,10 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -139,6 +139,8 @@ public class UserServiceImpl implements UserService {
         loginUserInfo.setCurrentProjectId(0);
         loginUserInfo.setManagerType(managerType);
         jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(loginUserInfo));
+        jedis.setex(String.valueOf(userInfo.getUserId()), Constant.TIME.HALF_HOUR,
+                String.valueOf(userInfo.getUserId()));
         jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()), token);
         LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
         return ReturnInfo.createReturnSuccessOne(loginRes);
@@ -158,6 +160,7 @@ public class UserServiceImpl implements UserService {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, userId);
+        jedis.setex(userId, 1, userId);
         jedis.del(token);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -175,8 +178,8 @@ public class UserServiceImpl implements UserService {
                 break;
             }
         }
-        if (CollectionUtils.isEmpty(users)) {
-            return ReturnInfo.create(CodeEnum.NOT_CONTENT);
+        if (users == null) {
+            users = new ArrayList<>();
         }
         return ReturnInfo.createReturnSucces(users);
     }

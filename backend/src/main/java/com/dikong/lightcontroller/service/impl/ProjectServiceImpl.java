@@ -82,6 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ReturnInfo projectRemove(int projectId) {
+        AuthCurrentUser.setCurrentProjectId(projectId);
         Project project = new Project();
         project.setProjectId(projectId);;
         project.setIsDelete(2);

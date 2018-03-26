@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ReturnInfo exceptionHandler(Exception exception) {
         exception.printStackTrace();
+        LOG.error("global_exception",exception);
         return ReturnInfo.create(CodeEnum.SERVER_ERROR);
     }
 }

@@ -40,7 +40,7 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>logs/${appName}.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<!-- 归档文件的最大数量 保存2个月 -->
-			<maxHistory>2</maxHistory>
+			<maxHistory>7</maxHistory>
 		</rollingPolicy>
 
 		<!-- 合适触发文件滚动切割 -->

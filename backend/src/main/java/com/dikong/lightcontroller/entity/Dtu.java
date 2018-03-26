@@ -62,6 +62,16 @@ public class Dtu {
      */
     private Integer projId;
 
+
+    /**
+     * 创建人
+     */
+    private Integer createBy;
+    /**
+     * 更新人
+     */
+    private Integer updateBy;
+
     public Long getId() {
         return id;
     }
@@ -146,5 +156,22 @@ public class Dtu {
 
     public void setOnlineStatus(Byte onlineStatus) {
         this.onlineStatus = onlineStatus;
+    }
+
+
+    public Integer getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(Integer createBy) {
+        this.createBy = createBy;
+    }
+
+    public Integer getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(Integer updateBy) {
+        this.updateBy = updateBy;
     }
 }

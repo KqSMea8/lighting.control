@@ -20,14 +20,24 @@ public class Holiday {
     //开始任务,节假日的当天00:00
     private String startTask;
 
+    /**
+     * 创建人
+     */
+    private Integer createBy;
+    /**
+     * 更新人
+     */
+    private Integer updateBy;
+
     public Holiday(){
 
     }
 
-    public Holiday(String holidayTime, Integer projId,String startTask) {
+    public Holiday(String holidayTime, Integer projId,String startTask,Integer createBy) {
         this.holidayTime = holidayTime;
         this.projId = projId;
         this.startTask = startTask;
+        this.createBy = createBy;
     }
 
     public Long getId() {
@@ -60,5 +70,21 @@ public class Holiday {
 
     public void setStartTask(String startTask) {
         this.startTask = startTask;
+    }
+
+    public Integer getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(Integer createBy) {
+        this.createBy = createBy;
+    }
+
+    public Integer getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(Integer updateBy) {
+        this.updateBy = updateBy;
     }
 }

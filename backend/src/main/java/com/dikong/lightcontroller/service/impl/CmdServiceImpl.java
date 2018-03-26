@@ -243,7 +243,7 @@ public class CmdServiceImpl implements CmdService {
         if (!result.isSuccess() && result.getProjetId() != null && result.getDeviceId() != null) {
             Jedis jedis = new JedisProxy(jedisPool).createProxy();
             jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + result.getProjetId(),
-                    String.valueOf(result.getDeviceId()), String.valueOf(varId));
+                    String.valueOf(varId), switchEnum.getValue());
             return new CmdRes<String>(false, "三次写数据失败");
         }
         return result;
@@ -423,7 +423,7 @@ public class CmdServiceImpl implements CmdService {
                 && reqResult.getProjetId() != null) {
             Jedis jedis = new JedisProxy(jedisPool).createProxy();
             jedis.hset(Constant.RESERT_CMD.KEY_PROFILE + reqResult.getProjetId(),
-                    String.valueOf(reqResult.getDeviceId()), String.valueOf(varId));
+                    String.valueOf(varId), String.valueOf(value));
             return new CmdRes<String>(false, "三次写数据失败");
         }
         if ("true".equals(reqResult.getData())) {
@@ -466,6 +466,7 @@ public class CmdServiceImpl implements CmdService {
                 }
             }
             if (flag == Constant.CMD.LOCK_TIME_OUT) {
+                result = new CmdRes<String>();
                 result.setDeviceId(String.valueOf(device.getId()));
                 result.setProjetId(String.valueOf(dtu.getProjId()));
                 result.setSuccess(false);

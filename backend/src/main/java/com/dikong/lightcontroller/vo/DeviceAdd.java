@@ -25,6 +25,10 @@ public class DeviceAdd {
     // 通讯点表文件
     private String model;
 
+    //创建人
+    private Integer createBy;
+
+
     public Long getId() {
         return id;
     }
@@ -71,5 +75,14 @@ public class DeviceAdd {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+
+    public Integer getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(Integer createBy) {
+        this.createBy = createBy;
     }
 }

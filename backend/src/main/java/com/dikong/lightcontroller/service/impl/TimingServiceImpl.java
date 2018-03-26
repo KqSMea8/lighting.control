@@ -164,8 +164,10 @@ public class TimingServiceImpl implements TimingService {
         timing.setRunVar(ordinaryNodeAdd.getRunVar());
         timing.setRunVarlue(ordinaryNodeAdd.getRunVarlue());
         timing.setStopWork(ordinaryNodeAdd.getStopWorkOnHoliday());
-
+        timing.setCreateBy(AuthCurrentUser.getUserId());
         timingDAO.insertSelective(timing);
+        //添加任务
+        this.addTimingStartCron(timing, projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -223,8 +225,34 @@ public class TimingServiceImpl implements TimingService {
         timing.setRunVar(timeSpecifiedNodeAdd.getRunVar());
         timing.setRunVarlue(timeSpecifiedNodeAdd.getRunVarlue());
         timing.setStopWork(timeSpecifiedNodeAdd.getStopWorkOnHoliday());
+        timing.setCreateBy(AuthCurrentUser.getUserId());
         timingDAO.insertSelective(timing);
+        //添加任务
+        this.addTimingStartCron(timing, projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+
+
+    /**
+     * 添加时序是启动任务
+     * 
+     * @param timing 添加的节点
+     * @param projId 项目id
+     */
+    private void addTimingStartCron(Timing timing, Integer projId) {
+        SysVar sysVar = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
+        if (sysVar == null
+                || (sysVar != null && BaseSysVar.CLOSE_SYS_VALUE.equals(sysVar.getVarValue()))) {
+            return;
+        }
+        List<String> taskNames = new ArrayList<>();
+        try {
+            sysVarService.startTimingTask(timing, BaseSysVar.OPEN_SYS_VALUE, projId, taskNames);
+        } catch (Exception e) {
+            taskNames.forEach(item -> taskService.removeTimingTask(item));
+            throw e;
+        }
     }
 
 
@@ -232,7 +260,7 @@ public class TimingServiceImpl implements TimingService {
     @Transactional
     public ReturnInfo deleteNode(Long id) {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        timingDAO.updateDeleteById(id, Timing.DEL_YES);
+        timingDAO.updateDeleteById(id, AuthCurrentUser.getUserId(), Timing.DEL_YES);
         List<TimingCron> timingCrons = timingCronDAO.selectAllByTimingId(id);
         if (!CollectionUtils.isEmpty(timingCrons)) {
             for (TimingCron timingCron : timingCrons) {
@@ -349,7 +377,8 @@ public class TimingServiceImpl implements TimingService {
         List<Holiday> holidays = new ArrayList<>();
         for (String holidayTime : holidayTimes) {
             ReturnInfo<String> stringReturnInfo = taskService.addHolidayTask(holidayTime);
-            holidays.add(new Holiday(holidayTime, projId, stringReturnInfo.getData()));
+            holidays.add(new Holiday(holidayTime, projId, stringReturnInfo.getData(),
+                    AuthCurrentUser.getUserId()));
         }
         holidayDAO.insertList(holidays);
         return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -365,7 +394,7 @@ public class TimingServiceImpl implements TimingService {
                 taskService.removeHolidayTask(holiday.getStartTask());
             }
         }
-        holidayDAO.deleteHoliday(time, projId);
+        holidayDAO.deleteHoliday(time, AuthCurrentUser.getUserId(), projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

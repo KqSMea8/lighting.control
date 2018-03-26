@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dikong.lightcontroller.dao.TimingCronDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,15 +140,15 @@ public class SysVarServiceImpl implements SysVarService {
             equipmentMonitorService.updateByTiming(sysVar.getVarId(),
                     Integer.valueOf(sysVar.getVarValue()));
             processSequence(projId, sysVar.getVarValue());
-            SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getVarId(), projId,
-                    sysVar.getSysVarType());
+            SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getSysVarType(), projId,
+                    sysVar.getVarId());
             sysVar.setId(var.getId());
         } else if (BaseSysVar.GROUP.equals(sysVar.getSysVarType())) {
             equipmentMonitorService.updateByGroupId(sysVar.getVarId(),
                     Integer.valueOf(sysVar.getVarValue()));
             processResult = processGroup(sysVar.getVarId(), sysVar.getVarValue());
-            SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getVarId(), projId,
-                    sysVar.getSysVarType());
+            SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getSysVarType(), projId,
+                    sysVar.getVarId());
             sysVar.setId(var.getId());
             if (processResult != null && processResult[0] > 0) {
                 sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
@@ -248,40 +249,13 @@ public class SysVarServiceImpl implements SysVarService {
                     if (!StringUtils.isEmpty(item.getTaskName())) {
                         continue;
                     }
-                    ReturnInfo<String> addTimingTask = null;
-                    if (Timing.ORDINARY_NODE.equals(item.getNodeType())) {
-                        String weekList = item.getWeekList();
-                        String nodeContentRunTime = item.getNodeContentRunTime();
-                        String cron = DateToCronUtils.cronFormtHHssMM(nodeContentRunTime, weekList);
-                        CommandSend commandSend = new CommandSend();
-                        commandSend.setTimingId(item.getId());
-                        commandSend.setVarIdS(seachAllRegisId(item, value));
-                        commandSend.setProjId(projId);
-                        addTimingTask = taskService.addTimingTask(commandSend, cron);
-                        timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
-                        taskNames.add(addTimingTask.getData());
-                    } else if (Timing.SPECIFIED_NODE.equals(item.getNodeType())) {
-                        String monthList = item.getMonthList();
-                        if (null != monthList && !monthList.isEmpty()) {
-                            String[] month = monthList.split(",");
-                            for (String ymd : month) {
-                                String date = ymd + " " + item.getNodeContentRunTime();
-                                String cron = DateToCronUtils.cronFormt(date);
-                                CommandSend commandSend = new CommandSend();
-                                commandSend.setTimingId(item.getId());
-                                commandSend.setVarIdS(seachAllRegisId(item, value));
-                                commandSend.setProjId(projId);
-                                addTimingTask = taskService.addTimingTask(commandSend, cron);
-                                timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
-                                taskNames.add(addTimingTask.getData());
-                            }
-                        }
-                    }
+                    this.startTimingTask(item, value, projId, taskNames);
                 }
                 // 如果是指定节假日,就把所有变量都设为0
                 // String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
                 // int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay,
                 // projId);
+
 
                 // 马上执行最近的时间点,
                 int amount = 0;
@@ -355,6 +329,7 @@ public class SysVarServiceImpl implements SysVarService {
                 allRegis.addAll(regisId);
                 taskService.removeTimingTask(item.getTaskName());
                 timingDAO.updateTaskNameByID(item.getId(), "");
+
                 if (Timing.GROUP_TYPE.equals(item.getRunType())) {
                     // 修改群组值
                     sysVarDAO.updateSysVar(value, item.getRunId(), projId);
@@ -370,6 +345,45 @@ public class SysVarServiceImpl implements SysVarService {
         return;
     }
 
+    /**
+     * 启动时序节点
+     * 
+     * @param item 时序节点
+     * @param value 值
+     * @param projId 项目id
+     * @param taskNames 任务
+     */
+    public void startTimingTask(Timing item, String value, Integer projId, List<String> taskNames) {
+        ReturnInfo<String> addTimingTask = null;
+        if (Timing.ORDINARY_NODE.equals(item.getNodeType())) {
+            String weekList = item.getWeekList();
+            String nodeContentRunTime = item.getNodeContentRunTime();
+            String cron = DateToCronUtils.cronFormtHHssMM(nodeContentRunTime, weekList);
+            CommandSend commandSend = new CommandSend();
+            commandSend.setTimingId(item.getId());
+            commandSend.setVarIdS(seachAllRegisId(item, value));
+            commandSend.setProjId(projId);
+            addTimingTask = taskService.addTimingTask(commandSend, cron);
+            timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
+            taskNames.add(addTimingTask.getData());
+        } else if (Timing.SPECIFIED_NODE.equals(item.getNodeType())) {
+            String monthList = item.getMonthList();
+            if (null != monthList && !monthList.isEmpty()) {
+                String[] month = monthList.split(",");
+                for (String ymd : month) {
+                    String date = ymd + " " + item.getNodeContentRunTime();
+                    String cron = DateToCronUtils.cronFormt(date);
+                    CommandSend commandSend = new CommandSend();
+                    commandSend.setTimingId(item.getId());
+                    commandSend.setVarIdS(seachAllRegisId(item, value));
+                    commandSend.setProjId(projId);
+                    addTimingTask = taskService.addTimingTask(commandSend, cron);
+                    timingDAO.updateTaskNameByID(item.getId(), addTimingTask.getData());
+                    taskNames.add(addTimingTask.getData());
+                }
+            }
+        }
+    }
 
 
     /**
