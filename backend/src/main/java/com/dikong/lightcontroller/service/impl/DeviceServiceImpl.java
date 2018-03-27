@@ -131,10 +131,10 @@ public class DeviceServiceImpl implements DeviceService {
         if (null != device && !StringUtils.isEmpty(device.getTaskName())) {
             taskService.removeDeviceTask(device.getTaskName());
         }
-        deviceDAO.updateDeleteById(id, Device.DEL_YES,AuthCurrentUser.getUserId());
-//        groupService.deleteGroupByDeviceId(id);
+        deviceDAO.updateDeleteById(id, Device.DEL_YES, AuthCurrentUser.getUserId());
+        // groupService.deleteGroupByDeviceId(id);
         timingService.deleteNodeByDeviceId(id);
-//        registerService.deleteRegisterByDeviceId(id);
+        // registerService.deleteRegisterByDeviceId(id);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
@@ -301,7 +301,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     @Transactional
-    public ReturnInfo conncationInfo(Long deviceId) {
+    public ReturnInfo conncationInfo(Long deviceId, Boolean isResert) {
         Register register = registerDAO.selectIdAndTypeByDeviceId(deviceId);
         if (null == register) {
             return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -334,8 +334,11 @@ public class DeviceServiceImpl implements DeviceService {
             // 更新变量中的在线状态
             registerDAO.updateCollectionByAddrAndProj(Device.ONLINE,
                     Register.DEFAULT_CONNCTION_ADDR, deviceId);
-            // 重发命令
-            resertCmd(device);
+
+            if (isResert != null && isResert) {
+                // 重发命令
+                resertCmd(device);
+            }
         } else {
             if (Device.ONLINE.equals(device.getStatus())) {
                 update.setConnectCount(
@@ -405,7 +408,7 @@ public class DeviceServiceImpl implements DeviceService {
         List<DeviceOnlineList> deviceOnlineLists =
                 deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
-            ReturnInfo returnInfo = conncationInfo(deviceOnlineList.getDeviceId());
+            ReturnInfo returnInfo = conncationInfo(deviceOnlineList.getDeviceId(), false);
             Device update = (Device) returnInfo.getData();
             if (update != null && update.getUseTimes() != null) {
                 deviceOnlineList.setUseTimes(update.getUseTimes() + " S");

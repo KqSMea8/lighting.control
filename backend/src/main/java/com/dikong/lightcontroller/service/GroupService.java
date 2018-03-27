@@ -32,7 +32,7 @@ public interface GroupService {
 
     ReturnInfo deleteGroupDevice(List<Long> middId);
 
-    ReturnInfo addGroupDevice(GroupDeviceMiddle groupDeviceMiddle);
+    ReturnInfo addGroupDevice(GroupDeviceMiddle groupDeviceMiddle) throws Exception;
 
     ReturnInfo updateGroupDevice(GroupDeviceMiddle groupDeviceMiddle);
 }

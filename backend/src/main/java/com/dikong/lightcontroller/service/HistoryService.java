@@ -24,5 +24,8 @@ public interface HistoryService {
 
     ReturnInfo updateHistory(History history);
 
+
+    ReturnInfo updateHistory(List<History> histories);
+
     ReturnInfo updateHistory(BaseSysVar sysVar);
 }

@@ -26,7 +26,8 @@ import tk.mybatis.mapper.common.Mapper;
 public interface TimingDAO extends Mapper<Timing> {
 
     @Update({"update timing set is_delete=#{isDelete},update_by=#{updateBy}  where id=#{id}"})
-    int updateDeleteById(@Param("id") Long id,@Param("updateBy") Integer updateBy, @Param("isDelete") Byte isDelete);
+    int updateDeleteById(@Param("id") Long id, @Param("updateBy") Integer updateBy,
+            @Param("isDelete") Byte isDelete);
 
 
     @Select({"<script>" + "select * from timing where is_delete=#{isDelete} and "
@@ -51,4 +52,9 @@ public interface TimingDAO extends Mapper<Timing> {
 
     @Update({"<script>" + "update timing set task_name=#{taskName} where id=#{id}" + "</script>"})
     int updateTaskNameByID(@Param("id") Long id, @Param("taskName") String taskName);
+
+
+    @Select({"select * from timing where run_id=#{groupId} and proj_id=#{projId}"})
+    List<Timing> selectTimingByGroupId(@Param("groupId") Long groupId,
+            @Param("projId") Integer projId,@Param("isDelete")Byte isDelete);
 }

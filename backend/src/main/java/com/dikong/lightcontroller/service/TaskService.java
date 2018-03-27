@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.QuartzJobDto;
 import com.dikong.lightcontroller.vo.CommandSend;
 
 /**
@@ -14,6 +15,8 @@ import com.dikong.lightcontroller.vo.CommandSend;
  * @see </P>
  */
 public interface TaskService {
+
+    ReturnInfo<Boolean> updateTask(QuartzJobDto quartzJobDto);
 
     ReturnInfo addDeviceTask(Long id);
 

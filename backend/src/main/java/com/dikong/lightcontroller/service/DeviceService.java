@@ -42,7 +42,7 @@ public interface DeviceService {
 
     ReturnInfo<List<DeviceBoardList>> selectAllSelectDevice();
 
-    ReturnInfo conncationInfo(Long id);
+    ReturnInfo conncationInfo(Long id, Boolean isResert);
 
     void resertCmd(Device device);
 

@@ -2,7 +2,6 @@ package com.dikong.lightcontroller.controller;
 
 import java.util.List;
 
-import com.dikong.lightcontroller.vo.GroupDeviceList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +17,7 @@ import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Group;
 import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.service.GroupService;
+import com.dikong.lightcontroller.vo.GroupDeviceList;
 import com.dikong.lightcontroller.vo.GroupList;
 
 import io.swagger.annotations.Api;
@@ -30,9 +30,10 @@ import io.swagger.annotations.Api;
  *
  * @author lengrongfu
  * @create 2018年01月22日下午3:24
- * @see </P>
+ * @see
+ *      </P>
  */
-@Api(value = "GroupController",description = "群组管理")
+@Api(value = "GroupController", description = "群组管理")
 @RestController
 @RequestMapping("/light")
 public class GroupController {
@@ -42,21 +43,23 @@ public class GroupController {
 
     /**
      * 群组列表接口
+     * 
      * @param groupList
      * @return
      */
     @PostMapping(path = "/group/list")
-    public ReturnInfo<List<Group>> list(@RequestBody GroupList groupList){
+    public ReturnInfo<List<Group>> list(@RequestBody GroupList groupList) {
         return groupService.list(groupList);
     }
 
     /**
      * 添加群组接口
+     * 
      * @param group 群组信息
      * @return
      */
     @PostMapping(path = "/group/add")
-    public ReturnInfo addGroup(@RequestBody Group group){
+    public ReturnInfo addGroup(@RequestBody Group group) {
         return groupService.add(group);
     }
 
@@ -64,12 +67,13 @@ public class GroupController {
 
     /**
      * 删除群组和群组关联的设备
-     * @param id　群组id
+     * 
+     * @param id 群组id
      * @return
      */
     @DeleteMapping(path = "/group/del/{id}")
-    public ReturnInfo deleteGroup(@PathVariable("id")Long id){
-        if (null == id || id == 0){
+    public ReturnInfo deleteGroup(@PathVariable("id") Long id) {
+        if (null == id || id == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return groupService.deleteGroup(id);
@@ -77,12 +81,13 @@ public class GroupController {
 
     /**
      * 获取群组下的所有设备
+     * 
      * @param id 群组id
      * @return
      */
     @GetMapping(path = "/group/device/{id}")
-    public ReturnInfo<List<GroupDeviceList>> deviceList(@PathVariable("id")Long id){
-        if (null == id || id == 0){
+    public ReturnInfo<List<GroupDeviceList>> deviceList(@PathVariable("id") Long id) {
+        if (null == id || id == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return groupService.deviceList(id);
@@ -90,32 +95,36 @@ public class GroupController {
 
     /**
      * 删除群组下的多个设备
-     * @param middId　中间表id
+     * 
+     * @param middId 中间表id
      * @return
      */
     @DeleteMapping(path = "/group/del/device/ids")
-    public ReturnInfo deleteGroupDevice(@RequestBody List<Long> middId){
+    public ReturnInfo deleteGroupDevice(@RequestBody List<Long> middId) {
         return groupService.deleteGroupDevice(middId);
     }
 
     /**
      * 添加群组下关联的设备
+     * 
      * @param groupDeviceMiddle
      * @return
      */
     @PostMapping(path = "/group/add/device")
-    public ReturnInfo addGroupDevice(@RequestBody GroupDeviceMiddle groupDeviceMiddle){
+    public ReturnInfo addGroupDevice(@RequestBody GroupDeviceMiddle groupDeviceMiddle)
+            throws Exception {
         return groupService.addGroupDevice(groupDeviceMiddle);
     }
 
 
     /**
      * 修改群组下绑定的设备
+     * 
      * @param groupDeviceMiddle
      * @return
      */
     @PutMapping(path = "/group/update/device")
-    public ReturnInfo updateGroupDevice(@RequestBody GroupDeviceMiddle groupDeviceMiddle){
+    public ReturnInfo updateGroupDevice(@RequestBody GroupDeviceMiddle groupDeviceMiddle) {
 
         return groupService.updateGroupDevice(groupDeviceMiddle);
     }

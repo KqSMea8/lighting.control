@@ -37,7 +37,7 @@ public class DeviceStatusConsumer implements Runnable {
             try {
                 Long deviceId = (Long) queue.take();
                 LOG.info("阻塞队列中读取返回值为:{}", deviceId);
-                deviceService.conncationInfo(deviceId);
+                deviceService.conncationInfo(deviceId,true);
             } catch (Exception e) {
                 e.printStackTrace();
                 LOG.error("获取设备状态错误", e);

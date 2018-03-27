@@ -645,4 +645,3 @@ ALTER TABLE timing ADD  `create_by` int(11) DEFAULT NULL;
 ALTER TABLE timing ADD  `update_by` int(11) DEFAULT NULL;
 
 
-curl -X DELETE -H "Content-Type: application/json" -d '{"LIGHT_CONTROLLER_JOB":["ea0482b8-0ea0-4e46-92fc-af23ab3ab202","6717d46c-d389-4871-8a02-2bd4aa265db8","92f61402-5aab-4349-bab9-fe609c746a31"]}' http://localhost:54321/jobs

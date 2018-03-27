@@ -66,7 +66,7 @@ public class Timing {
      */
     private String nodeContentCity;
     /**
-     * 执行变量,可以是组id,设备id
+     *
      * 如果是群组就为空，如果是设备，就保存设备下的变量id
      */
     private Long runVar;

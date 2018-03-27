@@ -31,13 +31,16 @@ import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Cnarea2016;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.Group;
+import com.dikong.lightcontroller.entity.History;
 import com.dikong.lightcontroller.entity.Holiday;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.entity.Timing;
 import com.dikong.lightcontroller.entity.TimingCron;
+import com.dikong.lightcontroller.entity.User;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
+import com.dikong.lightcontroller.service.HistoryService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TaskService;
 import com.dikong.lightcontroller.service.TimingService;
@@ -106,6 +109,8 @@ public class TimingServiceImpl implements TimingService {
     @Autowired
     private SysVarDAO sysVarDAO;
 
+    @Autowired
+    private HistoryService historyService;
 
     @Autowired
     private EquipmentMonitorService equipmentMonitorService;
@@ -166,7 +171,7 @@ public class TimingServiceImpl implements TimingService {
         timing.setStopWork(ordinaryNodeAdd.getStopWorkOnHoliday());
         timing.setCreateBy(AuthCurrentUser.getUserId());
         timingDAO.insertSelective(timing);
-        //添加任务
+        // 添加任务
         this.addTimingStartCron(timing, projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -227,7 +232,7 @@ public class TimingServiceImpl implements TimingService {
         timing.setStopWork(timeSpecifiedNodeAdd.getStopWorkOnHoliday());
         timing.setCreateBy(AuthCurrentUser.getUserId());
         timingDAO.insertSelective(timing);
-        //添加任务
+        // 添加任务
         this.addTimingStartCron(timing, projId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -235,7 +240,7 @@ public class TimingServiceImpl implements TimingService {
 
 
     /**
-     * 添加时序是启动任务
+     * 添加时序时启动任务
      * 
      * @param timing 添加的节点
      * @param projId 项目id
@@ -543,10 +548,10 @@ public class TimingServiceImpl implements TimingService {
                 // 判断当前命令是否是指定日
                 cmdService.writeSwitch(commandSend.getVarIdS());
             }
-            return ReturnInfo.create(CodeEnum.SUCCESS);
+        } else {
+            // 普通节点,直接运行
+            cmdService.writeSwitch(commandSend.getVarIdS());
         }
-        // 普通节点,直接运行
-        cmdService.writeSwitch(commandSend.getVarIdS());
 
         // 执行之后修改群组值和变量值
         if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
@@ -560,12 +565,37 @@ public class TimingServiceImpl implements TimingService {
                 registerDAO.updateRegisValueById(String.valueOf(item.getSwitchValue()),
                         item.getRegisId());
             });
+
         } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
             equipmentMonitorService.updateByVarId(timing.getRunVar(),
                     Integer.valueOf(timing.getRunVarlue()));
             registerDAO.updateRegisValueById(String.valueOf(timing.getRunVarlue()),
                     timing.getRunVar());
         }
+
+        // 记录时序运行之后的变量改变
+        List<History> histories = new ArrayList<>();
+        History history = new History();
+        if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
+            history.setVarType(History.GROUP_TYPE);
+            history.setVarId(timing.getRunId());
+            // 群组下关联的变量
+            for (CmdSendDto cmdSendDto : commandSend.getVarIdS()) {
+                History groupHistory = new History();
+                groupHistory.setVarType(History.REGISTER_TYPE);
+                groupHistory.setVarId(cmdSendDto.getRegisId());
+                groupHistory.setVarValue(String.valueOf(cmdSendDto.getSwitchValue()));
+                groupHistory.setCreateBy(User.SYS_USER_ID);
+                histories.add(groupHistory);
+            }
+        } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
+            history.setVarType(History.REGISTER_TYPE);
+            history.setVarId(timing.getRunVar());
+        }
+        history.setCreateBy(User.SYS_USER_ID);
+        history.setVarValue(timing.getRunVarlue());
+        histories.add(history);
+        historyService.updateHistory(histories);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

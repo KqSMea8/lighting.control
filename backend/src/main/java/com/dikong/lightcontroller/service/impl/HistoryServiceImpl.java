@@ -2,17 +2,20 @@ package com.dikong.lightcontroller.service.impl;
 
 import java.util.List;
 
-import com.dikong.lightcontroller.common.PageNation;
-import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.dikong.lightcontroller.common.CodeEnum;
+import com.dikong.lightcontroller.common.PageNation;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.HistoryDAO;
 import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.History;
+import com.dikong.lightcontroller.entity.User;
 import com.dikong.lightcontroller.service.HistoryService;
+import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.vo.HistoryList;
 import com.dikong.lightcontroller.vo.HistorySearch;
 import com.github.pagehelper.PageHelper;
@@ -45,20 +48,39 @@ public class HistoryServiceImpl implements HistoryService {
             // 群组和时序
             historyLists = historyDAO.selectSysVar(historySearch);
         }
+        if (!CollectionUtils.isEmpty(historyLists)) {
+            for (HistoryList historyList : historyLists) {
+                if (!StringUtils.isEmpty(historyList.getCreateBy())) {
+                    historyList.setCreateBy(User.SYS_USER_NAME);
+                }
+            }
+        }
         PageNation pageNation = ReturnInfo.create(historyLists);
-        return ReturnInfo.create(historyLists,pageNation);
+        return ReturnInfo.create(historyLists, pageNation);
     }
 
     @Override
     public ReturnInfo updateHistory(History history) {
         int useId = AuthCurrentUser.getUserId();
-        History lastHistory =
-                historyDAO.selectLastHistory(history.getVarId(), history.getVarType());
-        if (null != history.getVarValue() && (null == lastHistory
-                || !history.getVarValue().equals(lastHistory.getVarValue()))) {
-            history.setCreateBy(useId);
-            history.setVarValue(history.getVarValue());
-            historyDAO.insertHistory(history);
+        history.setCreateBy(useId);
+        history.setVarValue(history.getVarValue());
+        historyDAO.insertHistory(history);
+
+        // History lastHistory =
+        // historyDAO.selectLastHistory(history.getVarId(), history.getVarType());
+        // if (null != history.getVarValue() && (null == lastHistory
+        // || !history.getVarValue().equals(lastHistory.getVarValue()))) {
+        // history.setCreateBy(useId);
+        // history.setVarValue(history.getVarValue());
+        // historyDAO.insertHistory(history);
+        // }
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo updateHistory(List<History> histories) {
+        if (!CollectionUtils.isEmpty(histories)) {
+            histories.forEach(history -> this.updateHistory(history));
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }

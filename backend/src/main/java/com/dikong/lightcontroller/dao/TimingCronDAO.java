@@ -32,4 +32,7 @@ public interface TimingCronDAO extends Mapper<TimingCron>{
 
     @Delete({"delete from timing_cron where task_name=#{taskName}"})
     int deleteDelCronByTaskName(@Param("taskName")String taskName);
+
+    @Select({"select * from timing_cron where task_name=#{taskName}"})
+    TimingCron selectAllByTaskName(@Param("taskName")String taskName);
 }

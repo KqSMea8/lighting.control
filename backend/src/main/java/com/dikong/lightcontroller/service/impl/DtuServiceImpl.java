@@ -119,7 +119,7 @@ public class DtuServiceImpl implements DtuService {
     public ReturnInfo deleteDtu(Long id) {
         Dtu dtu = dtuDAO.selectDtuById(id);
         dtuCollectionApi.deleteDevice(dtu.getDeviceCode());
-        dtuDAO.updateIsDelete(id, Dtu.DEL_YES,AuthCurrentUser.getUserId());
+        dtuDAO.updateIsDelete(id, Dtu.DEL_YES, AuthCurrentUser.getUserId());
         deviceService.deleteDeviceByDtuId(id);
         int projId = AuthCurrentUser.getCurrentProjectId();
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
@@ -200,6 +200,17 @@ public class DtuServiceImpl implements DtuService {
             return ReturnInfo.create(CodeEnum.SUCCESS);
         }
         if (new Integer(0).equals(line)) {
+            // 判断dtu下的所有设备是否有在线的
+            Dtu dtu = dtuDAO.selectExistDeviceCode(deviceCode);
+            List<Device> deviceList = deviceDAO.selectAllByDtuId(dtu.getId(), Device.DEL_NO);
+            if (!CollectionUtils.isEmpty(deviceList)) {
+                for (Device device : deviceList) {
+                    if (Device.ONLINE.equals(device.getStatus())) {
+                        LOG.info("存在在线的设备:{},devicecode is {}", device, dtu.getDeviceCode());
+                        return ReturnInfo.create(CodeEnum.SUCCESS);
+                    }
+                }
+            }
             dtuDAO.updateOnlineStatusByCode(deviceCode, Dtu.OFFLINE);
             jedis.hset(DTU_ONLINE, deviceCode, String.valueOf(line));
         } else if (new Integer(2).equals(line)) {

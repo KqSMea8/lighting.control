@@ -143,6 +143,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
+     * 更新已经存在定时任务
+     * @param quartzJobDto
+     * @return
+     */
+    @Override
+    public ReturnInfo<Boolean> updateTask(QuartzJobDto quartzJobDto) {
+        boolean addSuccess = taskServiceApi.addTask(quartzJobDto);
+        return ReturnInfo.create(addSuccess);
+    }
+
+    /**
      * 添加设备任务
      * 
      * @param id

@@ -11,6 +11,10 @@ import javax.persistence.Id;
  */
 public class User {
 
+    public static final String SYS_USER_NAME = "SYS";
+
+    public static final Integer SYS_USER_ID = 0;
+
     @Id
     @GeneratedValue(generator = "JDBC")
     private Integer userId;
