@@ -288,7 +288,8 @@ public class CmdServiceImpl implements CmdService {
         req.put("cmdType", String.valueOf(ReadWriteEnum.WRITE.getCode()));
         req.put("registerMsg", dtu.getDeviceCode());
         req.put("cmd", sendMsg);
-        LOG.info("发送信息：" + JSON.toJSONString(req));
+        String uuid = UUID.randomUUID().toString();
+        LOG.info("[{}]发送信息：{}", uuid, JSON.toJSONString(req));
         String response = "";
         String requestId = UUID.randomUUID().toString();
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
@@ -312,7 +313,7 @@ public class CmdServiceImpl implements CmdService {
             }
         } catch (Exception e) {
             String info = "发送命令异常" + e.toString();
-            LOG.error(info);
+            LOG.error("[{}]", uuid, info);
             e.printStackTrace();
             cmdRecord.setResult(info);
             cmdRecordDao.insert(cmdRecord);
@@ -320,7 +321,7 @@ public class CmdServiceImpl implements CmdService {
             return writeResult;
         }
 
-        LOG.info("命令发送响应：" + response);
+        LOG.info("[{}]命令发送响应：{}", uuid, response);
         if (StringUtils.isEmpty(response)) {
             String info = "返回值为空";
             cmdRecord.setResult(info);
@@ -511,19 +512,20 @@ public class CmdServiceImpl implements CmdService {
         req.put("cmdType", String.valueOf(readWriteEnum.getCode()));
         req.put("registerMsg", dtu.getDeviceCode());
         req.put("cmd", sendMsg);
-        LOG.info("发送信息：" + JSON.toJSONString(req));
+        String uuid = UUID.randomUUID().toString();
+        LOG.info("[{}]发送信息：{}", uuid, JSON.toJSONString(req));
         try {
             response = OkhttpUtils
                     .postFrom(envioroment.getProperty(serviceIpKey) + "/device/command", req, null);
         } catch (IOException e) {
             String info = "发送命令异常" + e.toString();
-            LOG.error(info);
+            LOG.error("[{}]", uuid, info);
             e.printStackTrace();
             cmdRecord.setResult(info);
             cmdRecordDao.insert(cmdRecord);
             return new CmdRes<String>(false, "发送命令异常");
         }
-        LOG.info("命令发送响应：" + response);
+        LOG.info("[{}]命令发送响应：{}", uuid, response);
         if (StringUtils.isEmpty(response) || StringUtils
                 .isEmpty(response.replace(CmdMsgUtils.strTo16(dtu.getBeatContent()), ""))) {
             String info = "返回值为空或处理之后为空:" + response;

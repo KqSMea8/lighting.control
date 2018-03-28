@@ -50,7 +50,7 @@ public class HistoryServiceImpl implements HistoryService {
         }
         if (!CollectionUtils.isEmpty(historyLists)) {
             for (HistoryList historyList : historyLists) {
-                if (!StringUtils.isEmpty(historyList.getCreateBy())) {
+                if (StringUtils.isEmpty(historyList.getCreateBy())) {
                     historyList.setCreateBy(User.SYS_USER_NAME);
                 }
             }

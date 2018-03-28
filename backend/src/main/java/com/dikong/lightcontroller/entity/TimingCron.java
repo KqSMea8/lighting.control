@@ -13,6 +13,7 @@ import javax.persistence.Id;
  * @see </P>
  */
 public class TimingCron {
+
     @Id
     private Long id;
 

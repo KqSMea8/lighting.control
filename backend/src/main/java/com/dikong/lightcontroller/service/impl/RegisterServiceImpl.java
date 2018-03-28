@@ -8,22 +8,37 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.PageNation;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dao.GroupDeviceMiddleDAO;
 import com.dikong.lightcontroller.dao.RegisterDAO;
 import com.dikong.lightcontroller.dao.SysVarDAO;
+import com.dikong.lightcontroller.dao.TimingCronDAO;
+import com.dikong.lightcontroller.dao.TimingDAO;
 import com.dikong.lightcontroller.dto.CmdRes;
+import com.dikong.lightcontroller.dto.CmdSendDto;
+import com.dikong.lightcontroller.dto.QuartzJobDto;
+import com.dikong.lightcontroller.entity.BaseSysVar;
+import com.dikong.lightcontroller.entity.GroupDeviceMiddle;
 import com.dikong.lightcontroller.entity.History;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.RegisterTime;
 import com.dikong.lightcontroller.entity.SysVar;
+import com.dikong.lightcontroller.entity.Timing;
+import com.dikong.lightcontroller.entity.TimingCron;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.EquipmentMonitorService;
 import com.dikong.lightcontroller.service.RegisterService;
+import com.dikong.lightcontroller.service.TaskService;
+import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
+import com.dikong.lightcontroller.vo.CommandSend;
 import com.dikong.lightcontroller.vo.RegisterList;
 import com.dikong.lightcontroller.vo.SysVarList;
 import com.dikong.lightcontroller.vo.VarListSearch;
@@ -54,6 +69,21 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Autowired
     private SysVarDAO sysVarDAO;
+
+    @Autowired
+    private TimingDAO timingDAO;
+
+    @Autowired
+    private TimingCronDAO timingCronDAO;
+
+    @Autowired
+    private GroupDeviceMiddleDAO groupDeviceMiddleDAO;
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private TimingService timingService;
 
 
     @Autowired
@@ -88,8 +118,57 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     @Override
-    public ReturnInfo deleteRegister(Long id) {
+    @Transactional
+    @SuppressWarnings("all")
+    public ReturnInfo deleteRegister(Long id) throws Exception {
         registerDAO.deleteRegister(id);
+
+        List<GroupDeviceMiddle> groupDeviceMiddles = groupDeviceMiddleDAO.selectByRegisId(id);
+        // 删除群组关联的变量
+        groupDeviceMiddleDAO.deleteByRegisId(id);
+        // 删除管理的变量
+        timingService.deleteNodeByRegisId(id);
+
+        // 删除启动的时序变量中的群组关联的变量
+        int projId = AuthCurrentUser.getCurrentProjectId();
+        SysVar sysVar = sysVarDAO.selectSequence(projId, BaseSysVar.SEQUENCE);
+        if (sysVar == null
+                || (sysVar != null && BaseSysVar.CLOSE_SYS_VALUE.equals(sysVar.getVarValue()))) {
+            return ReturnInfo.create(CodeEnum.SUCCESS);
+        }
+        for (GroupDeviceMiddle groupDeviceMiddle : groupDeviceMiddles) {
+            List<Timing> timings = timingDAO.selectTimingByGroupId(groupDeviceMiddle.getGroupId(),
+                    projId, Timing.DEL_NO);
+            for (Timing timing : timings) {
+                if (!StringUtils.isEmpty(timing.getTaskName())) {
+                    TimingCron timingCron = timingCronDAO.selectAllByTaskName(timing.getTaskName());
+                    QuartzJobDto quartzJobDto =
+                            JSON.parseObject(timingCron.getCronJson(), QuartzJobDto.class);
+                    String jsonParams = quartzJobDto.getJobDO().getExtInfo().getJsonParams();
+                    CommandSend commandSend = JSON.parseObject(jsonParams, CommandSend.class);
+                    List<CmdSendDto> varIdS = commandSend.getVarIdS();
+                    for (int i = 0; i < varIdS.size(); i++) {
+                        CmdSendDto varId = varIdS.get(i);
+                        if (varId.getRegisId().equals(id)) {
+                            varIdS.remove(i);
+                        }
+                    }
+                    commandSend.setVarIdS(varIdS);
+                    quartzJobDto.getJobDO().getExtInfo()
+                            .setJsonParams(JSON.toJSONString(commandSend));
+                    ReturnInfo<Boolean> returnInfo = taskService.updateTask(quartzJobDto);
+                    if (!returnInfo.getData()) {
+                        LOG.error("添加群组变量到关联时序失败:", JSON.toJSONString(quartzJobDto));
+                        throw new Exception("添加群组变量到关联时序失败.");
+                    }
+                    // 更新
+                    String jsonString = JSON.toJSONString(quartzJobDto);
+                    timingCron.setCronJson(jsonString);
+                    timingCronDAO.updateByPrimaryKey(timingCron);
+                }
+            }
+        }
+
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 

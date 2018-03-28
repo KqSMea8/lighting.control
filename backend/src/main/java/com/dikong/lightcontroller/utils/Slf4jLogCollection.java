@@ -95,6 +95,7 @@ public class Slf4jLogCollection extends feign.Logger {
             }
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
+            logger.error("error:",e);
         }
     }
 

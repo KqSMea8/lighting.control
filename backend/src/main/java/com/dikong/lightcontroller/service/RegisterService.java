@@ -26,7 +26,7 @@ public interface RegisterService {
 
     ReturnInfo updateRegisterValue(Long id,String regisValue);
 
-    ReturnInfo deleteRegister(Long id);
+    ReturnInfo deleteRegister(Long id) throws Exception;
 
     ReturnInfo deleteRegisterByDeviceId(Long deviceId);
 

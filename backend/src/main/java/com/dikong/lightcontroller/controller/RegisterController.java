@@ -55,7 +55,7 @@ public class RegisterController {
     }
 
     @DeleteMapping(path = "/register/{id}")
-    public ReturnInfo delete(@PathVariable("id") Long id) {
+    public ReturnInfo delete(@PathVariable("id") Long id) throws Exception {
         if (null == id || id == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }

@@ -291,10 +291,11 @@ public class TimingServiceImpl implements TimingService {
     @Override
     public ReturnInfo deleteNodeByGroupId(Long groupId) {
         Example example = new Example(Timing.class);
-        example.createCriteria().andEqualTo("runType", Timing.GROUP_TYPE);
+        example.createCriteria().andEqualTo("runType", Timing.GROUP_TYPE).andEqualTo("runId",
+                groupId);
         List<Timing> timings = timingDAO.selectByExample(example);
         if (!CollectionUtils.isEmpty(timings)) {
-            timings.forEach(item -> deleteNode(item.getId()));
+            timings.forEach(item -> this.deleteNode(item.getId()));
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -302,13 +303,28 @@ public class TimingServiceImpl implements TimingService {
     @Override
     public ReturnInfo deleteNodeByDeviceId(Long deviceId) {
         Example example = new Example(Timing.class);
-        example.createCriteria().andEqualTo("runType", Timing.DEVICE_TYPE);
+        example.createCriteria().andEqualTo("runType", Timing.DEVICE_TYPE).andEqualTo("runId",
+                deviceId);
         List<Timing> timings = timingDAO.selectByExample(example);
         if (!CollectionUtils.isEmpty(timings)) {
-            timings.forEach(item -> deleteNode(item.getId()));
+            timings.forEach(item -> this.deleteNode(item.getId()));
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
+
+    @Override
+    public ReturnInfo deleteNodeByRegisId(Long regisId) {
+        Example example = new Example(Timing.class);
+        example.createCriteria().andEqualTo("runType", Timing.DEVICE_TYPE).andEqualTo("runVar",
+                regisId);
+        List<Timing> timings = timingDAO.selectByExample(example);
+        if (!CollectionUtils.isEmpty(timings)) {
+            timings.forEach(item -> this.deleteNode(item.getId()));
+        }
+        return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+
 
     @SuppressWarnings("all")
     @Override
@@ -531,6 +547,9 @@ public class TimingServiceImpl implements TimingService {
         String nowDateYearMonthDay = TimeWeekUtils.getNowDateYearMonthDay();
         int todayIsHoliday = holidayDAO.selectTodayIsHoliday(nowDateYearMonthDay, projId);
         Timing timing = timingDAO.selectById(commandSend.getTimingId());
+        if (CollectionUtils.isEmpty(commandSend.getVarIdS())) {
+            taskService.removeTimingTask(commandSend.getTaskName());
+        }
         if (todayIsHoliday > 0 && null != timing && Timing.STOP_YES.equals(timing.getStopWork())) {
             LOG.info("有指定节假日,{}", nowDateYearMonthDay);
             return ReturnInfo.create(CodeEnum.SUCCESS);

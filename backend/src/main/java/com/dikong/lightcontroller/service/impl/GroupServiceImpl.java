@@ -144,7 +144,6 @@ public class GroupServiceImpl implements GroupService {
         sysVarService.deleteSysVar(id, BaseSysVar.GROUP);
         timingService.deleteNodeByGroupId(id);
 
-
         equipmentMonitorService.delByGroupId(id);
 
         return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -224,6 +223,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional
+    @SuppressWarnings("all")
     public ReturnInfo addGroupDevice(GroupDeviceMiddle groupDeviceMiddle) throws Exception {
         Register register = registerDAO.selectRegisById(groupDeviceMiddle.getRegisId());
         if (null != register && (Register.AI.equals(register.getRegisType())
@@ -258,6 +258,10 @@ public class GroupServiceImpl implements GroupService {
                     LOG.error("添加群组变量到关联时序失败:", JSON.toJSONString(quartzJobDto));
                     throw new Exception("添加群组变量到关联时序失败.");
                 }
+                //更新
+                String jsonString = JSON.toJSONString(quartzJobDto);
+                timingCron.setCronJson(jsonString);
+                timingCronDAO.updateByPrimaryKey(timingCron);
             }
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);

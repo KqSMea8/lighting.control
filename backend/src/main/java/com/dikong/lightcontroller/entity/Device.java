@@ -229,4 +229,16 @@ public class Device {
     public void setUpdateBy(Integer updateBy) {
         this.updateBy = updateBy;
     }
+
+    @Override
+    public String toString() {
+        return "Device{" + "id=" + id + ", dtuId=" + dtuId + ", externalId='" + externalId + '\''
+                       + ", name='" + name + '\'' + ", code='" + code + '\'' + ", model='" + model
+                       + '\'' + ", modelFile='" + modelFile + '\'' + ", status=" + status
+                       + ", connectCount=" + connectCount + ", disconnectCount=" + disconnectCount
+                       + ", lastOnlineTime=" + lastOnlineTime + ", lastOfflineTime="
+                       + lastOfflineTime + ", useTimes=" + useTimes + ", isDelete=" + isDelete
+                       + ", taskName='" + taskName + '\'' + ", createBy=" + createBy + ", updateBy="
+                       + updateBy + '}';
+    }
 }

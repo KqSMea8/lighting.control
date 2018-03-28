@@ -133,7 +133,7 @@ public class DeviceServiceImpl implements DeviceService {
         }
         deviceDAO.updateDeleteById(id, Device.DEL_YES, AuthCurrentUser.getUserId());
         // groupService.deleteGroupByDeviceId(id);
-        timingService.deleteNodeByDeviceId(id);
+//        timingService.deleteNodeByDeviceId(id);
         // registerService.deleteRegisterByDeviceId(id);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }

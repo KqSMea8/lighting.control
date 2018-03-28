@@ -1,5 +1,8 @@
 package com.dikong.lightcontroller.service;
 
+import java.text.ParseException;
+import java.util.List;
+
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.Holiday;
 import com.dikong.lightcontroller.entity.Timing;
@@ -10,9 +13,6 @@ import com.dikong.lightcontroller.vo.TimeSpecifiedNodeAdd;
 import com.dikong.lightcontroller.vo.TimingList;
 import com.dikong.lightcontroller.vo.TimingListSearch;
 import com.dikong.lightcontroller.vo.TimingView;
-
-import java.text.ParseException;
-import java.util.List;
 
 /**
  * <p>
@@ -35,6 +35,8 @@ public interface TimingService {
     ReturnInfo deleteNodeByGroupId(Long groupId);
 
     ReturnInfo deleteNodeByDeviceId(Long deviceId);
+
+    ReturnInfo deleteNodeByRegisId(Long regisId);
 
     ReturnInfo<List<TimingList>> listNodeType(TimingListSearch timingListSearch);
 

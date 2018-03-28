@@ -29,6 +29,13 @@ public interface GroupDeviceMiddleDAO {
             "select id,device_id,group_id,regis_id from group_device_middle where group_id=#{groupId}"})
     List<GroupDeviceMiddle> selectByGroupId(@Param("groupId") Long groupId);
 
+    @Select({
+            "select id,device_id,group_id,regis_id from group_device_middle where regis_id=#{regisId}"})
+    List<GroupDeviceMiddle> selectByRegisId(@Param("regisId") Long regisId);
+
+    @Delete({"delete from group_device_middle where regis_id=#{regisId}"})
+    int deleteByRegisId(@Param("regisId") Long regisId);
+
     @Delete({"delete from group_device_middle where id=#{id}"})
     int deleteDeviceById(@Param("id") Long id);
 
@@ -60,4 +67,5 @@ public interface GroupDeviceMiddleDAO {
 
     @Select({"select group_id from group_device_middle where device_id=#{deviceId}"})
     List<Long> selectAllByDeviceId(@Param("deviceId") Long deviceId);
+
 }
