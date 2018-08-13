@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dikong.lightcontroller.dao.TimingCronDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,13 +135,17 @@ public class SysVarServiceImpl implements SysVarService {
         int[] processResult = null;
         int projId = AuthCurrentUser.getCurrentProjectId();
         if (BaseSysVar.SEQUENCE.equals(sysVar.getSysVarType())) {
-            sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
-            equipmentMonitorService.updateByTiming(sysVar.getVarId(),
-                    Integer.valueOf(sysVar.getVarValue()));
-            processSequence(projId, sysVar.getVarValue());
+            synchronized (sysVarDAO) {
+                sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
+            }
+            synchronized (equipmentMonitorService) {
+                equipmentMonitorService.updateByTiming(sysVar.getVarId(),
+                        Integer.valueOf(sysVar.getVarValue()));
+            }
             SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getSysVarType(), projId,
                     sysVar.getVarId());
             sysVar.setId(var.getId());
+            processSequence(projId, sysVar.getVarValue());
         } else if (BaseSysVar.GROUP.equals(sysVar.getSysVarType())) {
             equipmentMonitorService.updateByGroupId(sysVar.getVarId(),
                     Integer.valueOf(sysVar.getVarValue()));
