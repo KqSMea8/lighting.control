@@ -27,6 +27,7 @@ import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.EquipmentMonitor;
 import com.dikong.lightcontroller.entity.Group;
+import com.dikong.lightcontroller.entity.History;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.entity.SysVar;
 import com.dikong.lightcontroller.service.CmdService;
@@ -206,6 +207,11 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
         int sourceId = monitor.getSourceId();
         if (monitor.getMonitorType() == 1) {// 设备监控
             sendCmd(monitorId, (long) sourceId, Integer.valueOf(value), sendResult);
+            History history = new History();
+            history.setVarValue(value);
+            history.setVarId(new Long(sourceId));
+            history.setVarType(History.REGISTER_TYPE);
+            historyService.updateHistory(history);
         } else if (monitor.getMonitorType() == 2) {// 自定义监控
             int sourceType = monitor.getSourceType();// 1->单个设备 2->群组 3->时序
             switch (sourceType) {

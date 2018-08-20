@@ -374,8 +374,11 @@ public class DeviceServiceImpl implements DeviceService {
                 jedis.hgetAll(Constant.RESERT_CMD.KEY_PROFILE + String.valueOf(projId));
         if (!StringUtils.isEmpty(regisIdAndValues)) {
             for (Map.Entry<String, String> map : regisIdAndValues.entrySet()) {
-                LOG.info("开始重发命令,变量id为:{},值为:{}", map.getKey(), map.getValue());
                 Register register = registerDAO.selectRegisById(Long.valueOf(map.getKey()));
+                if (!register.getDeviceId().equals(device.getId())){
+                    continue;
+                }
+                LOG.info("开始重发命令,变量id为:{},值为:{}", map.getKey(), map.getValue());
                 CmdRes<String> stringCmdRes = null;
                 if (Register.BI.equals(register.getRegisType())
                         || Register.BV.equals(register.getRegisType())) {
@@ -408,7 +411,7 @@ public class DeviceServiceImpl implements DeviceService {
         List<DeviceOnlineList> deviceOnlineLists =
                 deviceDAO.selectOnlineStatus(projId, Device.DEL_NO, Dtu.DEL_NO);
         for (DeviceOnlineList deviceOnlineList : deviceOnlineLists) {
-            ReturnInfo returnInfo = conncationInfo(deviceOnlineList.getDeviceId(), false);
+            ReturnInfo returnInfo = this.conncationInfo(deviceOnlineList.getDeviceId(), false);
             Device update = (Device) returnInfo.getData();
             if (update != null && update.getUseTimes() != null) {
                 deviceOnlineList.setUseTimes(update.getUseTimes() + " S");
