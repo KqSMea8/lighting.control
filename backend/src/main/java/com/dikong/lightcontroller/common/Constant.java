@@ -43,4 +43,8 @@ public interface Constant {
     interface RESERT_CMD {
         String KEY_PROFILE = "LIGHT_";
     }
+    interface TREE_NOD {// 图控-树节点删除标志 1->未删除 2->删除
+        int NOT_DELETE = 1;
+        int DELETED = 2;
+    }
 }

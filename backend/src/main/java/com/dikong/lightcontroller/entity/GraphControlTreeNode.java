@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.entity;
 
 import java.util.Date;
 
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 /**
@@ -9,7 +10,9 @@ import javax.persistence.Id;
  * @version 2018年8月5日 下午1:04:12
  */
 public class GraphControlTreeNode {
+
     @Id
+    @GeneratedValue(generator = "JDBC")
     private Integer id;
     private Integer projectId;// 项目id
     private Integer parentId;

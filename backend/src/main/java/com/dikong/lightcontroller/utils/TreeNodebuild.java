@@ -39,6 +39,20 @@ public class TreeNodebuild extends GraphControlTreeNode {
         }
     }
 
+    // 递归组织集合 创建 树节点集合
+    public static void getAllNodeId(List<TreeNodebuild> listPer, List<Integer> nodeIds,
+            Integer pid) {
+        for (TreeNodebuild treeNode : listPer) {
+            // 如果组织父id=参数
+            if (treeNode.getParentId().equals(pid)) {
+                // 将节点 加入到 树节点集合
+                nodeIds.add(treeNode.getId());
+                // 递归 为这个新创建的 树节点找 子节点
+                getAllNodeId(listPer, nodeIds, treeNode.getId());
+            }
+        }
+    }
+
     public static List<Integer> getAllChilderNode(List<TreeNodebuild> treeNodebuilds) {
         List<Integer> childs = new ArrayList<Integer>();
         getChild(treeNodebuilds, childs);
