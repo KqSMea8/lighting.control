@@ -42,7 +42,8 @@ target
 logs
 
 target/
-
+front/
 ./*.iml
-
+./*.js
+./*.html
 backend/LOG_PATH_IS_UNDEFINED/*
