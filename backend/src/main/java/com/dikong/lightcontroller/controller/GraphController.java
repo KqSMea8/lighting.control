@@ -2,10 +2,12 @@ package com.dikong.lightcontroller.controller;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,14 +36,14 @@ public class GraphController {
     @ApiOperation(value = "新增节点")
     @ApiImplicitParam(required = true, dataType = "TreeNodeDto", name = "treeNode")
     @PostMapping("/node/add")
-    public ReturnInfo<GraphControlTreeNode> addNewNode(TreeNodeDto treeNode) {
+    public ReturnInfo<GraphControlTreeNode> addNewNode(@RequestBody TreeNodeDto treeNode) {
         return graphService.addNewNode(treeNode);
     }
 
     @ApiOperation(value = "编辑接口-检查是否存在公司编码和公司主体")
     @ApiImplicitParam(name = "nodeId", value = "树id", required = true, dataType = "Integer",
             paramType = "path")
-    @Delete("/node/del/{nodeId}")
+    @DeleteMapping("/node/del/{nodeId}")
     public ReturnInfo delNodeInfo(@PathVariable("nodeId") Integer nodeId) {
         return graphService.delNodeInfo(nodeId);
     }
@@ -49,14 +51,14 @@ public class GraphController {
     @ApiOperation(value = "更新节点")
     @ApiImplicitParam(required = true, dataType = "TreeNodeDto", name = "treeNode")
     @PostMapping("/node/update")
-    public ReturnInfo<GraphControlTreeNode> updateNode(TreeNodeDto treeNode) {
+    public ReturnInfo<GraphControlTreeNode> updateNode(@RequestBody TreeNodeDto treeNode) {
         return graphService.updateNode(treeNode);
     }
 
     @ApiOperation(value = "编辑接口-检查是否存在公司编码和公司主体")
     @ApiImplicitParam(name = "parentId", value = "父id", required = true, dataType = "Integer",
             paramType = "path")
-    @Delete("/node/list/{parentId}")
+    @GetMapping("/node/list/{parentId}")
     public ReturnInfo<List<TreeNodebuild>> listTree(@PathVariable("parentId") Integer parentId) {
         if (parentId == null) {
             parentId = 0;
