@@ -258,7 +258,7 @@ public class GroupServiceImpl implements GroupService {
                     LOG.error("添加群组变量到关联时序失败:", JSON.toJSONString(quartzJobDto));
                     throw new Exception("添加群组变量到关联时序失败.");
                 }
-                //更新
+                // 更新
                 String jsonString = JSON.toJSONString(quartzJobDto);
                 timingCron.setCronJson(jsonString);
                 timingCronDAO.updateByPrimaryKey(timingCron);
@@ -269,7 +269,7 @@ public class GroupServiceImpl implements GroupService {
 
     /**
      * 修改群组设备
-     * 
+     *
      * @param groupDeviceMiddle
      * @return
      */
@@ -277,5 +277,12 @@ public class GroupServiceImpl implements GroupService {
     public ReturnInfo updateGroupDevice(GroupDeviceMiddle groupDeviceMiddle) {
         groupDeviceMiddleDAO.updateGroupDevice(groupDeviceMiddle);
         return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ReturnInfo<Boolean> updateGroup(Group group) {
+    	group.setUpdateBy(AuthCurrentUser.getUserId());
+    	groupDAO.updateByPrimaryKeySelective(group);
+        return ReturnInfo.create(true);
     }
 }

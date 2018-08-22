@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.controller;
 
 import java.util.List;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,8 +64,16 @@ public class GroupController {
         return groupService.add(group);
     }
 
-
-
+    /**
+     * 更新群组名称
+     * @param group
+     * @return
+     */
+    @ApiOperation(value = "更新群组名称")
+    @PutMapping(path = "/group/update")
+    public ReturnInfo<Boolean> updateGroup(@RequestBody Group group){
+        return groupService.updateGroup(group);
+    }
     /**
      * 删除群组和群组关联的设备
      * 
