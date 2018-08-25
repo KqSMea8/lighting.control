@@ -1,8 +1,12 @@
 package com.dikong.lightcontroller.service.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,9 +14,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
+import com.dikong.lightcontroller.common.CodeEnum;
+import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.FileManageDao;
 import com.dikong.lightcontroller.entity.FileManage;
 import com.dikong.lightcontroller.service.FileManageService;
+import com.dikong.lightcontroller.utils.AuthCurrentUser;
 
 /**
  * @author huangwenjun
@@ -24,6 +34,9 @@ public class FileManageServiceImpl implements FileManageService {
     @Value("${file.save.base.path}")
     private String fileBasePath;
 
+    @Value("${imgs.save.base.path}")
+    private String imgBasePath;
+
     @Autowired
     private FileManageDao fileManageDao;
 
@@ -31,20 +44,22 @@ public class FileManageServiceImpl implements FileManageService {
 
     @Override
     @Transactional
-    public void fileAdd(MultipartFile sourcefile, Integer fileType) throws Exception {
-
+    public ReturnInfo fileAdd(MultipartFile sourcefile, Integer fileType) throws Exception {
         String fileName = sourcefile.getOriginalFilename();
-        String filePath = fileBasePath + SEPARATOR + fileType;
+        String filePath =
+                fileBasePath + SEPARATOR + AuthCurrentUser.getCurrentProjectId() + SEPARATOR
+                        + fileType;
         File targetfile = new File(filePath + SEPARATOR + fileName);
         if (targetfile.exists()) {
-            return;
+            return ReturnInfo.create(CodeEnum.FILE_EXIST);
         }
         // 先入库，再存文件
         FileManage fileManage = new FileManage();
         fileManage.setFileType(fileType);
-        fileManage.setProjectId(1);
+        fileManage.setProjectId(AuthCurrentUser.getCurrentProjectId());
         fileManage.setFilePath(filePath + SEPARATOR + fileName);
-        fileManage.setCreateBy(1);
+        fileManage.setFileName(fileName);
+        fileManage.setCreateBy(AuthCurrentUser.getUserId());
         fileManageDao.insertSelective(fileManage);
         if (!targetfile.getParentFile().exists()) {
             targetfile.getParentFile().mkdirs();
@@ -59,13 +74,41 @@ public class FileManageServiceImpl implements FileManageService {
         }
         inputStream.close();
         outputStream.close();
-        System.out.println("fileBasePath:" + fileBasePath);
+        return ReturnInfo.createReturnSuccessOne(null);
     }
 
     @Override
-    public void fileList(int projectId) {
-        // TODO Auto-generated method stub
+    public ReturnInfo<List<FileManage>> fileList(int fileType) {
+        Example example = new Example(FileManage.class);
+        example.excludeProperties("filePath");
+        Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("projectId", AuthCurrentUser.getCurrentProjectId());
+        if (fileType != 0) {
+            criteria.andEqualTo("fileType", fileType);
+        }
+        List<FileManage> result = fileManageDao.selectByExample(example);
+        return ReturnInfo.createReturnSuccessOne(result);
+    }
 
+    @Override
+    public void findInfo(HttpServletResponse response, int fileId) throws Exception {
+        FileManage fileManage = fileManageDao.selectByPrimaryKey(fileId);
+        if ((fileManage == null || fileManage.getProjectId() != AuthCurrentUser
+                .getCurrentProjectId())) {
+            if (!AuthCurrentUser.isManager()) {
+                return;
+            }
+        }
+        File file = new File(fileManage.getFilePath());
+        if (file.exists()) {
+            FileInputStream inputStream = new FileInputStream(file);
+            int byteCount = 0;
+            byte[] bytes = new byte[1024];
+            while ((byteCount = inputStream.read(bytes)) != -1) {
+                response.getOutputStream().write(bytes, 0, byteCount);
+            }
+            inputStream.close();
+        }
     }
 
     @Override
@@ -73,5 +116,4 @@ public class FileManageServiceImpl implements FileManageService {
         // TODO Auto-generated method stub
 
     }
-
 }

@@ -47,4 +47,11 @@ public interface Constant {
         int NOT_DELETE = 1;
         int DELETED = 2;
     }
+    // 文件类型 1->图片 2->音频 3->点位文件
+    interface FILE_TYPE {
+        int ALL = 0;
+        int IMG = 1;
+        int AUDIO = 2;
+        int POINT_INFO = 3;
+    }
 }

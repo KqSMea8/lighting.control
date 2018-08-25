@@ -2,12 +2,15 @@ package com.dikong.lightcontroller.entity;
 
 import java.util.Date;
 
+import javax.persistence.Id;
+
 /**
  * @author huangwenjun
  * @version 2018年8月21日 上午12:47:09
  */
 public class FileManage {
 
+    @Id
     private Integer id;
 
     /**
@@ -23,6 +26,7 @@ public class FileManage {
      */
     private String filePath;
 
+    private String fileName;
     private Integer createBy;
     private Date createTime;
 
@@ -58,6 +62,14 @@ public class FileManage {
         this.filePath = filePath;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     public Integer getCreateBy() {
         return createBy;
     }
@@ -77,7 +89,7 @@ public class FileManage {
     @Override
     public String toString() {
         return "FileManage [id=" + id + ", projectId=" + projectId + ", fileType=" + fileType
-                + ", filePath=" + filePath + ", createBy=" + createBy + ", createTime=" + createTime
-                + "]";
+                + ", filePath=" + filePath + ", fileName=" + fileName + ", createBy=" + createBy
+                + ", createTime=" + createTime + "]";
     }
 }

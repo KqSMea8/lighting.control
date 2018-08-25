@@ -1,6 +1,13 @@
 package com.dikong.lightcontroller.service;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.web.multipart.MultipartFile;
+
+import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.entity.FileManage;
 
 /**
  * @author huangwenjun
@@ -8,9 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface FileManageService {
 
-    public void fileAdd(MultipartFile file, Integer fileType) throws Exception;
+    public ReturnInfo fileAdd(MultipartFile file, Integer fileType) throws Exception;
 
-    public void fileList(int projectId);
+    public ReturnInfo<List<FileManage>> fileList(int fileType);
+
+    public void findInfo(HttpServletResponse response, int fileId) throws Exception;
 
     public void fileDel(int projectId);
 
