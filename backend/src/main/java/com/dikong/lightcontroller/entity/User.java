@@ -35,6 +35,8 @@ public class User {
      */
     private Integer isDelete;
 
+    private String macAddr;
+
     private Integer createBy;
 
     private Integer updateBy;
@@ -77,6 +79,14 @@ public class User {
 
     public void setIsDelete(Integer isDelete) {
         this.isDelete = isDelete;
+    }
+
+    public String getMacAddr() {
+        return macAddr;
+    }
+
+    public void setMacAddr(String macAddr) {
+        this.macAddr = macAddr;
     }
 
     public Integer getCreateBy() {

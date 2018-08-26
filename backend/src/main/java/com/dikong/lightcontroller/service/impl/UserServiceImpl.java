@@ -97,6 +97,12 @@ public class UserServiceImpl implements UserService {
         if (!userInfo.getPassword().equals(password)) {
             return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
         }
+        if (!StringUtils.isEmpty(userInfo.getMacAddr())) {
+            if (loginReqDto.getMacAddr() == null
+                    || userInfo.getMacAddr().indexOf(loginReqDto.getMacAddr()) < 0) {
+                return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN);
+            }
+        }
         String oldToken =
                 jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
         if (!StringUtils.isEmpty(oldToken)) {
