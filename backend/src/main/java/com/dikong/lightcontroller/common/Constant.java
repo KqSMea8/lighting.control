@@ -54,4 +54,9 @@ public interface Constant {
         int AUDIO = 2;
         int POINT_INFO = 3;
     }
+
+    interface IMG_AUTH {
+        int NOT_AUTH = 0;
+        int HAVE_AUTH = 1;
+    }
 }

@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.service;
 
+import org.springframework.web.bind.annotation.GetMapping;
+
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.ChangePwdReq;
 import com.dikong.lightcontroller.dto.LoginReqDto;
@@ -38,4 +40,7 @@ public interface UserService {
     public ReturnInfo changeUserInfo(User user);
 
     public ReturnInfo changeUserPwd(ChangePwdReq changePwdReq);
+
+    @GetMapping("/check/user/auth")
+    public int checkUserAuth(String token, String reqUri);
 }
