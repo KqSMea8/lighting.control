@@ -127,6 +127,11 @@ public class Timing {
      */
     private Integer updateBy;
 
+    /**
+     * 时间为天黑或天亮时的调整时间
+     */
+    private Integer adjustTime;
+
     public Long getId() {
         return id;
     }
@@ -277,5 +282,13 @@ public class Timing {
 
     public void setUpdateBy(Integer updateBy) {
         this.updateBy = updateBy;
+    }
+
+    public Integer getAdjustTime() {
+        return adjustTime;
+    }
+
+    public void setAdjustTime(Integer adjustTime) {
+        this.adjustTime = adjustTime;
     }
 }

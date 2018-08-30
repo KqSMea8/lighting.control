@@ -3,6 +3,7 @@ package com.dikong.lightcontroller.controller;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 
+import com.dikong.lightcontroller.service.AlarmSettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,8 @@ public class TaskCallbackController {
     @Autowired
     private BlockingQueue queue;
 
+    @Autowired AlarmSettingService alarmSettingService;
+
 //    public static final String DEVICE_STATUS_KEY = "device.status.key";
 
     @PostMapping(path = "/command/send")
@@ -78,5 +81,14 @@ public class TaskCallbackController {
     public ReturnInfo holidayTask(@PathVariable("taskName")String taskName){
         LOG.info("节假日回调任务,任务id:{},当前时间是{}",taskName,new Date());
         return timingService.holidayTask();
+    }
+
+    @ApiOperation(value = "项目告警回调任务")
+    @GetMapping(path = "/alarm/{projectId}")
+    public ReturnInfo alarm(@PathVariable("projectId")Integer projectId){
+        if (projectId == 0){
+            return ReturnInfo.create(true);
+        }
+        return alarmSettingService.triggerCallback(projectId);
     }
 }

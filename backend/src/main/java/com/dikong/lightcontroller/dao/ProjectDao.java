@@ -18,4 +18,11 @@ public interface ProjectDao extends Mapper<Project> {
             + " <foreach collection=\"projectIds\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\" >"
             + " #{item} </foreach> " + "</script>")
     public List<Project> projectList(@Param("projectIds") List<Integer> projectIds);
+
+
+    @Select("select * from project where is_delete=1")
+    List<Project> selectAll();
+
+    @Select("select * from project where project_id=#{projectId} and is_delete=1")
+    Project sleectProjectById(@Param("projectId")Integer projectId);
 }

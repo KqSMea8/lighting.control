@@ -47,4 +47,32 @@ public interface Constant {
         int NOT_DELETE = 1;
         int DELETED = 2;
     }
+
+    interface ALARM{
+        String REDIS_ALARM_KEY = "alarm.timing.key";
+        //1->等于，2->大于,3->小于,4->区间,5->不等于,6->大于等于,7->小于等于
+        Integer eq = 1;
+        Integer gt = 2;
+        Integer lt = 3;
+        Integer between = 4;
+        Integer neq = 5;
+        String ALARM_KEY = "Alarm_";
+        String ALARM_CLEAN_KEY = "Alarm_CLEAN_";
+        //告警状态， 1->正常状态,2->告警状态
+        Integer CLEAR = 1;
+        Integer ALARM = 2;
+        //触发状态,1->未触发,2->已触发
+        Integer NO_TRIGGER = 1;
+        Integer TRIGGER = 2;
+        //启用和禁用,1->启用,2->禁用
+        Integer Enable = 1;
+        Integer Disable= 2 ;
+        //告警触发类型,1->发生告警,2->消除告警
+        Integer ALARM_TYPE = 1;
+        Integer CLEAR_TYPE = 2;
+    }
+
+    interface PROJECT {
+        String PROJECT_CRONTAB = "project.crontab";
+    }
 }

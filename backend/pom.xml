@@ -129,6 +129,26 @@
 			<version>2.5.0</version>
 		</dependency>
 		<!--swagger2 end-->
+        <!-- https://mvnrepository.com/artifact/com.github.qcloudsms/qcloudsms -->
+        <dependency>
+            <groupId>com.github.qcloudsms</groupId>
+            <artifactId>qcloudsms</artifactId>
+            <version>1.0.5</version>
+        </dependency>
+		<!--mail-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+			<version>2.0.1.RELEASE</version>
+		</dependency>
+
+		<!-- Used to work with the newer excel file format - `.xlsx` -->
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.17</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>street-lighting-control</finalName>

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -62,6 +63,9 @@ public class TaskServiceImpl implements TaskService {
     // 节假日job group
     private static final String DEFAULT_HOLIDAY_JOB_GROUO = "LIGHT_HOLIDAY_JOB";
 
+    //项目设置
+    private static final String PROJECT_JOB_GROUP = "PROJECT_JOB_GROUP";
+    private static final String PROJECT_TRIGGER_GROUP = "PROJECT_TRIGGER_GROUP";
 
     private TaskServiceApi taskServiceApi;
 
@@ -71,6 +75,8 @@ public class TaskServiceImpl implements TaskService {
     private String deviceCallBackUrl;
     // 节假日回调url
     private String holidayCallbackUrl;
+    //回调host
+    private String callBackHostAndPort;
 
 
     @Autowired
@@ -111,7 +117,7 @@ public class TaskServiceImpl implements TaskService {
         }
         this.taskServiceApi = Feign.builder().decoder(new JacksonDecoder())
                 .encoder(new JacksonEncoder()).target(TaskServiceApi.class, host);
-
+        this.callBackHostAndPort = "http://" + properties.getProperty("server.address") + ":" + properties.getProperty("server.port");
     }
 
     private QuartzJobDto createTask(String method, String taskName, String jsonParams, String cron,
@@ -144,6 +150,7 @@ public class TaskServiceImpl implements TaskService {
 
     /**
      * 更新已经存在定时任务
+     * 
      * @param quartzJobDto
      * @return
      */
@@ -241,6 +248,28 @@ public class TaskServiceImpl implements TaskService {
     public ReturnInfo removeHolidayTask(String taskName) {
         boolean removeTask = removeTask(taskName, DEFAULT_HOLIDAY_JOB_GROUO);
         return ReturnInfo.createReturnSuccessOne(removeTask);
+    }
+
+    /**
+     * 添加项目告警定时任务
+     * @param projectId 项目id
+     * @param cronInterval 定时间隔
+     * @return
+     */
+    @Override
+    public ReturnInfo<String> addProjectAlarmTask(Integer projectId,Integer cronInterval) {
+        String taskName = UUID.randomUUID().toString();
+        int second = new Random().nextInt(60);
+        String cron = String.valueOf(second) + " */# * * * ? *";
+        String replaceCron = StringUtils.replace(cron, "#", String.valueOf(cronInterval));
+        String callBakc = callBackHostAndPort + "/light/callback/alarm/" + String.valueOf(projectId);
+        QuartzJobDto task =
+                createTask(QuartzJobDto.METHOD_GET, taskName, "", replaceCron, PROJECT_JOB_GROUP,
+                        PROJECT_TRIGGER_GROUP, "添加项目告警定时任务", callBakc);
+        if (task == null){
+            LOG.error("添加项目告警定时任务异常:{},时间间隔:{}",projectId,replaceCron);
+        }
+        return null;
     }
 
     private boolean removeTask(String taskName, String jobGroup) {

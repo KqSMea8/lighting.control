@@ -105,4 +105,9 @@ public class ProjectServiceImpl implements ProjectService {
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
+    @Override
+    public ReturnInfo<List<Project>> findAllEnableProj() {
+        return ReturnInfo.createReturnSuccessOne(projectDao.selectAll());
+    }
+
 }

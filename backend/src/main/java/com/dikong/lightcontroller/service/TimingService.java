@@ -44,7 +44,7 @@ public interface TimingService {
 
     ReturnInfo delHolidayNode(String time);
 
-    ReturnInfo<TimingView> timingView(String viewTime) throws ParseException;
+    ReturnInfo<List<TimingList>> timingView(String viewTime) throws ParseException;
 
     ReturnInfo<List<BoardList>> boardList();
 

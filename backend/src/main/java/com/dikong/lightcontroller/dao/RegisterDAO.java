@@ -2,6 +2,7 @@ package com.dikong.lightcontroller.dao;
 
 import java.util.List;
 
+import com.dikong.lightcontroller.dto.RegisDeviceDtuName;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -102,4 +103,14 @@ public interface RegisterDAO {
 
     @Delete({"delete from register where device_id=#{deviceId}"})
     int deleteByDeviceId(@Param("deviceId") Long deviceId);
+
+    @Select("<script>"
+            + "select r.id,r.var_name as `register_name`,d.name as `device_name`,dt.device_name as `dtu_name`"
+            + "from register r left join device d on r.device_id=d.id left join dtu dt on  d.dtu_id=dt.id"
+            + "where r.id in "
+            + "<foreach collection=\"alarmIds\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\" >"
+            + "#{item}"
+            + "</foreach>"
+            + "</script>")
+    List<RegisDeviceDtuName> selectNameByid(@Param("registIds")List<Integer> registIds);
 }

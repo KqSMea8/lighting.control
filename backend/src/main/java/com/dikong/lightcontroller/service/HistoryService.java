@@ -1,11 +1,15 @@
 package com.dikong.lightcontroller.service;
 
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.HistoryExportReq;
 import com.dikong.lightcontroller.entity.History;
 import com.dikong.lightcontroller.entity.BaseSysVar;
 import com.dikong.lightcontroller.vo.HistoryList;
 import com.dikong.lightcontroller.vo.HistorySearch;
+import org.springframework.web.servlet.ModelAndView;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -28,4 +32,6 @@ public interface HistoryService {
     ReturnInfo updateHistory(List<History> histories);
 
     ReturnInfo updateHistory(BaseSysVar sysVar);
+
+    ModelAndView exportHistory(HistoryExportReq exportReq) throws IOException;
 }

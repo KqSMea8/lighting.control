@@ -49,6 +49,10 @@ public class TimeOrdinaryNodeAdd {
     @NotNull
     private Byte stopWorkOnHoliday;
 
+    /**
+     * 时间为天黑或天亮时的调整时间
+     */
+    private Integer adjustTime;
 
 
     public Integer[] getWeekList() {
@@ -129,5 +133,21 @@ public class TimeOrdinaryNodeAdd {
 
     public void setProvinceId(Long provinceId) {
         this.provinceId = provinceId;
+    }
+
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
+    }
+
+    public Integer getAdjustTime() {
+        return adjustTime;
+    }
+
+    public void setAdjustTime(Integer adjustTime) {
+        this.adjustTime = adjustTime;
     }
 }

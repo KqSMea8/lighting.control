@@ -1,23 +1,26 @@
 package com.dikong.lightcontroller.controller;
 
-import com.dikong.lightcontroller.vo.HistoryList;
-import com.dikong.lightcontroller.vo.HistorySearch;
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.HistoryExportReq;
 import com.dikong.lightcontroller.entity.History;
 import com.dikong.lightcontroller.service.HistoryService;
+import com.dikong.lightcontroller.vo.HistoryList;
+import com.dikong.lightcontroller.vo.HistorySearch;
 
 import io.swagger.annotations.Api;
-
-import java.util.List;
 
 /**
  * <p>
@@ -45,5 +48,15 @@ public class HistoryController {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return historyService.searchVarHistory(historySearch);
+    }
+
+    /**
+     * 历史数据导出
+     *
+     */
+    @PostMapping(path = "/history/export")
+    public ModelAndView historyExport(@RequestBody HistoryExportReq exportReq,HttpServletResponse response)
+            throws IOException {
+        return historyService.exportHistory(exportReq);
     }
 }

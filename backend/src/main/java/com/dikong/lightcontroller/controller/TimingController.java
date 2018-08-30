@@ -154,7 +154,7 @@ public class TimingController {
      */
     @ApiOperation(value = "时序功能查看")
     @GetMapping(path = "/timing/node/view/{viewTime}")
-    public ReturnInfo<TimingView> view(@PathVariable("viewTime") String viewTime)
+    public ReturnInfo<List<TimingList>> view(@PathVariable("viewTime") String viewTime)
             throws ParseException {
         if (null == viewTime) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
