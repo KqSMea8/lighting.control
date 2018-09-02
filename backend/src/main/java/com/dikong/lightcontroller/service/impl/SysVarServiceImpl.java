@@ -457,8 +457,12 @@ public class SysVarServiceImpl implements SysVarService {
         List<CmdSendDto> cmdSendDtoList = new ArrayList<>();
         if (BaseSysVar.CLOSE_SYS_VALUE.equals(value)) {
             cmdSendDtoList.add(new CmdSendDto(regisId, SwitchEnum.CLOSE.getCode()));
-        } else {
+        } else if (BaseSysVar.OPEN_SYS_VALUE.equals(value)) {
             cmdSendDtoList.add(new CmdSendDto(regisId, SwitchEnum.OPEN.getCode()));
+        }else {
+            cmdService.writeAnalog(regisId,Integer.valueOf(value));
+            int[] result = {1};
+            return result;
         }
         return cmdService.writeSwitch(cmdSendDtoList);
     }

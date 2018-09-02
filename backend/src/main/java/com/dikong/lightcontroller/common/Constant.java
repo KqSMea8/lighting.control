@@ -47,4 +47,8 @@ public interface Constant {
         int NOT_DELETE = 1;
         int DELETED = 2;
     }
+
+    interface RTC {
+        String RESERT_KEY = "RTC_";
+    }
 }

@@ -3,11 +3,17 @@ package com.dikong.lightcontroller.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import com.dikong.lightcontroller.common.Constant;
+import com.dikong.lightcontroller.schedule.RTCSendTask;
+import com.dikong.lightcontroller.utils.RTCUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +82,9 @@ public class DtuServiceImpl implements DtuService {
 
     @Autowired
     private BlockingQueue deviceQueue;
+
+    @Autowired
+    private RTCSendTask rtcSendTask;
 
     private DtuServiceImpl() throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/application.properties");
@@ -222,6 +231,8 @@ public class DtuServiceImpl implements DtuService {
             for (Device device : deviceList) {
                 deviceService.resertCmd(device);
             }
+            //Todo 上线之后加入重发RTC时钟的逻辑
+            this.resertSendRTC(deviceList);
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
@@ -230,5 +241,21 @@ public class DtuServiceImpl implements DtuService {
     public ReturnInfo<List<Dtu>> allDtu() {
         List<Dtu> dtus = dtuDAO.selectAllDtu(Dtu.DEL_NO);
         return ReturnInfo.createReturnSuccessOne(dtus);
+    }
+
+    /**
+     * 重发RTC
+     * @param deviceList
+     */
+    private void resertSendRTC(List<Device> deviceList){
+        String[] registerAddrs = {"40028","40029"};
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        for (Device device : deviceList) {
+            String value = jedis.hget(Constant.RTC.RESERT_KEY, String.valueOf(device.getId()));
+            if (!StringUtils.isEmpty(value)){
+                Long[] deviceRTC = RTCUtils.DeviceRTC();
+                rtcSendTask.send(Arrays.asList(device),registerAddrs,deviceRTC);
+            }
+        }
     }
 }
