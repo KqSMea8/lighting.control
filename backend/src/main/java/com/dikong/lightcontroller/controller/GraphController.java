@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dto.GraphControlEditNodeDto;
 import com.dikong.lightcontroller.dto.TreeNodeDto;
 import com.dikong.lightcontroller.entity.GraphControlEditNode;
 import com.dikong.lightcontroller.entity.GraphControlTreeNode;
@@ -88,8 +90,11 @@ public class GraphController {
     @ApiImplicitParam(required = true, dataType = "Integer", name = "treeNodeId",
             paramType = "path")
     @GetMapping("/edit/node/list/{tree-node-id}")
-    public ReturnInfo<List<GraphControlEditNode>> listGraphEditNodes(
+    public ReturnInfo<List<GraphControlEditNodeDto>> listGraphEditNodes(
             @PathVariable("tree-node-id") Integer treeNodeId) {
+        if (treeNodeId == null || treeNodeId == 0) {
+            return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
+        }
         return graphService.listGraphEditNodes(treeNodeId);
     }
 

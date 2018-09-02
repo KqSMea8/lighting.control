@@ -59,4 +59,13 @@ public interface Constant {
         int NOT_AUTH = 0;
         int HAVE_AUTH = 1;
     }
+    // 组件类型1->底图 2->文字 3->开关量 4->模拟量 5->区域控件 6->曲线图控件
+    interface ASSEMBLY_TYPE {
+        int BACKGROUND = 1;
+        int FONT = 2;
+        int SWITCH = 3;
+        int ANALOG = 4;
+        int AREA = 5;
+        int CURVE = 6;
+    }
 }

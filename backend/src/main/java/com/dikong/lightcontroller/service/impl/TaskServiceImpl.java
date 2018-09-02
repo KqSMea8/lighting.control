@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -62,6 +63,9 @@ public class TaskServiceImpl implements TaskService {
     // 节假日job group
     private static final String DEFAULT_HOLIDAY_JOB_GROUO = "LIGHT_HOLIDAY_JOB";
 
+    // 图控job group
+    private static final String DEFAULT_GRAPH_JOB_GROUP = "GRAPH_CONTROLLER_JOB";
+    private static final String DEFAULT_GRAPH_TRIGGER_GROUP = "GRAPH_CONTROLLER_TRIGGER";
 
     private TaskServiceApi taskServiceApi;
 
@@ -72,6 +76,8 @@ public class TaskServiceImpl implements TaskService {
     // 节假日回调url
     private String holidayCallbackUrl;
 
+    @Value("${schedule.controller.graphCallBackUrl}")
+    private String graphCallBackUrl;
 
     @Autowired
     private TimingDAO timingDAO;
@@ -144,6 +150,7 @@ public class TaskServiceImpl implements TaskService {
 
     /**
      * 更新已经存在定时任务
+     * 
      * @param quartzJobDto
      * @return
      */
@@ -251,5 +258,21 @@ public class TaskServiceImpl implements TaskService {
         boolean delTask = taskServiceApi.delTask(jobKeyGroups);
         LOG.info("删除定时任务结果:{}", delTask);
         return delTask;
+    }
+
+    @Override
+    public ReturnInfo addGraphTask(Integer id) {
+        String taskName = UUID.randomUUID().toString();
+        String callBack = graphCallBackUrl + "/" + id;
+        QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,
+                DEFAULT_GRAPH_JOB_GROUP, DEFAULT_GRAPH_TRIGGER_GROUP, DEFAULT_DESCRIPTION,
+                callBack);
+        return ReturnInfo.createReturnSuccessOne(task);
+    }
+
+    @Override
+    public ReturnInfo removeGraphTask(String taskName) {
+        boolean removeTask = removeTask(taskName, DEFAULT_GRAPH_JOB_GROUP);
+        return ReturnInfo.createReturnSuccessOne(removeTask);
     }
 }

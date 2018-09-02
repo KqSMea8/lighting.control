@@ -12,7 +12,8 @@ import com.dikong.lightcontroller.vo.CommandSend;
  *
  * @author lengrongfu
  * @create 2018年01月29日下午10:05
- * @see </P>
+ * @see
+ *      </P>
  */
 public interface TaskService {
 
@@ -22,11 +23,15 @@ public interface TaskService {
 
     ReturnInfo removeDeviceTask(String taskName);
 
-    ReturnInfo<String> addTimingTask(CommandSend commandSend,String cron);
+    ReturnInfo<String> addTimingTask(CommandSend commandSend, String cron);
 
     ReturnInfo removeTimingTask(String taskName);
 
     ReturnInfo<String> addHolidayTask(String holidayTime);
 
     ReturnInfo removeHolidayTask(String taskName);
+
+    ReturnInfo addGraphTask(Integer id);
+
+    ReturnInfo removeGraphTask(String taskName);
 }

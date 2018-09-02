@@ -6,6 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.vo.CommandSend;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -34,7 +36,7 @@ import io.swagger.annotations.ApiOperation;
  * @see
  *      </P>
  */
-@Api(value = "TaskCallbackController",description = "任务回调管理")
+@Api(value = "TaskCallbackController", description = "任务回调管理")
 @RestController
 @RequestMapping("/light/callback")
 public class TaskCallbackController {
@@ -49,15 +51,15 @@ public class TaskCallbackController {
 
     @Autowired
     private TimingService timingService;
-    
+
     @Autowired
     private BlockingQueue queue;
 
-//    public static final String DEVICE_STATUS_KEY = "device.status.key";
+    // public static final String DEVICE_STATUS_KEY = "device.status.key";
 
     @PostMapping(path = "/command/send")
     public ReturnInfo commandSend(@RequestBody CommandSend commandSend) {
-        LOG.info("时序控制任务回调,回调参数为{}",commandSend);
+        LOG.info("时序控制任务回调,回调参数为{}", commandSend);
         return timingService.callBack(commandSend);
     }
 
@@ -68,15 +70,24 @@ public class TaskCallbackController {
         if (null == deviceId || deviceId == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
-        LOG.info("设置状态查找回调,设备id为{}",deviceId);
+        LOG.info("设置状态查找回调,设备id为{}", deviceId);
         queue.put(deviceId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
     @ApiOperation(value = "节假日回调任务")
     @GetMapping(path = "/holiday/task/{taskName}")
-    public ReturnInfo holidayTask(@PathVariable("taskName")String taskName){
-        LOG.info("节假日回调任务,任务id:{},当前时间是{}",taskName,new Date());
+    public ReturnInfo holidayTask(@PathVariable("taskName") String taskName) {
+        LOG.info("节假日回调任务,任务id:{},当前时间是{}", taskName, new Date());
         return timingService.holidayTask();
+    }
+
+    @ApiOperation(value = "图控任务回调")
+    @ApiImplicitParam(required = true, dataType = "Integer", name = "editNodeId",
+            paramType = "path")
+    @DeleteMapping("/callback/{tree-node-id}")
+    public void callBack(@PathVariable("tree-node-id") Integer editNodeId) {
+        System.out.println("call back success! 图控节点：" + editNodeId);
+        return;
     }
 }
