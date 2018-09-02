@@ -9,6 +9,7 @@ public class LoginReqDto {
     private String password;
     private String verificationCode;
     private String codeToken;
+    private String macAddr;
 
     public String getUsername() {
         return username;
@@ -40,5 +41,13 @@ public class LoginReqDto {
 
     public void setCodeToken(String codeToken) {
         this.codeToken = codeToken;
+    }
+
+    public String getMacAddr() {
+        return macAddr;
+    }
+
+    public void setMacAddr(String macAddr) {
+        this.macAddr = macAddr;
     }
 }

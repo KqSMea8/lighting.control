@@ -21,7 +21,9 @@ public enum CodeEnum {
     NOTHING_DELETE(-14, "删除暂存信息失败,未找到匹配内容"),
     USER_EXIST(-15, "用户已存在"),
     OLD_PWD_ERROR(-16, "旧密码错误"),
-    PWD_FORMAT_ERROR(-17,"密码长度最少6位");
+    PWD_FORMAT_ERROR(-17, "密码长度最少6位"),
+    FILE_EXIST(-18, "文件已存在"),
+    MAC_FORBID_LOGIN(-19, "当前机器禁止登陆");
 
     private int code;
 

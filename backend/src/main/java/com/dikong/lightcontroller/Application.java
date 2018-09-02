@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.dikong.lightcontroller.utils.SpringContextUtil;
 
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
 /**
  * Hello world!
  *
@@ -17,6 +19,7 @@ import com.dikong.lightcontroller.utils.SpringContextUtil;
 @EnableTransactionManagement
 @EnableAsync
 @EnableScheduling
+@EnableSwagger2
 public class Application {
 
     public static void main(String[] args) {

@@ -55,4 +55,8 @@ public interface TimingService {
     ReturnInfo holidayTask();
 
     ReturnInfo callBack(CommandSend commandSend);
+
+    ReturnInfo<Timing> getTiming(Long id);
+
+    ReturnInfo<Boolean> updateTiming(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd,Long id);
 }

@@ -36,9 +36,9 @@ spring:
       enabled: false
   datasource:
       druid:
-        url: jdbc:mysql://123.207.42.34:3306/schedule_job?autoReconnect=true&useUnicode=true&characterEncoding=utf8&serverTimezone=GMT&allowMultiQueries=true
-        username: root
-        password: e@#1fds23@3sdf2$#@34
+        url: jdbc:mysql://127.0.0.1:3306/schedule_job?autoReconnect=true&useUnicode=true&characterEncoding=utf8&serverTimezone=GMT&allowMultiQueries=true
+        username: sosop
+        password: sosop
         driver-class-name: com.mysql.jdbc.Driver
 
 

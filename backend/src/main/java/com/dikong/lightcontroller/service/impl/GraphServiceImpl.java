@@ -11,8 +11,10 @@ import org.springframework.util.CollectionUtils;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dao.GraphControlEditNodeDao;
 import com.dikong.lightcontroller.dao.GraphControlTreeNodeDao;
 import com.dikong.lightcontroller.dto.TreeNodeDto;
+import com.dikong.lightcontroller.entity.GraphControlEditNode;
 import com.dikong.lightcontroller.entity.GraphControlTreeNode;
 import com.dikong.lightcontroller.service.GraphService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
@@ -29,6 +31,9 @@ public class GraphServiceImpl implements GraphService {
 
     @Autowired
     private GraphControlTreeNodeDao treeNodeDao;
+
+    @Autowired
+    private GraphControlEditNodeDao editNodeDao;
 
     @Override
     public ReturnInfo<GraphControlTreeNode> addNewNode(TreeNodeDto treeNode) {
@@ -109,5 +114,37 @@ public class GraphServiceImpl implements GraphService {
         }
         retsult = TreeNodebuild.toTreeNodes(treeNodebuilds, parentId);
         return ReturnInfo.createReturnSuccessOne(retsult);
+    }
+
+    @Override
+    public ReturnInfo<GraphControlEditNode> addGraphEditNode(GraphControlEditNode editNode) {
+        // 组件类型1->底图 2->文字 3->开关量 4->模拟量 5->区域控件 6->曲线图控件
+        editNode.setProjectId(AuthCurrentUser.getCurrentProjectId());
+        editNode.setCreateBy(AuthCurrentUser.getUserId());
+        editNodeDao.insertSelective(editNode);
+        return ReturnInfo.createReturnSuccessOne(editNode);
+    }
+
+    @Override
+    public ReturnInfo<GraphControlEditNode> updateGraphEditNode(GraphControlEditNode editNode) {
+        editNode.setProjectId(AuthCurrentUser.getCurrentProjectId());
+        editNode.setUpdateBy(AuthCurrentUser.getCurrentProjectId());
+        editNodeDao.updateByPrimaryKey(editNode);
+        return ReturnInfo.createReturnSuccessOne(editNode);
+    }
+
+    @Override
+    public ReturnInfo<List<GraphControlEditNode>> listGraphEditNodes(Integer treeNodeId) {
+        Example queryExample = new Example(GraphControlEditNode.class);
+        queryExample.createCriteria().andEqualTo("projectId", AuthCurrentUser.getCurrentProjectId())
+                .andEqualTo("nodeId", treeNodeId);
+        List<GraphControlEditNode> editNodeList = editNodeDao.selectByExample(queryExample);
+        return ReturnInfo.createReturnSuccessOne(editNodeList);
+    }
+
+    @Override
+    public ReturnInfo delGraphEditNode(Integer editNodeId) {
+        editNodeDao.deleteByPrimaryKey(editNodeId);
+        return ReturnInfo.createReturnSuccessOne(null);
     }
 }

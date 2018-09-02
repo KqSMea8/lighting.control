@@ -75,4 +75,16 @@ public interface Constant {
     interface PROJECT {
         String PROJECT_CRONTAB = "project.crontab";
     }
+    // 文件类型 1->图片 2->音频 3->点位文件
+    interface FILE_TYPE {
+        int ALL = 0;
+        int IMG = 1;
+        int AUDIO = 2;
+        int POINT_INFO = 3;
+    }
+
+    interface IMG_AUTH {
+        int NOT_AUTH = 0;
+        int HAVE_AUTH = 1;
+    }
 }

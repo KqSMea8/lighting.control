@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
+
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
@@ -42,10 +46,6 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -96,6 +96,12 @@ public class UserServiceImpl implements UserService {
         String password = MD5Util.getMD5Str(loginReqDto.getPassword());
         if (!userInfo.getPassword().equals(password)) {
             return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
+        }
+        if (!StringUtils.isEmpty(userInfo.getMacAddr())) {
+            if (loginReqDto.getMacAddr() == null
+                    || userInfo.getMacAddr().indexOf(loginReqDto.getMacAddr()) < 0) {
+                return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN);
+            }
         }
         String oldToken =
                 jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
@@ -364,5 +370,24 @@ public class UserServiceImpl implements UserService {
         user.setUpdateBy(AuthCurrentUser.getUserId());
         userDao.updateByPrimaryKeySelective(user);
         return ReturnInfo.createReturnSuccessOne(null);
+    }
+
+    @Override
+    public int checkUserAuth(String token, String reqUri) {
+        LOG.info("token=" + token + " reqUri=" + reqUri);
+        Jedis jedis = jedisPool.getResource();
+        String userInfo = jedis.get(token);
+        if (StringUtils.isEmpty(userInfo)) {
+            return Constant.IMG_AUTH.NOT_AUTH;
+        }
+        LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        if (currentUserInfo.getManagerType() == Constant.USER.SUPER_MANAGER) {
+            return Constant.IMG_AUTH.HAVE_AUTH;
+        }
+        String[] uris = reqUri.split("/");
+        if (currentUserInfo.getCurrentProjectId().equals(Integer.valueOf(uris[0]))) {
+            return Constant.IMG_AUTH.HAVE_AUTH;
+        }
+        return Constant.IMG_AUTH.NOT_AUTH;
     }
 }

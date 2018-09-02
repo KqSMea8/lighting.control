@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -125,5 +126,32 @@ public class UserController {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
         return userService.userProjectList(userId);
+    }
+
+    /**
+     * 主要用户校验图片访问权限 1 ->有权限访问 0->无权限
+     * 
+     * @param request
+     * @return
+     */
+    @GetMapping("/check/user/auth")
+    public int checkUserAuth(HttpServletRequest request) {
+        String token = request.getParameter("token");
+        if (StringUtils.isEmpty(token)) {
+            return Constant.IMG_AUTH.NOT_AUTH;
+        }
+        String reqUri = request.getParameter("uri");
+        if (StringUtils.isEmpty(reqUri)) {
+            return Constant.IMG_AUTH.NOT_AUTH;
+        }
+        int result = Constant.IMG_AUTH.NOT_AUTH;
+        try {
+            result = userService.checkUserAuth(token, reqUri);
+        } catch (Exception e) {
+            LOG.error("图片权限校验失败" + e.toString());
+            e.printStackTrace();
+        }
+        LOG.info("图片校验结果:" + result);
+        return result;
     }
 }
