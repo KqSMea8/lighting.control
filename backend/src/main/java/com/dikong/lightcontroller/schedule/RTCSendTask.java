@@ -1,10 +1,13 @@
 package com.dikong.lightcontroller.schedule;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.dikong.lightcontroller.entity.History;
+import com.dikong.lightcontroller.service.HistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,9 @@ public class RTCSendTask {
 
 	@Autowired
 	private JedisPool jedisPool;
+
+	@Autowired
+	private HistoryService historyService;
 
 
 
@@ -109,6 +115,12 @@ public class RTCSendTask {
 					}
 					//如果都发送成功了，就删除之前存储失败的
 					jedis.hdel(Constant.RTC.RESERT_KEY,String.valueOf(device.getId()));
+					//保存更新记录
+					List<History> histories = new ArrayList<>();
+					histories.add(new History(registers.get(0).getId(),History.REGISTER_TYPE,String.valueOf(deviceRTC[0].intValue())));
+					histories.add(new History(registers.get(1).getId(),History.REGISTER_TYPE,String.valueOf(deviceRTC[1].intValue())));
+					historyService.updateHistory(histories);
+
 				}
 			}
 		}
