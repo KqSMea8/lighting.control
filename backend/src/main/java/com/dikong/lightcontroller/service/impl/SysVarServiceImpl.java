@@ -9,9 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import tk.mybatis.mapper.entity.Example;
 
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
@@ -46,8 +47,6 @@ import com.dikong.lightcontroller.vo.SysVarList;
 import com.dikong.lightcontroller.vo.VarListSearch;
 import com.github.pagehelper.PageHelper;
 
-import tk.mybatis.mapper.entity.Example;
-
 /**
  * <p>
  * Description
@@ -56,8 +55,7 @@ import tk.mybatis.mapper.entity.Example;
  *
  * @author lengrongfu
  * @create 2018年01月26日下午11:03
- * @see
- *      </P>
+ * @see </P>
  */
 @Service
 public class SysVarServiceImpl implements SysVarService {
@@ -130,7 +128,6 @@ public class SysVarServiceImpl implements SysVarService {
     }
 
     @Override
-    @Transactional
     public ReturnInfo updateSysVar(BaseSysVar sysVar) {
         int[] processResult = null;
         int projId = AuthCurrentUser.getCurrentProjectId();
@@ -142,16 +139,18 @@ public class SysVarServiceImpl implements SysVarService {
                 equipmentMonitorService.updateByTiming(sysVar.getVarId(),
                         Integer.valueOf(sysVar.getVarValue()));
             }
-            SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getSysVarType(), projId,
-                    sysVar.getVarId());
+            SysVar var =
+                    sysVarDAO.selectByVarIdAndProjId(sysVar.getSysVarType(), projId,
+                            sysVar.getVarId());
             sysVar.setId(var.getId());
             processSequence(projId, sysVar.getVarValue());
         } else if (BaseSysVar.GROUP.equals(sysVar.getSysVarType())) {
             equipmentMonitorService.updateByGroupId(sysVar.getVarId(),
                     Integer.valueOf(sysVar.getVarValue()));
             processResult = processGroup(sysVar.getVarId(), sysVar.getVarValue());
-            SysVar var = sysVarDAO.selectByVarIdAndProjId(sysVar.getSysVarType(), projId,
-                    sysVar.getVarId());
+            SysVar var =
+                    sysVarDAO.selectByVarIdAndProjId(sysVar.getSysVarType(), projId,
+                            sysVar.getVarId());
             sysVar.setId(var.getId());
             if (processResult != null && processResult[0] > 0) {
                 sysVarDAO.updateSysVar(sysVar.getVarValue(), sysVar.getVarId(), projId);
@@ -266,8 +265,9 @@ public class SysVarServiceImpl implements SysVarService {
                 for (; amount < 7; amount++) {
                     String weekNowDate = TimeWeekUtils.getLastWeek(amount);
                     String yearMonthDay = TimeWeekUtils.getLastYMD(amount);
-                    timingList = timingDAO.selectLastOne(weekNowDate, yearMonthDay, Timing.DEL_NO,
-                            projId);
+                    timingList =
+                            timingDAO.selectLastOne(weekNowDate, yearMonthDay, Timing.DEL_NO,
+                                    projId);
                     if (!CollectionUtils.isEmpty(timingList)) {
                         break;
                     }
@@ -337,8 +337,7 @@ public class SysVarServiceImpl implements SysVarService {
                     // 修改群组值
                     sysVarDAO.updateSysVar(value, item.getRunId(), projId);
                     // 修改监控中的群组
-                    equipmentMonitorService.updateByGroupId(item.getRunId(),
-                            Integer.valueOf(value));
+                    equipmentMonitorService.updateByGroupId(item.getRunId(), Integer.valueOf(value));
                 } else if (Timing.DEVICE_TYPE.equals(item.getRunType())) {
                     equipmentMonitorService.updateByVarId(item.getRunVar(), Integer.valueOf(value));
                 }
@@ -402,8 +401,8 @@ public class SysVarServiceImpl implements SysVarService {
             if (BaseSysVar.CLOSE_SYS_VALUE.equals(value)) {
                 cmdSendDtoList.add(new CmdSendDto(timing.getRunVar(), SwitchEnum.CLOSE.getCode()));
             } else {
-                cmdSendDtoList.add(
-                        new CmdSendDto(timing.getRunVar(), Integer.valueOf(timing.getRunVarlue())));
+                cmdSendDtoList.add(new CmdSendDto(timing.getRunVar(), Integer.valueOf(timing
+                        .getRunVarlue())));
             }
         } else if (Timing.GROUP_TYPE.equals(timing.getRunType())) {
             Long groupId = timing.getRunId();
@@ -413,8 +412,8 @@ public class SysVarServiceImpl implements SysVarService {
                     if (BaseSysVar.CLOSE_SYS_VALUE.equals(value)) {
                         cmdSendDtoList.add(new CmdSendDto(item, SwitchEnum.CLOSE.getCode()));
                     } else {
-                        cmdSendDtoList
-                                .add(new CmdSendDto(item, Integer.valueOf(timing.getRunVarlue())));
+                        cmdSendDtoList.add(new CmdSendDto(item, Integer.valueOf(timing
+                                .getRunVarlue())));
                     }
                 });
             }
@@ -459,8 +458,8 @@ public class SysVarServiceImpl implements SysVarService {
             cmdSendDtoList.add(new CmdSendDto(regisId, SwitchEnum.CLOSE.getCode()));
         } else if (BaseSysVar.OPEN_SYS_VALUE.equals(value)) {
             cmdSendDtoList.add(new CmdSendDto(regisId, SwitchEnum.OPEN.getCode()));
-        }else {
-            cmdService.writeAnalog(regisId,Integer.valueOf(value));
+        } else {
+            cmdService.writeAnalog(regisId, Integer.valueOf(value));
             int[] result = {1};
             return result;
         }
