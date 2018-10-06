@@ -10,6 +10,7 @@ public class LoginReqDto {
     private String verificationCode;
     private String codeToken;
     private String macAddr;
+    private String smsCode;
 
     public String getUsername() {
         return username;
@@ -49,5 +50,13 @@ public class LoginReqDto {
 
     public void setMacAddr(String macAddr) {
         this.macAddr = macAddr;
+    }
+
+    public String getSmsCode() {
+        return smsCode;
+    }
+
+    public void setSmsCode(String smsCode) {
+        this.smsCode = smsCode;
     }
 }

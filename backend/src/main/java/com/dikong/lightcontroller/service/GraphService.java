@@ -2,9 +2,12 @@ package com.dikong.lightcontroller.service;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.RequestBody;
+
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.GraphControlEditNodeDto;
 import com.dikong.lightcontroller.dto.TreeNodeDto;
+import com.dikong.lightcontroller.entity.GraphControlCurve;
 import com.dikong.lightcontroller.entity.GraphControlEditNode;
 import com.dikong.lightcontroller.entity.GraphControlTreeNode;
 import com.dikong.lightcontroller.utils.TreeNodebuild;
@@ -36,5 +39,13 @@ public interface GraphService {
     public ReturnInfo changeValue(Integer editNodeId, String value);
 
     public ReturnInfo refreshValue(Integer editNodeId);
+
+    public ReturnInfo callBack(Integer projectId);
+
+    public ReturnInfo listCurve(Integer editNodeId);
+
+    public ReturnInfo addCurve(@RequestBody GraphControlCurve graphControlCurve);
+
+    public ReturnInfo delBatchCurve(@RequestBody List<Integer> curveId);
 
 }

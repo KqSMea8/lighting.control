@@ -7,6 +7,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -29,6 +31,8 @@ import redis.clients.jedis.JedisPool;
 
 public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
 
+    private static final Logger LOG = LoggerFactory.getLogger(LoginHandleInterceptor.class);
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
             Object handler) throws Exception {
@@ -44,7 +48,14 @@ public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
             response(response, CodeEnum.NO_LOGIN, "");
             return false;
         }
-        LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        LoginRes currentUserInfo = null;
+        try {
+            currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
+        } catch (Exception e) {
+            LOG.info("登陆用户信息解析错误！" + userInfo);
+            response(response, CodeEnum.NO_LOGIN, "");
+            return false;
+        }
         AuthCurrentUser.set(currentUserInfo);
 
         jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(currentUserInfo));

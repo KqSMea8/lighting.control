@@ -6,7 +6,6 @@ import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.service.DeviceService;
+import com.dikong.lightcontroller.service.GraphService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.vo.CommandSend;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -55,6 +54,9 @@ public class TaskCallbackController {
     @Autowired
     private BlockingQueue queue;
 
+    @Autowired
+    private GraphService graphService;
+
     // public static final String DEVICE_STATUS_KEY = "device.status.key";
 
     @PostMapping(path = "/command/send")
@@ -82,12 +84,9 @@ public class TaskCallbackController {
         return timingService.holidayTask();
     }
 
-    @ApiOperation(value = "图控任务回调")
-    @ApiImplicitParam(required = true, dataType = "Integer", name = "editNodeId",
-            paramType = "path")
-    @DeleteMapping("/callback/{tree-node-id}")
-    public void callBack(@PathVariable("tree-node-id") Integer editNodeId) {
-        System.out.println("call back success! 图控节点：" + editNodeId);
-        return;
+    @GetMapping("/callback/graph/{project-id}")
+    public ReturnInfo callBack(@PathVariable("project-id") Integer projectId) {
+        System.out.println("call back success! 图控节点：" + projectId);
+        return graphService.callBack(projectId);
     }
 }

@@ -18,6 +18,11 @@ public class Project {
     private String projectName;
 
     private Integer projectStatus;
+    // 项目背景图文件id
+    private Integer bgFileId;
+    // 刷新间隔(图控)分钟
+    private Integer refreshInterval;
+    private String taskName;
     /**
      * 1->启用，2->禁用
      */
@@ -43,12 +48,36 @@ public class Project {
         this.projectName = projectName;
     }
 
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
+    }
+
     public Integer getProjectStatus() {
         return projectStatus;
     }
 
     public void setProjectStatus(Integer projectStatus) {
         this.projectStatus = projectStatus;
+    }
+
+    public Integer getBgFileId() {
+        return bgFileId;
+    }
+
+    public void setBgFileId(Integer bgFileId) {
+        this.bgFileId = bgFileId;
+    }
+
+    public Integer getRefreshInterval() {
+        return refreshInterval;
+    }
+
+    public void setRefreshInterval(Integer refreshInterval) {
+        this.refreshInterval = refreshInterval;
     }
 
     public Integer getIsDelete() {

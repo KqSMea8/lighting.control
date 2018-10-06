@@ -261,7 +261,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public ReturnInfo addGraphTask(Integer id) {
+    public ReturnInfo addGraphTask(Integer id, String cron) {
         String taskName = UUID.randomUUID().toString();
         String callBack = graphCallBackUrl + "/" + id;
         QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,

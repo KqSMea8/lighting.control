@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,15 +18,19 @@ import org.springframework.util.StringUtils;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
+import com.dikong.lightcontroller.dao.GraphControlCurveDao;
 import com.dikong.lightcontroller.dao.GraphControlEditNodeDao;
 import com.dikong.lightcontroller.dao.GraphControlTreeNodeDao;
+import com.dikong.lightcontroller.dao.ProjectDao;
 import com.dikong.lightcontroller.dto.CmdRes;
 import com.dikong.lightcontroller.dto.GraphControlEditNodeDto;
 import com.dikong.lightcontroller.dto.QuartzJobDto;
 import com.dikong.lightcontroller.dto.TreeNodeDto;
 import com.dikong.lightcontroller.entity.BaseSysVar;
+import com.dikong.lightcontroller.entity.GraphControlCurve;
 import com.dikong.lightcontroller.entity.GraphControlEditNode;
 import com.dikong.lightcontroller.entity.GraphControlTreeNode;
+import com.dikong.lightcontroller.entity.Project;
 import com.dikong.lightcontroller.entity.Register;
 import com.dikong.lightcontroller.service.CmdService;
 import com.dikong.lightcontroller.service.GraphService;
@@ -42,6 +48,8 @@ import tk.mybatis.mapper.entity.Example;
 @Service
 public class GraphServiceImpl implements GraphService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GraphServiceImpl.class);
+
     @Autowired
     private GraphControlTreeNodeDao treeNodeDao;
 
@@ -56,6 +64,12 @@ public class GraphServiceImpl implements GraphService {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private ProjectDao projectDao;
+
+    @Autowired
+    private GraphControlCurveDao curveDao;
 
     @Override
     public ReturnInfo<GraphControlTreeNode> addNewNode(TreeNodeDto treeNode) {
@@ -145,16 +159,24 @@ public class GraphServiceImpl implements GraphService {
         editNode.setProjectId(AuthCurrentUser.getCurrentProjectId());
         editNode.setCreateBy(AuthCurrentUser.getUserId());
         editNodeDao.insertSelective(editNode);
-        // TODO 如果添加的是曲线图控件，需要增加一个定时任务
-        String cronStr = "0 0/" + 1 + " * * * ? ";
-        ReturnInfo returnInfo = taskService.addGraphTask(editNode.getId());
+
+        Project project = projectDao.selectByPrimaryKey(AuthCurrentUser.getCurrentProjectId());
+        if (StringUtils.isEmpty(project.getTaskName())) {
+            return ReturnInfo.createReturnSuccessOne(editNode);
+        }
+        // 如果添加的是曲线图控件，需要增加一个定时任务
+        // 根据项目配置的间隔时间，配置定时间隔时间
+        String cronStr = "0 0/" + project.getRefreshInterval() + " * * * ? ";
+        ReturnInfo returnInfo = taskService.addGraphTask(editNode.getProjectId(), cronStr);
         if (null != returnInfo.getData()) {
-            // Device device = new Device();
-            // device.setId(deviceAdd.getId());
             QuartzJobDto quartzJobDto = (QuartzJobDto) returnInfo.getData();
-            // device.setTaskName(quartzJobDto.getJobDO().getName());
-            // deviceDAO.updateByPrimaryKeySelective(device);
-            System.out.println("job name=" + quartzJobDto.getJobDO().getName());
+            project.setTaskName(quartzJobDto.getJobDO().getName());
+            projectDao.updateByPrimaryKey(project);
+            LOG.info("定时任务添加成功：项目id:" + project.getProjectId() + " job name="
+                    + quartzJobDto.getJobDO().getName());
+        } else {
+            return ReturnInfo.create(CodeEnum.SERVER_ERROR.getCode(),
+                    CodeEnum.SERVER_ERROR + ":定时任务创建失败，请稍后重试！");
         }
         return ReturnInfo.createReturnSuccessOne(editNode);
     }
@@ -188,7 +210,7 @@ public class GraphServiceImpl implements GraphService {
             }
             if (result.isSuccess()) {
                 editNodeDto.setCurrentValue(new BigDecimal(result.getData()));
-            } else {// TODO 如果查询失败，返回默认值
+            } else {// 如果查询失败，返回默认值
                 editNodeDto.setCurrentValue(new BigDecimal(editNodeDto.getVarValue()));
             }
         }
@@ -196,7 +218,14 @@ public class GraphServiceImpl implements GraphService {
     }
 
     @Override
+    @Transactional
     public ReturnInfo delGraphEditNode(Integer editNodeId) {
+        GraphControlEditNode editNode = editNodeDao.selectByPrimaryKey(editNodeId);
+        if (editNode.getAssemblyType().equals(Constant.ASSEMBLY_TYPE.CURVE)) {
+            Example curveExample = new Example(GraphControlCurve.class);
+            curveExample.createCriteria().andEqualTo("editNodeId", editNodeId);
+            curveDao.deleteByExample(curveExample);
+        }
         editNodeDao.deleteByPrimaryKey(editNodeId);
         return ReturnInfo.createReturnSuccessOne(null);
     }
@@ -259,6 +288,44 @@ public class GraphServiceImpl implements GraphService {
         Example queryExample = new Example(GraphControlEditNode.class);
         queryExample.createCriteria().andEqualTo("", editNodeId);
         return null;
+    }
+
+    @Override
+    public ReturnInfo callBack(Integer projectId) {
+        // 根据项目id查询
+        List<Integer> varIds = curveDao.selectVarByPrjId(projectId);
+        if (CollectionUtils.isEmpty(varIds)) {
+            return ReturnInfo.createReturnSuccessOne(null);
+        }
+        // TODO
+        return null;
+    }
+
+    @Override
+    public ReturnInfo listCurve(Integer editNodeId) {
+        Example example = new Example(GraphControlCurve.class);
+        example.createCriteria().andEqualTo("editNodeId", editNodeId);
+        List<GraphControlCurve> controlCurves = curveDao.selectByExample(example);
+        if (CollectionUtils.isEmpty(controlCurves)) {
+            return ReturnInfo.createReturnSuccessOne(null);
+        }
+        return ReturnInfo.createReturnSucces(controlCurves);
+    }
+
+    @Override
+    public ReturnInfo addCurve(GraphControlCurve graphControlCurve) {
+        graphControlCurve.setProjectId(AuthCurrentUser.getCurrentProjectId());
+        graphControlCurve.setCreateBy(AuthCurrentUser.getUserId());
+        curveDao.insert(graphControlCurve);
+        return ReturnInfo.createReturnSuccessOne(graphControlCurve);
+    }
+
+    @Override
+    public ReturnInfo delBatchCurve(List<Integer> curveId) {
+        Example example = new Example(GraphControlCurve.class);
+        example.createCriteria().andIn("id", curveId);
+        curveDao.deleteByExample(example);
+        return ReturnInfo.createReturnSuccessOne(null);
     }
 }
 

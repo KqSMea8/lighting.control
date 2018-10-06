@@ -13,10 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import tk.mybatis.mapper.entity.Example;
-
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
@@ -46,6 +42,10 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.MD5Util;
 import com.github.pagehelper.PageHelper;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
     private ResourceDao resourceDao;
 
     @Override
-    public ReturnInfo login(LoginReqDto loginReqDto) {
+    public ReturnInfo login(LoginReqDto loginReqDto, String token) {
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
         LoginRes loginRes = null;
         Example userExample = new Example(User.class);
@@ -97,11 +97,36 @@ public class UserServiceImpl implements UserService {
         if (!userInfo.getPassword().equals(password)) {
             return ReturnInfo.create(CodeEnum.LOGIN_FAIL);
         }
+
+        // 校验当前mac地址是否可以登陆
         if (!StringUtils.isEmpty(userInfo.getMacAddr())) {
             if (loginReqDto.getMacAddr() == null
                     || userInfo.getMacAddr().indexOf(loginReqDto.getMacAddr()) < 0) {
-                return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN);
+                return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN, token);
             }
+        }
+        boolean smsFlag = false;
+        if (!StringUtils.isEmpty(token)) {// 校验token合法性
+            String smsCode = jedis.get(token);
+            if (smsCode != null) {
+                if (smsCode.equals(loginReqDto.getSmsCode())) {
+                    // 返回信息给前端
+                    jedis.del(token);
+                    smsFlag = true;
+                } else {
+                    // 返回信息给前端
+                    return ReturnInfo.create(CodeEnum.SMS_CODE_ERROR);
+                }
+            }
+        }
+        if (!smsFlag) {
+            token = UUID.randomUUID().toString();
+        }
+        // 校验是否需要短信验证码登陆
+        if (!smsFlag && !StringUtils.isEmpty(userInfo.getPhoneNumber())) {// 手机号不为空表示需要短信验证码
+            jedis.setex(token, 60, "1234");
+            // TODO 发送短信
+            return ReturnInfo.create(CodeEnum.INPUT_SMS_CODE, token);
         }
         String oldToken =
                 jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
@@ -109,7 +134,6 @@ public class UserServiceImpl implements UserService {
             jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
             jedis.del(oldToken);
         }
-        String token = UUID.randomUUID().toString();
         // 角色信息
         List<Integer> roleIds = userRoleDao.roleIds(userInfo.getUserId());
         if (CollectionUtils.isEmpty(roleIds)) {

@@ -3,6 +3,7 @@ package com.dikong.lightcontroller.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dto.GraphControlEditNodeDto;
 import com.dikong.lightcontroller.dto.TreeNodeDto;
+import com.dikong.lightcontroller.entity.GraphControlCurve;
 import com.dikong.lightcontroller.entity.GraphControlEditNode;
 import com.dikong.lightcontroller.entity.GraphControlTreeNode;
 import com.dikong.lightcontroller.service.GraphService;
@@ -104,5 +106,30 @@ public class GraphController {
     @DeleteMapping("/edit/node/del/{tree-node-id}")
     public ReturnInfo delGraphEditNode(@PathVariable("tree-node-id") Integer editNodeId) {
         return graphService.delGraphEditNode(editNodeId);
+    }
+
+    @ApiOperation(value = "曲线节点关联的变量列表")
+    @ApiImplicitParam(required = true, dataType = "Integer", name = "editNodeId",
+            paramType = "path")
+    @GetMapping("/edit/node/add/curve/{edit-node-id}")
+    public ReturnInfo listCurve(@PathVariable("edit-node-id") Integer editNodeId) {
+        return graphService.listCurve(editNodeId);
+    }
+
+    @ApiOperation(value = "增加曲线节点关联的变量")
+    @ApiImplicitParam(required = true, dataType = "GraphControlCurve", name = "graphControlCurve")
+    @PostMapping("/edit/node/add/curve")
+    public ReturnInfo addCurve(@RequestBody GraphControlCurve graphControlCurve) {
+        return graphService.addCurve(graphControlCurve);
+    }
+
+    @ApiOperation(value = "批量删除曲线节点关联的变量")
+    @ApiImplicitParam(required = true, dataType = "GraphControlCurve", name = "graphControlCurve")
+    @PostMapping("/edit/node/add/curve")
+    public ReturnInfo delBatchCurve(@RequestBody List<Integer> curveIds) {
+        if (CollectionUtils.isEmpty(curveIds)) {
+            return ReturnInfo.create(CodeEnum.NOT_CONTENT);
+        }
+        return graphService.delBatchCurve(curveIds);
     }
 }

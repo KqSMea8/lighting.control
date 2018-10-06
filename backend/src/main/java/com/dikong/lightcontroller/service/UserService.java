@@ -15,7 +15,7 @@ import com.dikong.lightcontroller.entity.UserProject;
  */
 public interface UserService {
 
-    public ReturnInfo login(LoginReqDto loginReqDto);
+    public ReturnInfo login(LoginReqDto loginReqDto, String token);
 
     public ReturnInfo loginOut(String token);
 

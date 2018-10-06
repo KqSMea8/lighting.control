@@ -23,7 +23,9 @@ public enum CodeEnum {
     OLD_PWD_ERROR(-16, "旧密码错误"),
     PWD_FORMAT_ERROR(-17, "密码长度最少6位"),
     FILE_EXIST(-18, "文件已存在"),
-    MAC_FORBID_LOGIN(-19, "当前机器禁止登陆");
+    MAC_FORBID_LOGIN(-19, "当前机器禁止登陆"),
+    INPUT_SMS_CODE(-20, "请输入短信验证码"),
+    SMS_CODE_ERROR(-21, "短信验证码错误");
 
     private int code;
 
