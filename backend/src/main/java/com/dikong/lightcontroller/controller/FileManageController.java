@@ -1,9 +1,5 @@
 package com.dikong.lightcontroller.controller;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.entity.FileManage;
 import com.dikong.lightcontroller.service.FileManageService;
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * @author huangwenjun
@@ -54,7 +54,7 @@ public class FileManageController {
     }
 
     @GetMapping("/one/{id}")
-    @ApiOperation("文件列表")
+    @ApiOperation("根据id获取单个文件")
     @ApiImplicitParam(name = "id", value = "文件id", required = true, dataType = "Integer",
             paramType = "path")
     public void fileInfo(HttpServletResponse response, @PathVariable("id") Integer fileId)

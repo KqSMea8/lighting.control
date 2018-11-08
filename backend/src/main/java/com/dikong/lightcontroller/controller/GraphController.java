@@ -125,7 +125,7 @@ public class GraphController {
 
     @ApiOperation(value = "批量删除曲线节点关联的变量")
     @ApiImplicitParam(required = true, dataType = "GraphControlCurve", name = "graphControlCurve")
-    @PostMapping("/edit/node/add/curve")
+    @PostMapping("/edit/node/del/curve")
     public ReturnInfo delBatchCurve(@RequestBody List<Integer> curveIds) {
         if (CollectionUtils.isEmpty(curveIds)) {
             return ReturnInfo.create(CodeEnum.NOT_CONTENT);

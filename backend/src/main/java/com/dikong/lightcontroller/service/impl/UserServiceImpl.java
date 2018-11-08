@@ -1,6 +1,7 @@
 package com.dikong.lightcontroller.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,10 +101,15 @@ public class UserServiceImpl implements UserService {
 
         // 校验当前mac地址是否可以登陆
         if (!StringUtils.isEmpty(userInfo.getMacAddr())) {
-            if (loginReqDto.getMacAddr() == null
-                    || userInfo.getMacAddr().indexOf(loginReqDto.getMacAddr()) < 0) {
+            if (loginReqDto.getMacAddr() == null) {
                 return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN, token);
             }
+            for (String tempMac : loginReqDto.getMacAddr().split(",")) {
+                if (userInfo.getMacAddr().indexOf(tempMac) > 0) {
+                    break;
+                }
+            }
+            return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN, token);
         }
         boolean smsFlag = false;
         if (!StringUtils.isEmpty(token)) {// 校验token合法性
@@ -124,9 +130,12 @@ public class UserServiceImpl implements UserService {
         }
         // 校验是否需要短信验证码登陆
         if (!smsFlag && !StringUtils.isEmpty(userInfo.getPhoneNumber())) {// 手机号不为空表示需要短信验证码
+            Map<String, Object> result = new HashMap<>();
+            result.put("token", token);
+            result.put("isSetSms", true);
             jedis.setex(token, 60, "1234");
             // TODO 发送短信
-            return ReturnInfo.create(CodeEnum.INPUT_SMS_CODE, token);
+            return ReturnInfo.createReturnSuccessOne(result);
         }
         String oldToken =
                 jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
