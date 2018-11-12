@@ -9,6 +9,7 @@ public interface Constant {
     interface LOGIN {
         String ONLINE_USERS_KEY = "online.users.key";
         String TOKEN = "token";
+        String SMS_CODE = "sms-code-";
     }
 
     interface TIME {

@@ -44,7 +44,14 @@ public class UserController {
             return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         String token = request.getHeader(Constant.LOGIN.TOKEN);
-        return userService.login(loginReqDto, token);
+        return userService.login(loginReqDto);
+    }
+
+    @PostMapping("/login/sms/{sms-code}")
+    public ReturnInfo smsLogin(HttpServletRequest request,
+            @PathVariable("sms-code") String smsCode) {
+        System.out.println("smsCode:" + smsCode);
+        return userService.smsLogin(request.getHeader("token"), smsCode);
     }
 
     @RequestMapping("/login-out")

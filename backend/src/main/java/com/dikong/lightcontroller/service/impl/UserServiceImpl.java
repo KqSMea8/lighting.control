@@ -84,9 +84,9 @@ public class UserServiceImpl implements UserService {
     private ResourceDao resourceDao;
 
     @Override
-    public ReturnInfo login(LoginReqDto loginReqDto, String token) {
+    public ReturnInfo login(LoginReqDto loginReqDto) {
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
-        LoginRes loginRes = null;
+        LoginRes loginRes = new LoginRes();
         Example userExample = new Example(User.class);
         userExample.createCriteria().andEqualTo("userName", loginReqDto.getUsername());
         List<User> userEntities = userDao.selectByExample(userExample);
@@ -102,41 +102,65 @@ public class UserServiceImpl implements UserService {
         // 校验当前mac地址是否可以登陆
         if (!StringUtils.isEmpty(userInfo.getMacAddr())) {
             if (loginReqDto.getMacAddr() == null) {
-                return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN, token);
+                return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN);
             }
             for (String tempMac : loginReqDto.getMacAddr().split(",")) {
                 if (userInfo.getMacAddr().indexOf(tempMac) > 0) {
                     break;
                 }
             }
-            return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN, token);
+            return ReturnInfo.create(CodeEnum.MAC_FORBID_LOGIN);
+        }
+        // 角色信息
+        List<Integer> roleIds = userRoleDao.roleIds(userInfo.getUserId());
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return ReturnInfo.create(CodeEnum.NOCOMPETENCE);
         }
         boolean smsFlag = false;
+
+        String token = UUID.randomUUID().toString();
+        // 校验是否需要短信验证码登陆
+        if (!smsFlag && !StringUtils.isEmpty(userInfo.getPhoneNumber())) {// 手机号不为空表示需要短信验证码
+            Map<String, Object> result = new HashMap<>();
+            result.put("token", token);
+            result.put("isSetSms", true);
+            jedis.setex(Constant.LOGIN.SMS_CODE + token, 60, "1234");
+            loginRes.setUserInfo(userInfo);
+            jedis.setex(token, Constant.TIME.MINUTE * 5, JSON.toJSONString(loginRes));
+            // TODO 发送短信
+            return ReturnInfo.createReturnSuccessOne(result);
+        }
+        loginRes = getUserInfo(userInfo, token);
+        return ReturnInfo.createReturnSuccessOne(loginRes);
+    }
+
+    @Override
+    public ReturnInfo smsLogin(String token, String smsCode) {
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
         if (!StringUtils.isEmpty(token)) {// 校验token合法性
-            String smsCode = jedis.get(token);
+            String oldSmsCode = jedis.get(Constant.LOGIN.SMS_CODE + token);
+            if (StringUtils.isEmpty(oldSmsCode)) {
+                return ReturnInfo.create(CodeEnum.NO_LOGIN);
+            }
+            String userInfo = jedis.get(token);
+            LoginRes currentUserInfo = JSON.parseObject(userInfo, LoginRes.class);
             if (smsCode != null) {
-                if (smsCode.equals(loginReqDto.getSmsCode())) {
+                if (smsCode.equals(oldSmsCode)) {
                     // 返回信息给前端
                     jedis.del(token);
-                    smsFlag = true;
+                    LoginRes result = getUserInfo(currentUserInfo.getUserInfo(), token);
+                    return ReturnInfo.createReturnSuccessOne(result);
                 } else {
                     // 返回信息给前端
                     return ReturnInfo.create(CodeEnum.SMS_CODE_ERROR);
                 }
             }
         }
-        if (!smsFlag) {
-            token = UUID.randomUUID().toString();
-        }
-        // 校验是否需要短信验证码登陆
-        if (!smsFlag && !StringUtils.isEmpty(userInfo.getPhoneNumber())) {// 手机号不为空表示需要短信验证码
-            Map<String, Object> result = new HashMap<>();
-            result.put("token", token);
-            result.put("isSetSms", true);
-            jedis.setex(token, 60, "1234");
-            // TODO 发送短信
-            return ReturnInfo.createReturnSuccessOne(result);
-        }
+        return ReturnInfo.create(CodeEnum.NO_LOGIN);
+    }
+
+    private LoginRes getUserInfo(User userInfo, String token) {
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
         String oldToken =
                 jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
         if (!StringUtils.isEmpty(oldToken)) {
@@ -145,9 +169,6 @@ public class UserServiceImpl implements UserService {
         }
         // 角色信息
         List<Integer> roleIds = userRoleDao.roleIds(userInfo.getUserId());
-        if (CollectionUtils.isEmpty(roleIds)) {
-            return ReturnInfo.create(CodeEnum.NOCOMPETENCE);
-        }
         List<Role> roles = roleDao.roleList(roleIds);
         int managerType = Constant.USER.PROJECT_MANAGER_CONTROL;
         for (Role role : roles) {
@@ -171,8 +192,6 @@ public class UserServiceImpl implements UserService {
             resources = resourceDao.resourceList(menuIds);
         }
         userInfo.setPassword("");
-        loginRes = new LoginRes(token, userInfo, menus, resources);
-        loginRes.setManagerType(managerType);
         LoginRes loginUserInfo = new LoginRes(token, userInfo, menus, resources);
         loginUserInfo.setRoles(roles);
         loginUserInfo.setCurrentProjectId(0);
@@ -182,8 +201,9 @@ public class UserServiceImpl implements UserService {
                 String.valueOf(userInfo.getUserId()));
         jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()), token);
         LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
-        return ReturnInfo.createReturnSuccessOne(loginRes);
+        return loginUserInfo;
     }
+
 
     /*
      * (non-Javadoc)

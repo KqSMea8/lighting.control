@@ -36,6 +36,7 @@ public class LoginHandleInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
             Object handler) throws Exception {
+        LOG.info("请求地址！" + request.getRequestURI());
         String token = request.getHeader(Constant.LOGIN.TOKEN);
         if (StringUtils.isEmpty(token)) {
             response(response, CodeEnum.NO_LOGIN, "");
