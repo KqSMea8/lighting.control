@@ -17,6 +17,8 @@ public interface UserService {
 
     public ReturnInfo login(LoginReqDto loginReqDto);
 
+    public ReturnInfo smsLogin(String token, String smsCode);
+
     public ReturnInfo loginOut(String token);
 
     public ReturnInfo userList(UserListReq userListReq);

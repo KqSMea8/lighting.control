@@ -14,10 +14,11 @@ public class GraphControlEditNode {
     @GeneratedValue(generator = "JDBC")
     private Integer id;
     private Integer projectId;
-    private Integer nodeId;
+    private Integer treeNodeId;
     // 组件类型1->底图 2->文字 3->开关量 4->模拟量 5->区域控件 6->曲线图控件
     private Integer assemblyType;
     private String assemblyContent;
+    private Integer targetType;
     private Integer targetId;
 
     private Date createTime;
@@ -41,12 +42,12 @@ public class GraphControlEditNode {
         this.projectId = projectId;
     }
 
-    public Integer getNodeId() {
-        return nodeId;
+    public Integer getTreeNodeId() {
+        return treeNodeId;
     }
 
-    public void setNodeId(Integer nodeId) {
-        this.nodeId = nodeId;
+    public void setTreeNodeId(Integer treeNodeId) {
+        this.treeNodeId = treeNodeId;
     }
 
     public Integer getAssemblyType() {
@@ -63,6 +64,14 @@ public class GraphControlEditNode {
 
     public void setAssemblyContent(String assemblyContent) {
         this.assemblyContent = assemblyContent;
+    }
+
+    public Integer getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(Integer targetType) {
+        this.targetType = targetType;
     }
 
     public Integer getTargetId() {

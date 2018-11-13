@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.service.DeviceService;
+import com.dikong.lightcontroller.service.GraphService;
 import com.dikong.lightcontroller.service.SysVarService;
 import com.dikong.lightcontroller.service.TimingService;
 import com.dikong.lightcontroller.vo.CommandSend;
@@ -35,7 +36,7 @@ import io.swagger.annotations.ApiOperation;
  * @see
  *      </P>
  */
-@Api(value = "TaskCallbackController",description = "任务回调管理")
+@Api(value = "TaskCallbackController", description = "任务回调管理")
 @RestController
 @RequestMapping("/light/callback")
 public class TaskCallbackController {
@@ -50,17 +51,20 @@ public class TaskCallbackController {
 
     @Autowired
     private TimingService timingService;
-    
+
     @Autowired
     private BlockingQueue queue;
 
     @Autowired AlarmSettingService alarmSettingService;
 
-//    public static final String DEVICE_STATUS_KEY = "device.status.key";
+    @Autowired
+    private GraphService graphService;
+
+    // public static final String DEVICE_STATUS_KEY = "device.status.key";
 
     @PostMapping(path = "/command/send")
     public ReturnInfo commandSend(@RequestBody CommandSend commandSend) {
-        LOG.info("时序控制任务回调,回调参数为{}",commandSend);
+        LOG.info("时序控制任务回调,回调参数为{}", commandSend);
         return timingService.callBack(commandSend);
     }
 
@@ -71,24 +75,29 @@ public class TaskCallbackController {
         if (null == deviceId || deviceId == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
-        LOG.info("设置状态查找回调,设备id为{}",deviceId);
+        LOG.info("设置状态查找回调,设备id为{}", deviceId);
         queue.put(deviceId);
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
     @ApiOperation(value = "节假日回调任务")
     @GetMapping(path = "/holiday/task/{taskName}")
-    public ReturnInfo holidayTask(@PathVariable("taskName")String taskName){
-        LOG.info("节假日回调任务,任务id:{},当前时间是{}",taskName,new Date());
+    public ReturnInfo holidayTask(@PathVariable("taskName") String taskName) {
+        LOG.info("节假日回调任务,任务id:{},当前时间是{}", taskName, new Date());
         return timingService.holidayTask();
     }
 
     @ApiOperation(value = "项目告警回调任务")
     @GetMapping(path = "/alarm/{projectId}")
-    public ReturnInfo alarm(@PathVariable("projectId")Integer projectId){
-        if (projectId == 0){
+    public ReturnInfo alarm(@PathVariable("projectId")Integer projectId) {
+        if (projectId == 0) {
             return ReturnInfo.create(true);
         }
         return alarmSettingService.triggerCallback(projectId);
+    }
+    @GetMapping("/callback/graph/{project-id}")
+    public ReturnInfo callBack(@PathVariable("project-id") Integer projectId) {
+        System.out.println("call back success! 图控节点：" + projectId);
+        return graphService.callBack(projectId);
     }
 }

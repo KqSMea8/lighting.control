@@ -34,8 +34,10 @@ public class User {
      * 1->未删除 2->删除
      */
     private Integer isDelete;
-
+    // 允许登陆的mac地址
     private String macAddr;
+    // 短信验证码手机号,默认为空
+    private String phoneNumber;
 
     private Integer createBy;
 
@@ -89,6 +91,14 @@ public class User {
         this.macAddr = macAddr;
     }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
     public Integer getCreateBy() {
         return createBy;
     }
@@ -107,8 +117,9 @@ public class User {
 
     @Override
     public String toString() {
-        return "User [id=" + userId + ", userName=" + userName + ", password=" + password
-                + ", userStatus=" + userStatus + ", isDelete=" + isDelete + ", createBy=" + createBy
-                + ", updateBy=" + updateBy + "]";
+        return "User [userId=" + userId + ", userName=" + userName + ", password=" + password
+                + ", userStatus=" + userStatus + ", isDelete=" + isDelete + ", macAddr=" + macAddr
+                + ", phoneNumber=" + phoneNumber + ", createBy=" + createBy + ", updateBy="
+                + updateBy + "]";
     }
 }

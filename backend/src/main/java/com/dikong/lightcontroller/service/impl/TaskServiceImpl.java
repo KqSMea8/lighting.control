@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -66,6 +67,9 @@ public class TaskServiceImpl implements TaskService {
     //项目设置
     private static final String PROJECT_JOB_GROUP = "PROJECT_JOB_GROUP";
     private static final String PROJECT_TRIGGER_GROUP = "PROJECT_TRIGGER_GROUP";
+    // 图控job group
+    private static final String DEFAULT_GRAPH_JOB_GROUP = "GRAPH_CONTROLLER_JOB";
+    private static final String DEFAULT_GRAPH_TRIGGER_GROUP = "GRAPH_CONTROLLER_TRIGGER";
 
     private TaskServiceApi taskServiceApi;
 
@@ -78,6 +82,8 @@ public class TaskServiceImpl implements TaskService {
     //回调host
     private String callBackHostAndPort;
 
+    @Value("${schedule.controller.graphCallBackUrl}")
+    private String graphCallBackUrl;
 
     @Autowired
     private TimingDAO timingDAO;
@@ -280,5 +286,21 @@ public class TaskServiceImpl implements TaskService {
         boolean delTask = taskServiceApi.delTask(jobKeyGroups);
         LOG.info("删除定时任务结果:{}", delTask);
         return delTask;
+    }
+
+    @Override
+    public ReturnInfo addGraphTask(Integer id, String cron) {
+        String taskName = UUID.randomUUID().toString();
+        String callBack = graphCallBackUrl + "/" + id;
+        QuartzJobDto task = createTask(QuartzJobDto.METHOD_GET, taskName, "", DEFAULT_DEVICE_CRON,
+                DEFAULT_GRAPH_JOB_GROUP, DEFAULT_GRAPH_TRIGGER_GROUP, DEFAULT_DESCRIPTION,
+                callBack);
+        return ReturnInfo.createReturnSuccessOne(task);
+    }
+
+    @Override
+    public ReturnInfo removeGraphTask(String taskName) {
+        boolean removeTask = removeTask(taskName, DEFAULT_GRAPH_JOB_GROUP);
+        return ReturnInfo.createReturnSuccessOne(removeTask);
     }
 }
