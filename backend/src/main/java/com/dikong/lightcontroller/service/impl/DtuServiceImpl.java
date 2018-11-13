@@ -58,6 +58,7 @@ public class DtuServiceImpl implements DtuService {
     private static final Logger LOG = LoggerFactory.getLogger(DtuServiceImpl.class);
 
     private static final String DTU_ONLINE = "dtu.online.status";
+    private static final String DTU_CODE  = "dtu_code_";
 
     @Autowired
     private DtuDAO dtuDAO;
@@ -149,7 +150,7 @@ public class DtuServiceImpl implements DtuService {
                         BussinessCode.DTU_CODE_EXIST.getMsg());
             }
             dtu.setProjId(projId);
-            Long dtuDevice = jedis.incr(String.valueOf(projId));
+            Long dtuDevice = jedis.incr(DTU_CODE+String.valueOf(projId));
             dtu.setDevice("DTU" + dtuDevice);
             if (existDtu == null) {
                 dtu.setCreateBy(AuthCurrentUser.getUserId());
