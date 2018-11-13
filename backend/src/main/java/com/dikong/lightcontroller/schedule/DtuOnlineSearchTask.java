@@ -22,33 +22,32 @@ import com.dikong.lightcontroller.utils.OkhttpUtils;
 @Component
 public class DtuOnlineSearchTask {
 
-    private static final String serviceIpKey = "collection.host";
 
-    private static Logger LOG = LoggerFactory.getLogger(DtuOnlineSearchTask.class);
+	private static final String serviceIpKey = "collection.host";
 
-    @Autowired
-    private Environment envioroment;
+	private static Logger LOG = LoggerFactory.getLogger(DtuOnlineSearchTask.class);
 
-    @Autowired
-    private DtuService dtuService;
+	@Autowired
+	private Environment envioroment;
 
-    @Scheduled(cron = "0 */10 * * * *")
-    public void scanTimingNewTask() throws IOException {
-        String url = envioroment.getProperty(serviceIpKey) + "/device/all";
-        String resp = OkhttpUtils.get(url);
-        CollectionDeviceAll collectionDeviceAll = JSON.parseObject(resp, CollectionDeviceAll.class);
-        if (collectionDeviceAll.getData() != null) {
-            LOG.info("定时调用dtu在线列表返回:{},时间为:{}",collectionDeviceAll.getData().size(),new Date().toString());
-            for (Map.Entry<String, CollectionDeviceAll.DtuStatus> stringDtuStatusEntry : collectionDeviceAll
-                    .getData().entrySet()) {
-                if (stringDtuStatusEntry != null && stringDtuStatusEntry.getKey() != null
-                        && stringDtuStatusEntry.getValue() != null
-                        && stringDtuStatusEntry.getValue().getStatus() != null) {
-                    dtuService.conncationInfo(stringDtuStatusEntry.getKey(),stringDtuStatusEntry.getValue().getStatus());
-                }
-            }
-        }
-    }
+	@Autowired
+	private DtuService dtuService;
 
-
+	@Scheduled(cron = "0 */10 * * * *")
+	public void scanTimingNewTask() throws IOException {
+		String url = envioroment.getProperty(serviceIpKey) + "/device/all";
+		String resp = OkhttpUtils.get(url);
+		CollectionDeviceAll collectionDeviceAll = JSON.parseObject(resp, CollectionDeviceAll.class);
+		if (collectionDeviceAll.getData() != null) {
+			LOG.info("定时调用dtu在线列表返回:{},时间为:{}",collectionDeviceAll.getData().size(),new Date().toString());
+			for (Map.Entry<String, CollectionDeviceAll.DtuStatus> stringDtuStatusEntry : collectionDeviceAll
+					.getData().entrySet()) {
+				if (stringDtuStatusEntry != null && stringDtuStatusEntry.getKey() != null
+						&& stringDtuStatusEntry.getValue() != null
+						&& stringDtuStatusEntry.getValue().getStatus() != null) {
+					dtuService.conncationInfo(stringDtuStatusEntry.getKey(),stringDtuStatusEntry.getValue().getStatus());
+				}
+			}
+		}
+	}
 }

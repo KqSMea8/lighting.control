@@ -113,4 +113,15 @@ public interface RegisterDAO {
             + "</foreach>"
             + "</script>")
     List<RegisDeviceDtuName> selectNameByid(@Param("registIds")List<Integer> registIds);
+
+    @Select("<script>"
+            + "select * from register where device_id=#{deviceId}"
+            + "<if test=\" registerAddr != null \">"
+            + " and regis_addr in "
+            + "<foreach collection=\"registerAddr\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
+            + "#{item}"
+            + "</foreach>"
+            + "</if>"
+            + "</script>")
+    List<Register> selectRegisterByDeviceId(@Param("deviceId") Long deviceId,@Param("registerAddr")String[] registerAddr);
 }
