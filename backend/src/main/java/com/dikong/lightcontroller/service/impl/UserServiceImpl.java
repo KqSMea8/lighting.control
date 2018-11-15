@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import tk.mybatis.mapper.entity.Example;
+
 import com.alibaba.fastjson.JSON;
 import com.dikong.lightcontroller.common.CodeEnum;
 import com.dikong.lightcontroller.common.Constant;
@@ -42,11 +46,8 @@ import com.dikong.lightcontroller.service.UserService;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
 import com.dikong.lightcontroller.utils.MD5Util;
+import com.dikong.lightcontroller.utils.VerifyCodeUtils;
 import com.github.pagehelper.PageHelper;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import tk.mybatis.mapper.entity.Example;
 
 /**
  * @author huangwenjun
@@ -124,9 +125,10 @@ public class UserServiceImpl implements UserService {
             Map<String, Object> result = new HashMap<>();
             result.put("token", token);
             result.put("isSetSms", true);
-            jedis.setex(Constant.LOGIN.SMS_CODE + token, 60, "1234");
+            String smsCode = VerifyCodeUtils.generateSmsVerifyCode(6);
+            jedis.setex(Constant.LOGIN.SMS_CODE + token, 60, "123456");
             loginRes.setUserInfo(userInfo);
-            jedis.setex(token, Constant.TIME.MINUTE * 5, JSON.toJSONString(loginRes));
+            jedis.setex(token, Constant.TIME.MINUTE * 10, JSON.toJSONString(loginRes));
             // TODO 发送短信
             return ReturnInfo.createReturnSuccessOne(result);
         }
@@ -159,10 +161,22 @@ public class UserServiceImpl implements UserService {
         return ReturnInfo.create(CodeEnum.NO_LOGIN);
     }
 
+    @Override
+    public ReturnInfo resendSmsCode(String token) {
+        Jedis jedis = new JedisProxy(jedisPool).createProxy();
+        if (jedis.exists(Constant.LOGIN.SMS_CODE + token)) {
+            return ReturnInfo.create(CodeEnum.REQUEST_METHOD_ERROR);
+        }
+        String smsCode = VerifyCodeUtils.generateSmsVerifyCode(6);
+        jedis.setex(Constant.LOGIN.SMS_CODE + token, 60, "234567");
+
+        // TODO 发送短信
+        return ReturnInfo.createReturnSuccessOne(null);
+    }
+
     private LoginRes getUserInfo(User userInfo, String token) {
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
-        String oldToken =
-                jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
+        String oldToken = jedis.hget(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
         if (!StringUtils.isEmpty(oldToken)) {
             jedis.hdel(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()));
             jedis.del(oldToken);
@@ -197,8 +211,7 @@ public class UserServiceImpl implements UserService {
         loginUserInfo.setCurrentProjectId(0);
         loginUserInfo.setManagerType(managerType);
         jedis.setex(token, Constant.TIME.HALF_HOUR, JSON.toJSONString(loginUserInfo));
-        jedis.setex(String.valueOf(userInfo.getUserId()), Constant.TIME.HALF_HOUR,
-                String.valueOf(userInfo.getUserId()));
+        jedis.setex(String.valueOf(userInfo.getUserId()), Constant.TIME.HALF_HOUR, String.valueOf(userInfo.getUserId()));
         jedis.hset(Constant.LOGIN.ONLINE_USERS_KEY, String.valueOf(userInfo.getUserId()), token);
         LOG.info("用户登陆成功：" + JSON.toJSONString(userInfo));
         return loginUserInfo;
@@ -340,8 +353,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ReturnInfo userDelProject(UserProject userProjectReq) {
         Example example = new Example(UserProject.class);
-        example.createCriteria().andEqualTo("userId", userProjectReq.getUserId())
-                .andEqualTo("projectId", userProjectReq.getProjectId())
+        example.createCriteria().andEqualTo("userId", userProjectReq.getUserId()).andEqualTo("projectId", userProjectReq.getProjectId())
                 .andEqualTo("managerTypeId", userProjectReq.getManagerTypeId());
         userProjectDao.deleteByExample(example);
         return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -364,8 +376,7 @@ public class UserServiceImpl implements UserService {
             jedis.set(token, JSON.toJSONString(currentUserInfo));// 更新用户信息
             return ReturnInfo.createReturnSuccessOne(projectRes);
         }
-        List<Integer> manageTypeIds =
-                userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
+        List<Integer> manageTypeIds = userProjectDao.manageTypeIds(AuthCurrentUser.getUserId(), projectId);
         if (manageTypeIds.size() >= 2) {
             currentUserInfo.setManagerType(Constant.USER.PROJECT_SUPER_MANAGER);
             projectRes.setManagerType(Constant.USER.PROJECT_SUPER_MANAGER);

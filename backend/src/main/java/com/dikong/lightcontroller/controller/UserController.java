@@ -1,5 +1,7 @@
 package com.dikong.lightcontroller.controller;
 
+import io.swagger.annotations.Api;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -25,8 +27,6 @@ import com.dikong.lightcontroller.entity.UserProject;
 import com.dikong.lightcontroller.service.UserService;
 import com.github.pagehelper.util.StringUtil;
 
-import io.swagger.annotations.Api;
-
 @Api(value = "UserController", description = "用户管理")
 @RestController
 @RequestMapping("/light/user")
@@ -38,9 +38,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ReturnInfo login(@RequestBody LoginReqDto loginReqDto, HttpServletRequest request) {
-        if (StringUtil.isEmpty(loginReqDto.getUsername())
-                || StringUtil.isEmpty(loginReqDto.getPassword())
-                || loginReqDto.getPassword().length() < 6) {
+        if (StringUtil.isEmpty(loginReqDto.getUsername()) || StringUtil.isEmpty(loginReqDto.getPassword()) || loginReqDto.getPassword().length() < 6) {
             return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         String token = request.getHeader(Constant.LOGIN.TOKEN);
@@ -48,10 +46,13 @@ public class UserController {
     }
 
     @PostMapping("/login/sms/{sms-code}")
-    public ReturnInfo smsLogin(HttpServletRequest request,
-            @PathVariable("sms-code") String smsCode) {
-        System.out.println("smsCode:" + smsCode);
+    public ReturnInfo smsLogin(HttpServletRequest request, @PathVariable("sms-code") String smsCode) {
         return userService.smsLogin(request.getHeader("token"), smsCode);
+    }
+
+    @PostMapping("/login/resend/smscode")
+    public ReturnInfo resendSmsCode(HttpServletRequest request) {
+        return userService.resendSmsCode(request.getHeader("token"));
     }
 
     @RequestMapping("/login-out")
@@ -70,8 +71,7 @@ public class UserController {
 
     @PutMapping("/change/pwd")
     public ReturnInfo changeUserPwd(@RequestBody ChangePwdReq changePwdReq) {
-        if (!StringUtil.isEmpty(changePwdReq.getNewPwd())
-                && changePwdReq.getNewPwd().length() < 6) {
+        if (!StringUtil.isEmpty(changePwdReq.getNewPwd()) && changePwdReq.getNewPwd().length() < 6) {
             return ReturnInfo.create(CodeEnum.PWD_FORMAT_ERROR);
         }
         return userService.changeUserPwd(changePwdReq);
@@ -120,8 +120,7 @@ public class UserController {
     }
 
     @RequestMapping("/project/enter/{project-id}")
-    public ReturnInfo enterProject(@PathVariable("project-id") Integer projectId,
-            HttpServletRequest request) {
+    public ReturnInfo enterProject(@PathVariable("project-id") Integer projectId, HttpServletRequest request) {
         if (projectId == null) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }

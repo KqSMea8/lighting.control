@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Select;
 
-import com.dikong.lightcontroller.entity.GraphControlCurve;
-
 import tk.mybatis.mapper.common.Mapper;
+
+import com.dikong.lightcontroller.entity.GraphControlCurve;
 
 /**
  * @author huangwenjun
@@ -15,5 +15,5 @@ import tk.mybatis.mapper.common.Mapper;
 public interface GraphControlCurveDao extends Mapper<GraphControlCurve> {
 
     @Select("SELECT DISTINCT var_id FROM graph_control_curve  WHERE project_id=#{projectId}")
-    public List<Integer> selectVarByPrjId(Integer projectId);
+    public List<Long> selectVarByPrjId(Integer projectId);
 }
