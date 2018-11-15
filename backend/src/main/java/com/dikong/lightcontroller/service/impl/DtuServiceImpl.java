@@ -4,16 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import com.dikong.lightcontroller.common.Constant;
-import com.dikong.lightcontroller.schedule.RTCSendTask;
-import com.dikong.lightcontroller.utils.RTCUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +19,7 @@ import org.springframework.util.StringUtils;
 
 import com.dikong.lightcontroller.common.BussinessCode;
 import com.dikong.lightcontroller.common.CodeEnum;
+import com.dikong.lightcontroller.common.Constant;
 import com.dikong.lightcontroller.common.ReturnInfo;
 import com.dikong.lightcontroller.dao.DeviceDAO;
 import com.dikong.lightcontroller.dao.DtuDAO;
@@ -31,11 +27,13 @@ import com.dikong.lightcontroller.dto.DeviceApi;
 import com.dikong.lightcontroller.dto.DtuList;
 import com.dikong.lightcontroller.entity.Device;
 import com.dikong.lightcontroller.entity.Dtu;
+import com.dikong.lightcontroller.schedule.RTCSendTask;
 import com.dikong.lightcontroller.service.DeviceService;
 import com.dikong.lightcontroller.service.DtuService;
 import com.dikong.lightcontroller.service.api.DtuCollectionApi;
 import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.utils.JedisProxy;
+import com.dikong.lightcontroller.utils.RTCUtils;
 import com.dikong.lightcontroller.utils.Slf4jLogCollection;
 import com.github.pagehelper.PageHelper;
 
@@ -64,7 +62,7 @@ public class DtuServiceImpl implements DtuService {
     private static final Logger LOG = LoggerFactory.getLogger(DtuServiceImpl.class);
 
     private static final String DTU_ONLINE = "dtu.online.status";
-    private static final String DTU_CODE  = "dtu_code_";
+    private static final String DTU_CODE = "dtu_code_";
 
     @Autowired
     private DtuDAO dtuDAO;
@@ -159,7 +157,7 @@ public class DtuServiceImpl implements DtuService {
                         BussinessCode.DTU_CODE_EXIST.getMsg());
             }
             dtu.setProjId(projId);
-            Long dtuDevice = jedis.incr(DTU_CODE+String.valueOf(projId));
+            Long dtuDevice = jedis.incr(DTU_CODE + String.valueOf(projId));
             dtu.setDevice("DTU" + dtuDevice);
             if (existDtu == null) {
                 dtu.setCreateBy(AuthCurrentUser.getUserId());
@@ -232,7 +230,7 @@ public class DtuServiceImpl implements DtuService {
             for (Device device : deviceList) {
                 deviceService.resertCmd(device);
             }
-            //Todo 上线之后加入重发RTC时钟的逻辑
+            // Todo 上线之后加入重发RTC时钟的逻辑
             this.resertSendRTC(deviceList);
         }
         return ReturnInfo.create(CodeEnum.SUCCESS);
@@ -244,18 +242,30 @@ public class DtuServiceImpl implements DtuService {
         return ReturnInfo.createReturnSuccessOne(dtus);
     }
 
+    @Override
+    public ReturnInfo<String> dtuSendRTC(Long id) {
+        List<Device> devices = deviceDAO.selectAllByDtuId(id, Device.DEL_NO);
+        if (!CollectionUtils.isEmpty(devices)) {
+            String[] registerAddrs = {"40028", "40029"};
+            Long[] deviceRTC = RTCUtils.DeviceRTC();
+            rtcSendTask.send(devices, registerAddrs, deviceRTC);
+        }
+        return ReturnInfo.create("下发成功。");
+    }
+
     /**
      * 重发RTC
+     *
      * @param deviceList
      */
-    private void resertSendRTC(List<Device> deviceList){
-        String[] registerAddrs = {"40028","40029"};
+    private void resertSendRTC(List<Device> deviceList) {
+        String[] registerAddrs = {"40028", "40029"};
         Jedis jedis = new JedisProxy(jedisPool).createProxy();
         for (Device device : deviceList) {
             String value = jedis.hget(Constant.RTC.RESERT_KEY, String.valueOf(device.getId()));
-            if (!StringUtils.isEmpty(value)){
+            if (!StringUtils.isEmpty(value)) {
                 Long[] deviceRTC = RTCUtils.DeviceRTC();
-                rtcSendTask.send(Arrays.asList(device),registerAddrs,deviceRTC);
+                rtcSendTask.send(Arrays.asList(device), registerAddrs, deviceRTC);
             }
         }
     }

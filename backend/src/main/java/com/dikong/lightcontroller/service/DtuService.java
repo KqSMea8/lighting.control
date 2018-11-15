@@ -36,4 +36,6 @@ public interface DtuService {
     ReturnInfo conncationInfo(String deviceCode,Integer line);
 
     ReturnInfo<List<Dtu>> allDtu();
+
+    ReturnInfo<String> dtuSendRTC(Long id);
 }

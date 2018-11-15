@@ -2,6 +2,9 @@ package com.dikong.lightcontroller.entity;
 
 import javax.persistence.Id;
 
+/**
+ * @Date
+ */
 public class RegisterTimingEntity {
 
 	@Id
