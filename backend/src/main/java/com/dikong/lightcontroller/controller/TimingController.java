@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -90,11 +91,17 @@ public class TimingController {
 
     @ApiOperation(value = "获取修改普通 节点")
     @GetMapping(path = "/timing/ordinary/{id}")
-    public ReturnInfo getOrdinary(@PathVariable("id") Long id) {
+    public ReturnInfo<Timing> getOrdinary(@PathVariable("id") Long id) {
         if (id == 0) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);
         }
-        return null;
+        return timingService.getTiming(id);
+    }
+
+    @ApiOperation(value = "修改时序节点")
+    @PutMapping(path = "/timing/update/{id}")
+    public ReturnInfo<Boolean> updateTiming(@RequestBody TimeSpecifiedNodeAdd timeSpecifiedNodeAdd,@PathVariable("id")Long id){
+        return timingService.updateTiming(timeSpecifiedNodeAdd, id);
     }
 
     /**
@@ -154,7 +161,7 @@ public class TimingController {
      */
     @ApiOperation(value = "时序功能查看")
     @GetMapping(path = "/timing/node/view/{viewTime}")
-    public ReturnInfo<TimingView> view(@PathVariable("viewTime") String viewTime)
+    public ReturnInfo<List<TimingList>> view(@PathVariable("viewTime") String viewTime)
             throws ParseException {
         if (null == viewTime) {
             return ReturnInfo.create(CodeEnum.REQUEST_PARAM_ERROR);

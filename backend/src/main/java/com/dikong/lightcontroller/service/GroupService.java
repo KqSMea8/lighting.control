@@ -35,4 +35,6 @@ public interface GroupService {
     ReturnInfo addGroupDevice(GroupDeviceMiddle groupDeviceMiddle) throws Exception;
 
     ReturnInfo updateGroupDevice(GroupDeviceMiddle groupDeviceMiddle);
+
+    ReturnInfo<Boolean> updateGroup(Group group);
 }

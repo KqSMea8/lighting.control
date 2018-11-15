@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dikong.lightcontroller.utils.TimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,8 @@ import com.dikong.lightcontroller.vo.TimingView;
 import com.github.pagehelper.PageHelper;
 
 import tk.mybatis.mapper.entity.Example;
+
+import static java.util.Arrays.asList;
 
 /**
  * <p>
@@ -115,6 +118,12 @@ public class TimingServiceImpl implements TimingService {
     @Autowired
     private EquipmentMonitorService equipmentMonitorService;
 
+    /**
+     * 添加普通时序
+     * 
+     * @param ordinaryNodeAdd
+     * @return
+     */
     @SuppressWarnings("all")
     @Override
     @Transactional
@@ -157,6 +166,8 @@ public class TimingServiceImpl implements TimingService {
             } else {
                 startTime = TimeCalculate.getSunsetTime(cnarea.getLng(), cnarea.getLat());
             }
+            // Todo 调整偏移时间
+            startTime = TimeUtils.TimeAdjust(startTime, ordinaryNodeAdd.getAdjustTime());
             timing.setNodeContentRunTime(startTime);
         } else {
             timing.setNodeContentRunTime(ordinaryNodeAdd.getStartTime());
@@ -170,13 +181,20 @@ public class TimingServiceImpl implements TimingService {
         timing.setRunVarlue(ordinaryNodeAdd.getRunVarlue());
         timing.setStopWork(ordinaryNodeAdd.getStopWorkOnHoliday());
         timing.setCreateBy(AuthCurrentUser.getUserId());
+        timing.setAdjustTime(ordinaryNodeAdd.getAdjustTime());
         timingDAO.insertSelective(timing);
         // 添加任务
         this.addTimingStartCron(timing, projId);
+        // Todo 添加定时优化代码
+
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
-
+    /**
+     * 添加指定时序
+     * @param timeSpecifiedNodeAdd
+     * @return
+     */
     @SuppressWarnings("all")
     @Override
     @Transactional
@@ -218,6 +236,8 @@ public class TimingServiceImpl implements TimingService {
             } else {
                 startTime = TimeCalculate.getSunsetTime(cnarea.getLng(), cnarea.getLat());
             }
+            // Todo 调整偏移时间
+            startTime = TimeUtils.TimeAdjust(startTime, timeSpecifiedNodeAdd.getAdjustTime());
             timing.setNodeContentRunTime(startTime);
         } else {
             timing.setNodeContentRunTime(timeSpecifiedNodeAdd.getStartTime());
@@ -231,6 +251,7 @@ public class TimingServiceImpl implements TimingService {
         timing.setRunVarlue(timeSpecifiedNodeAdd.getRunVarlue());
         timing.setStopWork(timeSpecifiedNodeAdd.getStopWorkOnHoliday());
         timing.setCreateBy(AuthCurrentUser.getUserId());
+        timing.setAdjustTime(timeSpecifiedNodeAdd.getAdjustTime());
         timingDAO.insertSelective(timing);
         // 添加任务
         this.addTimingStartCron(timing, projId);
@@ -340,47 +361,59 @@ public class TimingServiceImpl implements TimingService {
         if (!CollectionUtils.isEmpty(timings)) {
             timings.forEach(item -> {
                 TimingList timingList = new TimingList();
-                StringBuilder builder = new StringBuilder();
+                // StringBuilder builder = new StringBuilder();
                 Integer runTimeType = item.getNodeContentRunTimeType();
                 if (Timing.ORDINDRY_TIME.equals(runTimeType)) {
-                    builder.append(item.getNodeContentRunTime());
-                    builder.append("; ");
+                    timingList.setNodeTime(item.getNodeContentRunTime());
+                    timingList.setCity("N/A");
+                    // builder.append();
+                    // builder.append("; ");
                 } else if (Timing.DAWN_TIME.equals(runTimeType)) {
-                    builder.append("天亮");
-                    builder.append("; ");
+                    timingList.setNodeTime("天亮");
+                    // builder.append("天亮");
+                    // builder.append("; ");
                     Cnarea2016 cnarea =
                             cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
-                    builder.append(cnarea.getName());
+                    // builder.append(cnarea.getName());
+                    timingList.setCity(cnarea.getName());
                 } else if (Timing.DARK_TIME.equals(runTimeType)) {
-                    builder.append("天黑");
-                    builder.append("; ");
+                    timingList.setNodeTime("天黑");
+                    // builder.append("天黑");
+                    // builder.append("; ");
                     Cnarea2016 cnarea =
                             cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
-                    builder.append(cnarea.getName());
+                    // builder.append(cnarea.getName());
+                    timingList.setCity(cnarea.getName());
                 }
-                builder.append("; ");
-                builder.append("[ ");
+                // builder.append("; ");
+                // builder.append("[ ");
                 if (Timing.GROUP_TYPE.equals(item.getRunType())) {
                     String groupCode = groupDAO.selectCodeById(item.getRunId());
-                    builder.append("SYS:Group" + groupCode);
+                    // builder.append("SYS:Group" + groupCode);
+                    timingList.setDevice("SYS:Group" + groupCode);
                 } else if (Timing.DEVICE_TYPE.equals(item.getRunType())) {
                     DeviceDtu deviceDtu = deviceDAO.selectById(item.getRunId());
                     String registerAddr = registerDAO.selectById(item.getRunVar());
                     String s = deviceDtu.getDtuName() + ":ID"
                             + Integer.parseInt(deviceDtu.getDeviceCode()) + ":" + registerAddr;
-                    builder.append(s);
+                    // builder.append(s);
+                    timingList.setDevice(s);
                 }
-                builder.append(" ]");
-                builder.append("=");
-                builder.append(item.getRunVarlue());
-                builder.append("; ");
+                // builder.append(" ]");
+                // builder.append("=");
+                timingList.setFeatures(item.getRunVarlue());
+                // builder.append(item.getRunVarlue());
+                // builder.append("; ");
                 if (Timing.ORDINARY_NODE.equals(timingListSearch.getNodeType())) {
-                    builder.append(item.getWeekList());
+                    // builder.append(item.getWeekList());
+                    timingList.setWeek(item.getWeekList().split(","));
                 } else if (Timing.SPECIFIED_NODE.equals(timingListSearch.getNodeType())) {
-                    builder.append(item.getMonthList());
+                    // builder.append(item.getMonthList());
+                    timingList.setWeek(item.getMonthList().split(","));
+
                 }
-                builder.append("; ");
-                timingList.setNodeContet(builder.toString());
+                // builder.append("; ");
+                // timingList.setNodeContet(builder.toString());
                 timingList.setNodeName("节点" + item.getNodeName());
                 timingList.setId(item.getId());
                 timingLists.add(timingList);
@@ -421,44 +454,48 @@ public class TimingServiceImpl implements TimingService {
 
 
     @Override
-    public ReturnInfo<TimingView> timingView(String viewTime) throws ParseException {
+    public ReturnInfo<List<TimingList>> timingView(String viewTime) throws ParseException {
         int projId = AuthCurrentUser.getCurrentProjectId();
-        List<String> weekTime = TimeWeekUtils.getWeekTime(viewTime);
+        // List<String> weekTime = TimeWeekUtils.getWeekTime(viewTime);
+        // Todo 只显示选中的那一天
+        List<String> weekTime = asList(viewTime);
         List<Holiday> holidays = holidayDAO.selectAllHoliday(weekTime, projId);
         Map<String, String> holidaMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(holidays)) {
             holidays.forEach(item -> holidaMap.put(item.getHolidayTime(), item.getHolidayTime()));
         }
-        TimingView timingView = new TimingView();
-        int day = 1;
+        // TimingView timingView = new TimingView();
+        List<TimingList> timingLists = new ArrayList<>();
+        // 获取今天是周几
+        int day = Integer.parseInt(TimeWeekUtils.getWeekNowDate());
         for (String holidayTime : weekTime) {
-            List<TimingList> dayList = new ArrayList<>();
-            if (null == holidaMap.get(holidayTime)) {
-                List<TimingList> dayOrdinary =
-                        searchOrdinary(projId, day, null, Timing.ORDINARY_NODE);
-                List<TimingList> daySpecified =
-                        searchOrdinary(projId, day, holidayTime, Timing.SPECIFIED_NODE);
-                dayList.addAll(dayOrdinary);
-                dayList.addAll(daySpecified);
+            if (null != holidaMap.get(holidayTime)) {
+                continue;
             }
-            if (day == 1) {
-                timingView.setMonday(dayList);
-            } else if (day == 2) {
-                timingView.setTuesday(dayList);
-            } else if (day == 3) {
-                timingView.setWednesday(dayList);
-            } else if (day == 4) {
-                timingView.setThursday(dayList);
-            } else if (day == 5) {
-                timingView.setFriday(dayList);
-            } else if (day == 6) {
-                timingView.setStaturday(dayList);
-            } else if (day == 7) {
-                timingView.setSunday(dayList);
-            }
-            day += 1;
+
+            List<TimingList> dayOrdinary = searchOrdinary(projId, day, null, Timing.ORDINARY_NODE);
+            List<TimingList> daySpecified =
+                    searchOrdinary(projId, day, holidayTime, Timing.SPECIFIED_NODE);
+            timingLists.addAll(dayOrdinary);
+            timingLists.addAll(daySpecified);
+            // if (day == 1) {
+            // timingView.setMonday(dayList);
+            // } else if (day == 2) {
+            // timingView.setTuesday(dayList);
+            // } else if (day == 3) {
+            // timingView.setWednesday(dayList);
+            // } else if (day == 4) {
+            // timingView.setThursday(dayList);
+            // } else if (day == 5) {
+            // timingView.setFriday(dayList);
+            // } else if (day == 6) {
+            // timingView.setStaturday(dayList);
+            // } else if (day == 7) {
+            // timingView.setSunday(dayList);
+            // }
+            // day += 1;
         }
-        return ReturnInfo.createReturnSuccessOne(timingView);
+        return ReturnInfo.createReturnSuccessOne(timingLists);
     }
 
 
@@ -618,6 +655,24 @@ public class TimingServiceImpl implements TimingService {
         return ReturnInfo.create(CodeEnum.SUCCESS);
     }
 
+    /**
+     * 获取时序对象
+     * 
+     * @param id
+     * @return
+     */
+    @Override
+    public ReturnInfo<Timing> getTiming(Long id) {
+        Timing timing = timingDAO.selectById(id);
+        return ReturnInfo.create(timing);
+    }
+
+    @Override
+    public ReturnInfo<Boolean> updateTiming(TimeSpecifiedNodeAdd timeSpecifiedNodeAdd, Long id) {
+
+        return null;
+    }
+
 
     @SuppressWarnings("all")
     private List<TimingList> searchOrdinary(int projId, int day, String monthTime, int nodeType) {
@@ -636,42 +691,51 @@ public class TimingServiceImpl implements TimingService {
         List<TimingList> timingLists = new ArrayList<>();
         timings.forEach(item -> {
             TimingList timingList = new TimingList();
-            StringBuilder builder = new StringBuilder();
+            // StringBuilder builder = new StringBuilder();
             Integer runTimeType = item.getNodeContentRunTimeType();
             if (Timing.ORDINDRY_TIME.equals(runTimeType)) {
-                builder.append(item.getNodeContentRunTime());
-                builder.append(";");
+                timingList.setNodeTime(item.getNodeContentRunTime());
+                timingList.setCity("N/A");
+                // builder.append(item.getNodeContentRunTime());
+                // builder.append(";");
             } else if (Timing.DAWN_TIME.equals(runTimeType)) {
-                builder.append("天亮");
-                builder.append(";");
+                timingList.setNodeTime("天亮");
+                // builder.append("天亮");
+                // builder.append(";");
                 Cnarea2016 cnarea =
                         cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
-                builder.append(cnarea.getName());
+                // builder.append(cnarea.getName());
+                timingList.setCity(cnarea.getName());
             } else if (Timing.DARK_TIME.equals(runTimeType)) {
-                builder.append("天黑");
-                builder.append(";");
+                timingList.setNodeTime("天黑");
+                // builder.append("天黑");
+                // builder.append(";");
                 Cnarea2016 cnarea =
                         cnareaDAO.selectCnarea(Long.parseLong(item.getNodeContentCity()));
-                builder.append(cnarea.getName());
+                // builder.append(cnarea.getName());
+                timingList.setCity(cnarea.getName());
             }
-            builder.append(";");
-            builder.append("[ ");
+            // builder.append(";");
+            // builder.append("[ ");
             if (Timing.GROUP_TYPE.equals(item.getRunType())) {
                 String groupCode = groupDAO.selectCodeById(item.getRunId());
-                builder.append("SYS:Group" + groupCode);
+                // builder.append("SYS:Group" + groupCode);
+                timingList.setDevice("SYS:Group" + groupCode);
             } else if (Timing.DEVICE_TYPE.equals(item.getRunType())) {
                 DeviceDtu deviceDtu = deviceDAO.selectById(item.getRunId());
                 String registerAddr = registerDAO.selectById(item.getRunVar());
                 String s = deviceDtu.getDtuName() + ":ID"
                         + Integer.parseInt(deviceDtu.getDeviceCode()) + ":" + registerAddr;
-                builder.append(s);
+                // builder.append(s);
+                timingList.setDevice(s);
             }
-            builder.append(" ]");
-            builder.append("=");
-            builder.append(item.getRunVarlue());
-            builder.append(";");
-            timingList.setNodeContet(builder.toString());
-            timingList.setNodeName(item.getNodeName());
+            // builder.append(" ]");
+            // builder.append("=");
+            // builder.append(item.getRunVarlue());
+            timingList.setFeatures(item.getRunVarlue());
+            // builder.append(";");
+            // timingList.setNodeContet(builder.toString());
+            timingList.setNodeName("节点" + item.getNodeName());
             timingList.setId(item.getId());
             timingLists.add(timingList);
         });

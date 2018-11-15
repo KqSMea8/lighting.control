@@ -54,7 +54,7 @@ public interface DeviceDAO extends Mapper<Device> {
     @Select({"select id,code from device where dtu_id=#{dtuId} AND is_delete=#{isDelete} "})
     List<Device> selectIdList(@Param("dtuId") Long dtuId, @Param("isDelete") Byte isDelete);
 
-    @Select({"select * from device where id=#{devId}"})
+    @Select({"select * from device where id=#{devId} and is_delete=1"})
     Device selectDeviceById(@Param("devId") long devId);
 
 
@@ -96,4 +96,8 @@ public interface DeviceDAO extends Mapper<Device> {
 
     @Update({"update device set is_delete=#{isDelete} where dtu_id=#{dtuId}"})
     int updateDeleteByDtuId(@Param("dtuId") Long id, @Param("isDelete") Byte isDelete);
+
+
+    @Select("select * from device where is_delete=#{isDelete}")
+    List<Device> selectAllByIsDelete(@Param("isDelete") Byte isDelete);
 }

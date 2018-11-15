@@ -17,4 +17,8 @@ public interface UserProjectDao extends Mapper<UserProject> {
     @Select("SELECT manager_type_id FROM user_project WHERE user_id=#{userId} AND project_id=#{projectId}")
     public List<Integer> manageTypeIds(@Param("userId") int userId,
             @Param("projectId") int projectId);
+
+
+    @Select("select user_id from user_project where project_id=#{projectId}")
+    List<Integer> selectUserIdByProjId(@Param("projectId")Integer projectId);
 }

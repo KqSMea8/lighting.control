@@ -1,7 +1,24 @@
 package com.dikong.lightcontroller.service.impl;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.dikong.lightcontroller.dto.HistoryExportReq;
+import com.dikong.lightcontroller.utils.ExcelView;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -19,6 +36,7 @@ import com.dikong.lightcontroller.utils.AuthCurrentUser;
 import com.dikong.lightcontroller.vo.HistoryList;
 import com.dikong.lightcontroller.vo.HistorySearch;
 import com.github.pagehelper.PageHelper;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * <p>
@@ -33,6 +51,8 @@ import com.github.pagehelper.PageHelper;
  */
 @Service
 public class HistoryServiceImpl implements HistoryService {
+
+    private static String[] columns = {"DTU设备", "串口设备名称", "变量名称", "值","发生时间","修改人"};
 
     @Autowired
     private HistoryDAO historyDAO;
@@ -102,5 +122,43 @@ public class HistoryServiceImpl implements HistoryService {
         history.setVarValue(sysVar.getVarValue());
         updateHistory(history);
         return ReturnInfo.create(CodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ModelAndView exportHistory(HistoryExportReq exportReq) throws IOException {
+        //1、导出时间最多只能是三个月
+        //2、查询数据
+        List<Long> registerIds = new ArrayList<>();
+        List<Long> seqIds = new ArrayList<>();
+        List<Long> groupIds = new ArrayList<>();
+        for (HistoryExportReq.Varble varble : exportReq.getVarbles()) {
+            if (History.REGISTER_TYPE.equals(varble.getVarType())) {
+                registerIds.add(varble.getVarId());
+            }else if (History.GROUP_TYPE.equals(varble.getVarType())){
+                groupIds.add(varble.getVarId());
+            }else if (History.SEQUENCE_TYPE.equals(varble.getVarType())){
+                seqIds.add(varble.getVarId());
+            }
+        }
+        List<HistoryList> historyLists = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(registerIds)){
+            List<HistoryList> lists =
+                    historyDAO.selectAllIn(History.REGISTER_TYPE, registerIds);
+            historyLists.addAll(lists);
+        }
+        if (!CollectionUtils.isEmpty(groupIds)){
+            List<HistoryList> groups =
+                    historyDAO.selectSysVarIn(History.GROUP_TYPE, groupIds);
+            historyLists.addAll(groups);
+        }
+        if (!CollectionUtils.isEmpty(seqIds)){
+            List<HistoryList> seqs =
+                    historyDAO.selectSysVarIn(History.SEQUENCE_TYPE, seqIds);
+            historyLists.addAll(seqs);
+        }
+        Map<String, Object> model = new HashMap<String, Object>();
+        model.put("headers",columns);
+        model.put("results",historyLists);
+        return new ModelAndView(new ExcelView(), model);
     }
 }

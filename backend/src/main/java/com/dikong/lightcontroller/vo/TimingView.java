@@ -29,6 +29,7 @@ public class TimingView {
     //周天
     private List<TimingList> sunday;
 
+
     public List<TimingList> getMonday() {
         return monday;
     }

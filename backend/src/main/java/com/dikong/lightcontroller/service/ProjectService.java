@@ -18,4 +18,6 @@ public interface ProjectService {
     public ReturnInfo projectRemove(int projectId);
 
     public ReturnInfo projectUpdate(Project project);
+
+    ReturnInfo<List<Project>> findAllEnableProj();
 }

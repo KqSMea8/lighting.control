@@ -31,6 +31,7 @@ public interface TaskService {
 
     ReturnInfo removeHolidayTask(String taskName);
 
+    ReturnInfo<String> addProjectAlarmTask(Integer projectId,Integer cronInterval);
     ReturnInfo addGraphTask(Integer id, String cron);
 
     ReturnInfo removeGraphTask(String taskName);

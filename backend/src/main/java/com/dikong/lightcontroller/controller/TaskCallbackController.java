@@ -3,6 +3,7 @@ package com.dikong.lightcontroller.controller;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 
+import com.dikong.lightcontroller.service.AlarmSettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,8 @@ public class TaskCallbackController {
     @Autowired
     private BlockingQueue queue;
 
+    @Autowired AlarmSettingService alarmSettingService;
+
     @Autowired
     private GraphService graphService;
 
@@ -84,6 +87,14 @@ public class TaskCallbackController {
         return timingService.holidayTask();
     }
 
+    @ApiOperation(value = "项目告警回调任务")
+    @GetMapping(path = "/alarm/{projectId}")
+    public ReturnInfo alarm(@PathVariable("projectId")Integer projectId) {
+        if (projectId == 0) {
+            return ReturnInfo.create(true);
+        }
+        return alarmSettingService.triggerCallback(projectId);
+    }
     @GetMapping("/callback/graph/{project-id}")
     public ReturnInfo callBack(@PathVariable("project-id") Integer projectId) {
         System.out.println("call back success! 图控节点：" + projectId);

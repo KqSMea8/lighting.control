@@ -53,4 +53,32 @@ public interface HistoryDAO {
             + "and h.create_time &lt;=#{search.endTime}" + " order by create_time desc "
             + "</script>"})
     List<HistoryList> selectSysVar(@Param("search") HistorySearch historySearch);
+
+
+    @Select("<script>"
+            + "SELECT dt.device_name as dtu_name,d.name as device_name,r.regis_name as regis_name,h.var_value,h.create_time,u.user_name as create_by "
+            + "from history h LEFT JOIN user u on h.create_by=u.user_id LEFT JOIN register r on h.var_id=r.id LEFT JOIN device d on r.device_id=d.id LEFT JOIN dtu dt on d.dtu_id=dt.id "
+            + "WHERE h.var_type=#{varType} "
+            + " and h.var_id in"
+            + "<foreach collection=\"varIds\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
+            + "#{item}"
+            + "</foreach>"
+            + "and h.create_time &gt;=#{search.startTime} "
+            + "and h.create_time &lt;=#{search.endTime}" + " order by create_time desc "
+            + "</script>")
+    List<HistoryList> selectAllIn(@Param("varType")Integer varType,@Param("varIds")List<Long> varIds);
+
+
+    @Select({"<script>"
+            + "SELECT sv.var_name as regis_name,h.var_value,h.create_time,u.user_name as create_by "
+            + "from history h LEFT JOIN user u on h.create_by=u.user_id LEFT JOIN sys_var sv on h.var_id=sv.id "
+            + "where h.var_type=#{varType} "
+            + "and h.var_id in"
+            + "<foreach collection=\"varIds\" index=\"index\" item=\"item\" open=\"(\" separator=\",\" close=\")\">"
+            + "#{item}"
+            + "</foreach>"
+            + "and h.create_time &gt;=#{search.startTime} "
+            + "and h.create_time &lt;=#{search.endTime}" + " order by create_time desc "
+            + "</script>"})
+    List<HistoryList> selectSysVarIn(@Param("varType")Integer varType,@Param("varIds")List<Long> varIds);
 }
