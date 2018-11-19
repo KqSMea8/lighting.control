@@ -29,5 +29,3 @@ public interface CmdService {
 
     public CmdRes<String> writeAnalog(long varId, int value);
 }
-
-
