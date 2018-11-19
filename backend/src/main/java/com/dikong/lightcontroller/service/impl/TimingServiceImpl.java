@@ -540,7 +540,6 @@ public class TimingServiceImpl implements TimingService {
      * @return
      */
     @Override
-    @Transactional
     public ReturnInfo callBack(CommandSend commandSend) {
         int projId = commandSend.getProjId();
         // 先判断是否是节假日
@@ -579,11 +578,11 @@ public class TimingServiceImpl implements TimingService {
             // 修改监控中的群组
             equipmentMonitorService.updateByGroupId(timing.getRunId(),
                     Integer.valueOf(timing.getRunVarlue()));
-            commandSend.getVarIdS().forEach(item -> {
+            for (CmdSendDto item : commandSend.getVarIdS()) {
                 equipmentMonitorService.updateByVarId(item.getRegisId(), item.getSwitchValue());
                 registerDAO.updateRegisValueById(String.valueOf(item.getSwitchValue()),
                         item.getRegisId());
-            });
+            }
 
         } else if (Timing.DEVICE_TYPE.equals(timing.getRunType())) {
             equipmentMonitorService.updateByVarId(timing.getRunVar(),

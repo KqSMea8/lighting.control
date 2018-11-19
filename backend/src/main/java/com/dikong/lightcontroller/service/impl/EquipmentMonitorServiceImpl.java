@@ -195,7 +195,6 @@ public class EquipmentMonitorServiceImpl implements EquipmentMonitorService {
     }
 
     @Override
-    @Transactional
     public ReturnInfo changeStatus(Integer monitorId, String value) {
         EquipmentMonitor monitor = monitorDao.selectByPrimaryKey(monitorId);
         if (monitor.getValueType().equals(Register.AI)
