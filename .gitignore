@@ -45,3 +45,5 @@ target/
 
 ./*.iml
 
+# npm dependent
+front/node_modules/*
